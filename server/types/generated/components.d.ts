@@ -230,6 +230,13 @@ export interface LayoutNavbar extends Struct.ComponentSchema {
         };
       }> &
       Schema.Attribute.DefaultTo<'Guidelines'>;
+    menuLeadership: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Leadership'>;
     menuMission: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

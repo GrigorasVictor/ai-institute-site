@@ -10,6 +10,7 @@
   "options": {
     "draftAndPublish": true
   },
+  "pluginOptions": {},
   "attributes": {
     "name": {
       "type": "string",
@@ -62,6 +63,16 @@
     },
     "displayOrder": {
       "type": "integer",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "category"
+            },
+            "leadership"
+          ]
+        }
+      },
       "default": 0
     },
     "subtitle": {
