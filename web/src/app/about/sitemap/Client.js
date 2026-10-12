@@ -64,7 +64,7 @@ export default function Client({ aboutData }) {
       title: "About",
       links: [
         { label: "Mission & History", href: "/about#mission" },
-        { label: "Organigram", href: "/about/organigram" },
+        { label: "Leadership & Governance", href: "/about/leadership" },
         { label: "Sitemap", href: "/about/sitemap" },
         { label: "Reports", href: "/about/reports" },
         { label: "Regulations", href: "/about/procedures-regulations" },

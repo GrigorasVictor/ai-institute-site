@@ -498,6 +498,19 @@ export interface ApiAboutPageAboutPage extends Struct.SingleTypeSchema {
         };
       }> &
       Schema.Attribute.DefaultTo<'Just for you'>;
+    leadershipDescription: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    leadershipTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Leadership & Governance'>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -4993,6 +5006,10 @@ export interface ApiTeamTeam extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    category: Schema.Attribute.Enumeration<
+      ['leadership', 'research', 'project', 'support', 'other']
+    > &
+      Schema.Attribute.DefaultTo<'research'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -5001,6 +5018,7 @@ export interface ApiTeamTeam extends Struct.CollectionTypeSchema {
       'api::department.department'
     >;
     description: Schema.Attribute.RichText;
+    displayOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     image: Schema.Attribute.Media<'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::team.team'> &
@@ -5012,6 +5030,7 @@ export interface ApiTeamTeam extends Struct.CollectionTypeSchema {
     projects: Schema.Attribute.Relation<'manyToMany', 'api::project.project'>;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'name'>;
+    subtitle: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

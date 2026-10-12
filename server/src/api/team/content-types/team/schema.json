@@ -10,6 +10,7 @@
   "options": {
     "draftAndPublish": true
   },
+  "pluginOptions": {},
   "attributes": {
     "name": {
       "type": "string",
@@ -48,6 +49,34 @@
       "relation": "manyToMany",
       "target": "api::project.project",
       "inversedBy": "teams"
+    },
+    "category": {
+      "type": "enumeration",
+      "default": "research",
+      "enum": [
+        "leadership",
+        "research",
+        "project",
+        "support",
+        "other"
+      ]
+    },
+    "displayOrder": {
+      "type": "integer",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "category"
+            },
+            "leadership"
+          ]
+        }
+      },
+      "default": 0
+    },
+    "subtitle": {
+      "type": "string"
     }
   }
 }
