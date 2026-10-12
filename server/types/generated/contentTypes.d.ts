@@ -3140,7 +3140,7 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
     projects: Schema.Attribute.Relation<'manyToMany', 'api::project.project'>;
     publishedAt: Schema.Attribute.DateTime;
     role: Schema.Attribute.Enumeration<
-      ['Strategic', 'Diamond', 'Platinium', 'Gold', 'Partner']
+      ['Strategic', 'Diamond', 'Platinum', 'Gold', 'Partner']
     > &
       Schema.Attribute.DefaultTo<'Partner'>;
     slug: Schema.Attribute.UID<'name'>;

@@ -1571,11 +1571,11 @@ export async function getDepartmentBySlug(slug, locale = 'en') {
         coCoordinator: PERSON_WITH_IMAGE_POPULATE,
       },
     };
-    
+
     // Convert to query string
     const params = createParams(baseOptions);
     const data = await fetchAPI(`/departments?${params.toString()}`);
-    
+
     // Fallback logic
     if (!data.data?.length && locale && locale !== 'en') {
       const fallbackOptions = { ...baseOptions, locale: 'en' };
@@ -1585,7 +1585,7 @@ export async function getDepartmentBySlug(slug, locale = 'en') {
         return { ...fallbackData.data[0], _isFallback: true };
       }
     }
-    
+
     return data.data?.[0] || null;
   } catch (error) {
     console.error('Failed to fetch department by slug:', error);
@@ -1688,9 +1688,9 @@ export async function getEventBySlug(slug, locale) {
       },
       locale,
     });
-    
+
     let res = await fetchAPI(`/events?${params.toString()}`);
-    
+
     if (!res?.data?.length && locale && locale !== 'en') {
       const fallbackParams = new URLSearchParams(params);
       fallbackParams.set('locale', 'en');
@@ -1699,7 +1699,7 @@ export async function getEventBySlug(slug, locale) {
         return { ...res.data[0], _isFallback: true };
       }
     }
-    
+
     return res?.data?.[0] || null;
   } catch (error) {
     console.error('Failed to fetch event by slug:', error);
@@ -2614,12 +2614,12 @@ export function isPartnerFormer(partner) {
 
 export const isPartnerArchived = isPartnerFormer;
 
-export const PARTNER_ROLES = ['Strategic', 'Diamond', 'Platinium', 'Gold', 'Partner'];
+export const PARTNER_ROLES = ['Strategic', 'Diamond', 'Platinum', 'Gold', 'Partner'];
 
 export const PARTNER_ROLE_ORDER = {
   Strategic: 1,
   Diamond: 2,
-  Platinium: 3,
+  Platinum: 3,
   Gold: 4,
   Partner: 5,
 };
@@ -2630,7 +2630,7 @@ export function normalizePartnerRole(rawRole) {
   const lower = val.toLowerCase();
   if (lower === 'strategic') return 'Strategic';
   if (lower === 'diamond') return 'Diamond';
-  if (lower === 'platinium' || lower === 'platinum') return 'Platinium';
+  if (lower === 'platinum' || lower === 'platinum') return 'Platinum';
   if (lower === 'gold') return 'Gold';
   if (lower === 'partner') return 'Partner';
   return 'Partner';
@@ -2791,12 +2791,12 @@ export function transformEventData(strapiEvents) {
   const list = Array.isArray(strapiEvents) ? strapiEvents : strapiEvents ? [strapiEvents] : [];
   return list.map((evt) => {
     const attributes = evt?.attributes ?? evt ?? {};
-    
+
     const participants = (attributes.participants || []).map((p) => {
       const pPerson = p.person?.data?.attributes ?? p.person ?? null;
-      
+
       let personName, personTitle, personBio, personImage, personSlug, personEmail;
-      
+
       // If a relationship is selected, ONLY use data from the relationship
       if (pPerson && (pPerson.firstName || pPerson.slug)) {
         personName = `${pPerson.firstName || ''} ${pPerson.lastName || ''}`.trim() || '';

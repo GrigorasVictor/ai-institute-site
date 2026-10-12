@@ -7,6 +7,7 @@ import BodyContentImage from "@/components/shared/BodyContentImage";
 import DynamicZone from "@/components/shared/DynamicZone";
 import RichMarkdown from "@/components/shared/RichMarkdown";
 import { getPhaseColorClasses, getProjectPhase } from "@/lib/projectPhase";
+import PartnerRoleBadge, { getPartnerRoleConfig } from "@/components/PartnerRoleBadge";
 
 const FALLBACK_AVATAR = "/people/Basic_avatar_image.png";
 
@@ -396,31 +397,40 @@ export default function ProjectDetailClient({
                     const partnerUrl = typeof partner === "object" ? partner.url || partner.website : null;
                     const partnerLogo = typeof partner === "object" ? partner.logo : null;
 
+                    const partnerRole = typeof partner === "object" ? partner.role || partner.type : null;
+                    const roleConfig = partnerRole ? getPartnerRoleConfig(partnerRole) : null;
+
                     return (
-                      <div key={`partner-${idx}`} className="flex items-center gap-3">
-                        {partnerLogo ? (
-                          <img
-                            src={partnerLogo}
-                            alt={partnerName}
-                            className="w-8 h-8 rounded object-contain"
-                          />
-                        ) : (
-                          <span className="text-lg">🤝</span>
-                        )}
-                        {partnerUrl ? (
-                          <a
-                            href={partnerUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                          >
-                            {partnerName}
-                          </a>
-                        ) : (
-                          <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                            {partnerName}
-                          </span>
-                        )}
+                      <div
+                        key={`partner-${idx}`}
+                        className={`flex items-center justify-between gap-3 p-2.5 rounded-xl border-2 transition-colors ${roleConfig ? roleConfig.cardBorder : 'border-gray-100 dark:border-gray-700/60'} bg-gray-50/50 dark:bg-gray-800/40`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {partnerLogo ? (
+                            <img
+                              src={partnerLogo}
+                              alt={partnerName}
+                              className="w-8 h-8 rounded object-contain shrink-0"
+                            />
+                          ) : (
+                            <span className="text-lg shrink-0">🤝</span>
+                          )}
+                          {partnerUrl ? (
+                            <a
+                              href={partnerUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline truncate"
+                            >
+                              {partnerName}
+                            </a>
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300 font-medium truncate">
+                              {partnerName}
+                            </span>
+                          )}
+                        </div>
+                        {partnerRole && <PartnerRoleBadge role={partnerRole} size="xs" />}
                       </div>
                     );
                   })}
