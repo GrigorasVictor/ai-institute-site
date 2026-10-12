@@ -29,7 +29,7 @@ export default async function sitemap() {
     { url: `${SITE_URL}/about/reports`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/about/procedures-regulations`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${SITE_URL}/about/rooms-calendar`, changeFrequency: "monthly", priority: 0.4 },
-    { url: `${SITE_URL}/about/organigram`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/about/leadership`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/about/virtual-tour`, changeFrequency: "yearly", priority: 0.4 },
     { url: `${SITE_URL}/about/guidelines`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${SITE_URL}/about/sitemap`, changeFrequency: "monthly", priority: 0.3 },

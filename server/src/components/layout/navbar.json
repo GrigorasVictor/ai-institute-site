@@ -187,6 +187,15 @@
         }
       }
     },
+    "menuLeadership": {
+      "type": "string",
+      "default": "Leadership",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "menuSitemap": {
       "type": "string",
       "default": "Sitemap",

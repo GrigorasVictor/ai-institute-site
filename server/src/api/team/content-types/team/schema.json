@@ -48,6 +48,24 @@
       "relation": "manyToMany",
       "target": "api::project.project",
       "inversedBy": "teams"
+    },
+    "category": {
+      "type": "enumeration",
+      "default": "research",
+      "enum": [
+        "leadership",
+        "research",
+        "project",
+        "support",
+        "other"
+      ]
+    },
+    "displayOrder": {
+      "type": "integer",
+      "default": 0
+    },
+    "subtitle": {
+      "type": "string"
     }
   }
 }

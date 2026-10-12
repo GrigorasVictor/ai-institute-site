@@ -149,6 +149,23 @@
         }
       }
     },
+    "leadershipTitle": {
+      "type": "string",
+      "default": "Leadership & Governance",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "leadershipDescription": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "regulationsTitle": {
       "type": "string",
       "default": "Regulations",

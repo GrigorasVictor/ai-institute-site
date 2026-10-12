@@ -631,6 +631,31 @@ export async function getDepartmentTeams(departmentSlug) {
 }
 
 /**
+ * Get leadership/governance teams from Strapi
+ * @returns {Promise<Array>} Array of normalized team entries with category "leadership"
+ */
+export async function getLeadershipTeams() {
+  try {
+    const params = createParams({
+      sort: ['displayOrder:asc', 'name:asc'],
+      filters: { category: { $eq: 'leadership' } },
+      publicationState: 'preview',
+      populate: {
+        department: DEPARTMENT_POPULATE,
+        members: {
+          populate: { person: PERSON_WITH_IMAGE_POPULATE },
+        },
+      },
+    });
+    const data = await fetchAPI(`/teams?${params.toString()}`);
+    return transformTeamData(data.data || []);
+  } catch (error) {
+    console.error('Failed to fetch leadership teams:', error);
+    return [];
+  }
+}
+
+/**
  * Get all projects from Strapi
  * @returns {Promise<Array>} Array of projects
  */
@@ -2372,6 +2397,9 @@ export function transformProjectData(strapiProjects) {
         slug: teamAttr.slug || '',
         name: teamAttr.name || '',
         description: teamAttr.description || '',
+        subtitle: teamAttr.subtitle || '',
+        category: teamAttr.category || 'research',
+        displayOrder: teamAttr.displayOrder ?? 0,
         department: deptEntry ? { id: deptEntry?.id ?? null, name: deptAttr.name || '', slug: deptAttr.slug || '' } : null,
         members: toArray(teamAttr.members).map((m) => {
           const personEntry = m?.person?.data ?? m?.person;
@@ -2618,6 +2646,9 @@ export function transformTeamData(strapiTeams) {
       slug: attributes.slug || '',
       name: attributes.name || '',
       description: attributes.description || '',
+      subtitle: attributes.subtitle || '',
+      category: attributes.category || 'research',
+      displayOrder: attributes.displayOrder ?? 0,
       type: attributes.type || '',
       department,
       members,
@@ -3087,7 +3118,8 @@ export const DEFAULT_GLOBAL = {
     newsAwards: "Awards",
     newsCareers: "Careers",
     aboutMission: "Mission",
-    aboutOrganigram: "Organigram",
+    aboutLeadership: "Leadership",
+    aboutOrganigram: "Leadership",
     aboutSitemap: "Sitemap",
     aboutReports: "Reports",
     aboutRegulations: "Regulations",

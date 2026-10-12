@@ -177,7 +177,7 @@ export default function Navbar({ navbarData: customNavbarData }) {
 
   const aboutMenu = [
     { href: '/about#mission', label: nav.menuMission || 'Mission' },
-    { href: '/about/organigram', label: nav.menuOrganigram || 'Organigram' },
+    { href: '/about/leadership', label: nav.menuLeadership || 'Leadership' },
     { href: '/about/sitemap', label: nav.menuSitemap || 'Sitemap' },
     { href: '/about/reports', label: nav.menuReports || 'Reports' },
     { href: '/about/procedures-regulations', label: nav.menuRegulations || 'Regulations' },

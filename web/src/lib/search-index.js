@@ -28,7 +28,7 @@ const STATIC_ENTRIES = [
   { title: "Procedures & Regulations", route: "/about/procedures-regulations", tags: ["about", "procedures", "regulations"], snippet: "Policies, procedures, and regulations." },
   { title: "Guidelines", route: "/about/guidelines", tags: ["about", "guidelines", "onboarding"], snippet: "Onboarding guidance and practical information." },
   { title: "Rooms & Calendar", route: "/about/rooms-calendar", tags: ["about", "rooms", "calendar"], snippet: "Rooms, schedules, and calendar information." },
-  { title: "Organigram", route: "/about/organigram", tags: ["about", "organigram", "structure"], snippet: "Institutional structure and committees." },
+  { title: "Leadership & Governance", route: "/about/leadership", tags: ["about", "leadership", "governance", "board", "director", "structure", "organigram"], snippet: "Institute leadership board, executive committee, and governance." },
   { title: "Virtual Tour", route: "/about/virtual-tour", tags: ["about", "virtual tour", "3d"], snippet: "Virtual tour of the institute." },
   { title: "Sitemap", route: "/about/sitemap", tags: ["about", "sitemap"], snippet: "Overview of the website structure." },
   { title: "Contact", route: "/contact", tags: ["contact", "location", "email"], snippet: "Contact details and ways to reach AIRI." },
