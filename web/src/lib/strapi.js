@@ -274,7 +274,7 @@ const PROJECT_POPULATE = {
       fields: ['name', 'slug'],
     },
     partners: {
-      fields: ['name', 'slug', 'website', 'country', 'partnershipStatus', 'description'],
+      fields: ['name', 'slug', 'website', 'country', 'role', 'description'],
       populate: {
         logo: {
           fields: ['url', 'formats', 'alternativeText'],
@@ -820,7 +820,7 @@ export async function getProjectBySlug(slug, locale = null) {
 export async function getPartners(options = {}) {
   const locale = typeof options === 'string' ? options : options?.locale;
   const PARTNER_POPULATE = {
-    fields: ['name', 'slug', 'website', 'country', 'partnershipStatus', 'description'],
+    fields: ['name', 'slug', 'website', 'country', 'role', 'description'],
     populate: {
       logo: {
         fields: ['url', 'formats', 'alternativeText'],
@@ -829,7 +829,7 @@ export async function getPartners(options = {}) {
         fields: ['url', 'formats', 'alternativeText'],
       },
       projects: {
-        fields: ['title', 'slug', 'isIndustryEngagement'],
+        fields: ['title', 'slug', 'startDate', 'endDate', 'isIndustryEngagement'],
       },
     },
   };
@@ -860,7 +860,7 @@ export async function getPartnerBySlug(slug, locale = null) {
       publicationState: 'preview',
       locale,
       filters: { slug: { $eq: slug } },
-      fields: ['name', 'slug', 'website', 'country', 'partnershipStatus', 'description'],
+      fields: ['name', 'slug', 'website', 'country', 'role', 'description'],
       populate: {
         logo: {
           fields: ['url', 'formats', 'alternativeText'],
@@ -869,7 +869,7 @@ export async function getPartnerBySlug(slug, locale = null) {
           fields: ['url', 'formats', 'alternativeText'],
         },
         projects: {
-          fields: ['title', 'slug', 'abstract', 'isIndustryEngagement'],
+          fields: ['title', 'slug', 'abstract', 'startDate', 'endDate', 'isIndustryEngagement'],
           populate: {
             heroImage: {
               fields: ['url', 'formats', 'alternativeText'],
@@ -2375,11 +2375,16 @@ export function transformProjectData(strapiProjects) {
         };
       }).filter((linkedProject) => linkedProject.slug || linkedProject.title);
 
+      const role = normalizePartnerRole(partnerData.role || partnerData.type);
+
       return {
         id: partner?.id ?? null,
         slug: partnerData.slug || '',
         name: partnerData.name || '',
         country: partnerData.country || '',
+        role,
+        type: role,
+        partnerRole: role,
         description: stripHtml(partnerData.description || ''),
         descriptionMarkdown: typeof partnerData.description === 'string' ? partnerData.description : '',
         url: normalizeExternalUrl(partnerData.website),
@@ -2574,6 +2579,9 @@ export function isProjectArchived(proj) {
   if (!proj) return false;
   // If proj is a Strapi raw object or transformed object
   const attributes = proj?.attributes ?? proj ?? {};
+  if (typeof attributes.isArchived === 'boolean') {
+    return attributes.isArchived;
+  }
   const endDate = attributes.endDate;
   if (!endDate) return false;
   const end = new Date(endDate);
@@ -2588,6 +2596,44 @@ export function isTeamArchived(team) {
   const projects = team.projects || [];
   if (!projects.length) return false;
   return projects.every((p) => isProjectArchived(p));
+}
+
+export function isPartnerFormer(partner) {
+  if (!partner) return true;
+  const attributes = partner?.attributes ?? partner ?? {};
+  if (typeof attributes.isFormer === 'boolean') {
+    return attributes.isFormer;
+  }
+  if (typeof attributes.isArchived === 'boolean') {
+    return attributes.isArchived;
+  }
+  const projects = toArray(attributes.projects?.data ?? attributes.projects ?? []);
+  if (!projects.length) return true;
+  return projects.every((p) => isProjectArchived(p));
+}
+
+export const isPartnerArchived = isPartnerFormer;
+
+export const PARTNER_ROLES = ['Strategic', 'Diamond', 'Platinium', 'Gold', 'Partner'];
+
+export const PARTNER_ROLE_ORDER = {
+  Strategic: 1,
+  Diamond: 2,
+  Platinium: 3,
+  Gold: 4,
+  Partner: 5,
+};
+
+export function normalizePartnerRole(rawRole) {
+  if (!rawRole) return 'Partner';
+  const val = String(rawRole).trim();
+  const lower = val.toLowerCase();
+  if (lower === 'strategic') return 'Strategic';
+  if (lower === 'diamond') return 'Diamond';
+  if (lower === 'platinium' || lower === 'platinum') return 'Platinium';
+  if (lower === 'gold') return 'Gold';
+  if (lower === 'partner') return 'Partner';
+  return 'Partner';
 }
 
 export function transformTeamData(strapiTeams) {
@@ -3006,12 +3052,6 @@ export function transformResourceData(strapiResources) {
 export function transformPartnerData(strapiPartners) {
   const list = Array.isArray(strapiPartners) ? strapiPartners : strapiPartners ? [strapiPartners] : [];
 
-  const normalizePartnerStatus = (rawStatus) => {
-    const value = (rawStatus || '').toString().trim().toLowerCase();
-    if (value === 'former') return 'former';
-    return 'current';
-  };
-
   const normalizeBodyBlocks = (blocks) =>
     toArray(blocks)
       .map((block) => {
@@ -3049,6 +3089,9 @@ export function transformPartnerData(strapiPartners) {
           title: projectData.title || '',
           slug: projectData.slug || '',
           abstract: projectData.abstract || '',
+          startDate: projectData.startDate || null,
+          endDate: projectData.endDate || null,
+          isArchived: isProjectArchived(project),
           isIndustryEngagement: !!projectData.isIndustryEngagement,
           heroImage: resolveMediaUrl(projectData.heroImage),
           domains: toArray(projectData.domains?.data ?? projectData.domains)
@@ -3065,17 +3108,24 @@ export function transformPartnerData(strapiPartners) {
       })
       .filter((project) => project.title || project.slug);
 
+    const isFormer = partnerProjects.length === 0 || partnerProjects.every((p) => p.isArchived);
+    const isCurrent = !isFormer;
+    const status = isFormer ? 'former' : 'current';
+    const role = normalizePartnerRole(attributes.role || attributes.type);
+
     const website = normalizeExternalUrl(attributes.website);
     const markdownDescription = typeof attributes.description === 'string' ? attributes.description : '';
     const plainDescription = stripHtml(markdownDescription);
     const blurb = plainDescription;
-    const status = normalizePartnerStatus(attributes.partnershipStatus);
 
     return {
       id: partner?.id ?? null,
       name: attributes.name || '',
       slug: attributes.slug || '',
       country: attributes.country || '',
+      role,
+      type: role,
+      partnerRole: role,
       description: plainDescription,
       descriptionMarkdown: markdownDescription,
       blurb,
@@ -3086,7 +3136,10 @@ export function transformPartnerData(strapiPartners) {
       body: normalizeBodyBlocks(attributes.body),
       projects: partnerProjects,
       partnerStatus: status,
-      isCurrentPartner: status === 'current',
+      status,
+      isCurrentPartner: isCurrent,
+      isFormer,
+      isArchived: isFormer,
       _strapi: partner,
       _isFallback: partner._isFallback || false,
     };
