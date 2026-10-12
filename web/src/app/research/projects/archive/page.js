@@ -16,7 +16,7 @@ export default async function ProjectArchivePage() {
     getSingleType("projects-page", locale),
   ]);
 
-  const projects = transformProjectData(strapiProjects).filter(p => p.isArchived);
+  const projects = transformProjectData(strapiProjects).filter(p => p.isArchived && !p.isIndustryEngagement);
 
   return <ProjectsClient projects={projects} pageData={pageData} isArchive={true} />;
 }
