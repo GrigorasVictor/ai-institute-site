@@ -155,7 +155,7 @@ export default function ProjectsClient({ projects: rawProjects = [], pageData, i
     const src = Array.isArray(rawProjects) ? rawProjects : [];
     return src
       .map((p) => normalizeProject(p))
-      .filter((p) => p.title);
+      .filter((p) => p.title && !p.isIndustryEngagement);
   }, [rawProjects]);
 
   const { allRegions, allDomains, allLeads, allMembers } = useMemo(() => {
