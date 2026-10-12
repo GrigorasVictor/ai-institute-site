@@ -2,6 +2,7 @@
 
 import CatalogNotice from "@/components/CatalogNotice";
 import { motion } from "framer-motion";
+import PartnerRoleBadge, { getPartnerRoleConfig } from "@/components/PartnerRoleBadge";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -44,19 +45,25 @@ export default function PartnersClient({ partners, CollaboratorsClient }) {
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           variants={containerVariants}
         >
-          {partners.map((p) => (
-            <motion.a
-              key={p.name}
-              href={p.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-2xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800/70 transition block"
-              variants={itemVariants}
-            >
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h2>
-              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{p.blurb}</p>
-            </motion.a>
-          ))}
+          {partners.map((p) => {
+            const roleConfig = getPartnerRoleConfig(p.role);
+            return (
+              <motion.a
+                key={p.name}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`rounded-2xl border-2 p-5 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800/70 transition block ${roleConfig.cardBorder}`}
+                variants={itemVariants}
+              >
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{p.name}</h2>
+                  <PartnerRoleBadge role={p.role} size="xs" />
+                </div>
+                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">{p.blurb}</p>
+              </motion.a>
+            );
+          })}
         </motion.div>
 
         <motion.section className="mt-12" variants={itemVariants}>

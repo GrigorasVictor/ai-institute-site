@@ -26,6 +26,7 @@ import {
   FaLink,
 } from 'react-icons/fa';
 import { containerVariants, itemVariants } from '@/lib/animations';
+import PartnerRoleBadge, { getPartnerRoleConfig } from '@/components/PartnerRoleBadge';
 const PROJECT_DETAIL_DEFAULTS = {
   notFound: "Project not found",
   backToProjects: "Back to Projects",
@@ -205,12 +206,17 @@ function PartnerCard({ partner }) {
   const logoUrl = partner?.logo || null;
   const partnerProfileHref = partner?.slug ? `/engagement/partners/${encodeURIComponent(partner.slug)}` : '';
   const websiteHref = partner?.url || '';
+  const roleConfig = getPartnerRoleConfig(partner?.role);
 
   return (
     <motion.div variants={itemVariants} className="h-full">
       <div
-        className={`group relative flex flex-col justify-between h-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 transition-all duration-300 ${partnerProfileHref ? 'hover:-translate-y-1 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-900' : ''}`}
+        className={`group relative flex flex-col justify-between h-full bg-gray-50 dark:bg-gray-900 border-2 rounded-2xl p-5 transition-all duration-300 ${roleConfig.cardBorder} ${partnerProfileHref ? 'hover:-translate-y-1 hover:shadow-xl' : ''}`}
       >
+        <div className="flex items-center justify-end mb-3 relative z-20">
+          <PartnerRoleBadge role={partner?.role} size="xs" />
+        </div>
+
         <div className="flex flex-col items-center justify-center min-h-[5rem] mb-4">
           {logoUrl ? (
             <>

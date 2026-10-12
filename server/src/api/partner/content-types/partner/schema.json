@@ -293,14 +293,16 @@
         "Zimbabwe"
       ]
     },
-    "partnershipStatus": {
+    "role": {
       "type": "enumeration",
       "enum": [
-        "current",
-        "former"
+        "Strategic",
+        "Diamond",
+        "Platinum",
+        "Gold",
+        "Partner"
       ],
-      "default": "current",
-      "required": true
+      "default": "Partner"
     },
     "description": {
       "type": "richtext",
