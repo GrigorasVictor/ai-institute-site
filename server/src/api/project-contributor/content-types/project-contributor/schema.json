@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "project_contributors",
+  "info": {
+    "singularName": "project-contributor",
+    "pluralName": "project-contributors",
+    "displayName": "Project Contributor"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "person": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::person.person",
+      "inversedBy": "project_contributors"
+    },
+    "project": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::project.project",
+      "inversedBy": "project_contributors"
+    },
+    "role": {
+      "type": "enumeration",
+      "enum": [
+        "Director",
+        "Project / Programme Manager",
+        "Legal Officer",
+        "Technical Officer",
+        "Procurement Officer",
+        "Financial Officer",
+        "Specialist / Expert",
+        "Research Assistant",
+        "Researcher",
+        "PhD Student",
+        "Master's Student",
+        "Bachelor's Student",
+        "Technician",
+        "Other"
+      ]
+    }
+  }
+}

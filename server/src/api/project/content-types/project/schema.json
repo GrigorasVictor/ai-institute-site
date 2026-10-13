@@ -17,13 +17,13 @@
   "attributes": {
     "title": {
       "type": "string",
-      "required": true,
-      "unique": true,
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "required": true,
+      "unique": true
     },
     "slug": {
       "type": "uid",
@@ -69,31 +69,31 @@
     },
     "body": {
       "type": "dynamiczone",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "components": [
         "shared.section",
         "shared.rich-text",
         "shared.media",
         "shared.slider"
-      ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      ]
     },
     "researchContent": {
       "type": "dynamiczone",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "components": [
         "shared.section",
         "shared.rich-text",
         "shared.media",
         "shared.slider"
-      ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      ]
     },
     "contactInfo": {
       "type": "component",
@@ -157,6 +157,12 @@
       "relation": "manyToMany",
       "target": "api::news-article.news-article",
       "mappedBy": "relatedProjects"
+    },
+    "project_contributors": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::project-contributor.project-contributor",
+      "mappedBy": "project"
     }
   }
 }

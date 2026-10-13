@@ -63,6 +63,7 @@ services:
       - "1337:1337"
     volumes:
       - ./server/public/uploads:/app/public/uploads
+      #- ./server/src:/app/src
     depends_on:
       postgres:
         condition: service_healthy

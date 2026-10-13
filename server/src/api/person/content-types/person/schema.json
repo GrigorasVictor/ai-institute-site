@@ -10,6 +10,7 @@
   "options": {
     "draftAndPublish": true
   },
+  "pluginOptions": {},
   "attributes": {
     "firstName": {
       "type": "string",
@@ -172,6 +173,12 @@
     "importEligible": {
       "type": "boolean",
       "default": false
+    },
+    "project_contributors": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::project-contributor.project-contributor",
+      "mappedBy": "person"
     }
   }
 }
