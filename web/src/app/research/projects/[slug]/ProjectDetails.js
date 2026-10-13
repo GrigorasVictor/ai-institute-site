@@ -24,6 +24,7 @@ import {
   FaEnvelope,
   FaGithub,
   FaLink,
+  FaStar,
 } from 'react-icons/fa';
 import { containerVariants, itemVariants } from '@/lib/animations';
 import PartnerRoleBadge, { getPartnerRoleConfig } from '@/components/PartnerRoleBadge';
@@ -907,7 +908,7 @@ export default function ProjectDetails({ project, pageData }) {
                         className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-4"
                       >
                         <Link href={person.slug ? `/people/${encodeURIComponent(person.slug)}` : '/people'} className="block text-center group">
-                          <div className="w-20 h-20 mx-auto mb-3">
+                          <div className="relative w-20 h-20 mx-auto mb-3">
                             <img
                               src={person.image || '/people/Basic_avatar_image.png'}
                               alt={person.name}
@@ -917,9 +918,11 @@ export default function ProjectDetails({ project, pageData }) {
                           <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                             {person.name}
                           </h3>
-                          {person.title && (
+                          {person.role ? (
+                            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-1 line-clamp-1">{person.role}</p>
+                          ) : person.title ? (
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{person.title}</p>
-                          )}
+                          ) : null}
                         </Link>
                       </motion.div>
                     ))}

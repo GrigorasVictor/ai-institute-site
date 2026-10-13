@@ -15,6 +15,7 @@ import {
   getSingleType,
   getPeopleGraphData, 
   getTeamsGraphData,
+  getProjectsGraphData,
   getTeams,
   transformTeamData
 } from "@/lib/strapi";
@@ -32,6 +33,19 @@ function normalizeTeams(rawTeams) {
       })
       .filter((id) => id != null);
     return { id: t?.id ?? null, name: attr.name || null, memberIds };
+  });
+}
+
+function normalizeProjects(rawProjects) {
+  return (rawProjects || []).map((p) => {
+    const attr = p?.attributes ?? p ?? {};
+    const memberIds = (attr.individualContributors || [])
+      .map((m) => {
+        const person = m?.person?.data ?? m?.person;
+        return person?.id ?? null;
+      })
+      .filter((id) => id != null);
+    return { id: p?.id ?? null, title: attr.title || null, memberIds };
   });
 }
 
@@ -61,6 +75,7 @@ export default async function PeoplePage() {
       pageData,
       graphPeopleData,
       rawTeams,
+      rawProjects,
       allTeamsRaw
     ] = await Promise.all([
       getStaff({ types: PERSON_TYPE_FILTERS.staff }),
@@ -72,6 +87,7 @@ export default async function PeoplePage() {
       getSingleType("people-page", locale),
       getPeopleGraphData(),
       getTeamsGraphData(),
+      getProjectsGraphData(),
       getTeams(),
     ]);
 
@@ -89,7 +105,11 @@ export default async function PeoplePage() {
     const activeTeams = allTeams.filter((t) => !t.isArchived);
     const archivedTeams = allTeams.filter((t) => t.isArchived);
 
-    const { nodes, links, departmentColors } = buildGraph(enrichedGraphPeople, normalizeTeams(rawTeams));
+    const { nodes, links, departmentColors } = buildGraph(
+      enrichedGraphPeople,
+      normalizeTeams(rawTeams),
+      normalizeProjects(rawProjects)
+    );
 
     return (
     <>

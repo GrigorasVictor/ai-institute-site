@@ -257,7 +257,6 @@ const PERSON_FULL_POPULATE = {
 const PEOPLE_GRAPH_POPULATE = {
   department: { fields: ['name', 'slug'] },
   publications: { fields: ['title'] },
-  contributingProjects: { fields: ['title'] },
   socialLinks: { fields: ['label', 'url', 'icon'] },
 };
 
@@ -554,6 +553,27 @@ export async function getTeamsGraphData() {
 }
 
 /**
+ * Minimal project fetch for the people graph: each project's title plus the ids of its
+ * individual contributor people. Project contributors live on the project side (a repeatable component),
+ * so it can't be read off the person record — co-project edges are derived in
+ * the browser from the shared project ids returned here.
+ * @returns {Promise<Array>} Array of projects with individualContributors[].person populated
+ */
+export async function getProjectsGraphData() {
+  try {
+    return await fetchAllEntries('/projects', {
+      fields: ['title', 'slug'],
+      populate: {
+        individualContributors: { populate: { person: { fields: ['id'] } } },
+      },
+    });
+  } catch (error) {
+    console.error('Failed to fetch projects graph data:', error);
+    return [];
+  }
+}
+
+/**
  * Get all teams a person is a member of, identified by their slug.
  * Filters server-side on the members[].person.slug component relation.
  * @param {string} slug - The person's slug
@@ -676,7 +696,9 @@ export async function getProjects(options = {}) {
       populate: {
         ...PROJECT_POPULATE.populate,
         teams: { fields: ['name', 'slug'] },
-        contributors: PERSON_WITH_IMAGE_POPULATE,
+        individualContributors: {
+          populate: { person: PERSON_WITH_IMAGE_POPULATE },
+        },
       },
     });
 
@@ -755,7 +777,9 @@ export async function getProjectBySlug(slug, locale = null) {
             department: DEPARTMENT_POPULATE,
           },
         },
-        contributors: PERSON_WITH_IMAGE_POPULATE,
+        individualContributors: {
+          populate: { person: PERSON_WITH_IMAGE_POPULATE },
+        },
         news: {
           fields: ['title', 'slug', 'summary', 'category', 'publishedDate', 'linkUrl', 'tags'],
           populate: {
@@ -2426,18 +2450,22 @@ export function transformProjectData(strapiProjects) {
       };
     });
 
-    const contributors = toArray(attributes.contributors?.data ?? attributes.contributors).map((c) => {
-      const personData = c?.attributes ?? c ?? {};
+    const individualContributors = toArray(attributes.individualContributors).map((c) => {
+      const person = c?.person?.data ?? c?.person;
+      const personData = person?.attributes ?? person ?? {};
+      if (!person && !c?.name) return null;
       return {
-        id: c?.id ?? null,
-        slug: personData.slug || '',
-        name: `${personData.firstName || ''} ${personData.lastName || ''}`.trim() || '',
+        id: person?.id ?? c?.id ?? null,
+        slug: personData.slug || c?.slug || '',
+        name: `${personData.firstName || ''} ${personData.lastName || ''}`.trim() || c?.name || '',
         title: personData.title || '',
         type: personData.type || '',
+        role: c?.role || '',
+        isLead: Boolean(c?.isLead),
         email: personData.email || '',
         image: resolveMediaUrl(personData.portrait),
       };
-    }).filter((c) => c.slug || c.name);
+    }).filter((c) => c && (c.slug || c.name));
 
     const publications = toArray(attributes.publications?.data ?? attributes.publications).map((pub) => {
       const pubData = pub?.attributes ?? pub ?? {};
@@ -2564,7 +2592,8 @@ export function transformProjectData(strapiProjects) {
       domains,
       domain: domains.map((d) => d.name).filter(Boolean),
       teams,
-      contributors,
+      individualContributors,
+      contributors: individualContributors,
       timeline: normalizeTimelineEntries(attributes.timeline),
       publications,
       resources,
