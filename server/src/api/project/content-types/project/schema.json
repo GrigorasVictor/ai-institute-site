@@ -145,12 +145,6 @@
       "component": "project.team-member",
       "repeatable": true
     },
-    "contributors": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::person.person",
-      "inversedBy": "contributingProjects"
-    },
     "results": {
       "type": "relation",
       "relation": "manyToMany",

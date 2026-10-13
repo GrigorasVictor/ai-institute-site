@@ -163,12 +163,6 @@
       "target": "api::publication.publication",
       "mappedBy": "authors"
     },
-    "contributingProjects": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::project.project",
-      "mappedBy": "contributors"
-    },
     "importEligible": {
       "type": "boolean",
       "default": false

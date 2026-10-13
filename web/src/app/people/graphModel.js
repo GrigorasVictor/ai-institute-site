@@ -97,13 +97,25 @@ function groupByTeam(teams) {
   return groups;
 }
 
+// Project contributors live on the project side (a repeatable component),
+// so turn the [{ id, title, memberIds }] list from getProjectsGraphData()
+// into the same sharedItemId -> members shape.
+function groupByProject(projects) {
+  const groups = new Map();
+  projects.forEach((pr) => {
+    if (!pr || pr.id == null) return;
+    groups.set(pr.id, { title: pr.title || null, members: (pr.memberIds || []).slice() });
+  });
+  return groups;
+}
+
 /**
  * Build the collaboration graph from raw people records.
  * @param {Array} people - records from getPeopleGraphData()
  * @param {Array} teams - [{ id, name, memberIds }] from getTeamsGraphData()
  * @returns {{ nodes: Array, links: Array, departmentColors: Object }}
  */
-export function buildGraph(people = [], teams = []) {
+export function buildGraph(people = [], teams = [], projects = []) {
   const departmentColors = buildDepartmentColors(people);
 
   // Reverse the team->members list into person id -> [{ id, title }] so each
@@ -117,10 +129,21 @@ export function buildGraph(people = [], teams = []) {
     });
   });
 
+  // Reverse project->contributors list into person id -> [{ id, title }]
+  const projectsByPerson = new Map();
+  projects.forEach((pr) => {
+    if (!pr || pr.id == null) return;
+    (pr.memberIds || []).forEach((pid) => {
+      if (!projectsByPerson.has(pid)) projectsByPerson.set(pid, []);
+      projectsByPerson.get(pid).push({ id: pr.id, title: pr.title || null });
+    });
+  });
+
   const nodes = people.map((p) => {
     const deptName = p.department?.name || null;
     const pubs = p.publications || [];
     const personTeams = teamsByPerson.get(p.id) || [];
+    const personProjects = projectsByPerson.get(p.id) || [];
     return {
       id: p.id,
       slug: p.slug || null,
@@ -137,8 +160,8 @@ export function buildGraph(people = [], teams = []) {
       // summed cited_by of CMS-linked papers — those undercount people whose work
       // isn't fully indexed in the CMS (e.g. 0 linked pubs but 11k Scholar cites).
       citationCount: p.scholarCitationCount || 0,
-      projectCount: (p.contributingProjects || []).length,
-      projects: (p.contributingProjects || []).map((x) => ({ id: x.id, title: x.title })),
+      projectCount: personProjects.length,
+      projects: personProjects,
       teamCount: personTeams.length,
       teams: personTeams,
       degree: 0,
@@ -146,7 +169,7 @@ export function buildGraph(people = [], teams = []) {
   });
 
   const pubGroups = groupByRelation(people, (p) => p.publications);
-  const projGroups = groupByRelation(people, (p) => p.contributingProjects);
+  const projGroups = groupByProject(projects);
   const teamGroups = groupByTeam(teams);
 
   const edgeMap = new Map();
