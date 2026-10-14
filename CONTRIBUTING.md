@@ -19,6 +19,9 @@ We use GitHub Issues and Projects to track work:
 
 Before starting work on a feature, check if an issue exists or create one to discuss your approach.
 
+**Be advised:** tasks that involve changes to the Strapi schema may require data migration on the production server. 
+Please coordinate with maintainers before making such changes. 
+
 ## Git Workflow
 
 ### Branching Strategy
@@ -35,7 +38,7 @@ We follow a simplified Git Flow model:
 Use descriptive names that indicate the type and purpose:
 
 ```
-feature/<short-description>    # New features
+feat/<short-description>    # New features
 fix/<issue-or-description>      # Bug fixes
 docs/<what-documentation>       # Documentation updates
 refactor/<what-refactoring>     # Code refactoring
