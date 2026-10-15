@@ -681,13 +681,20 @@ export async function getLeadershipTeams() {
  */
 export async function getProjects(options = {}) {
   try {
-    const { domainSlug, themeSlug, publicationState = 'preview', locale } = options;
+    const {
+      domainSlug,
+      themeSlug,
+      publicationState = 'preview',
+      locale,
+      page,
+      pageSize = 100,
+    } = options;
 
     const filters = {};
     if (domainSlug) filters.domains = { slug: { $eq: domainSlug } };
     if (themeSlug) filters.themes = { slug: { $eq: themeSlug } };
 
-    const params = createParams({
+    const baseOptions = {
       sort: 'title:asc',
       publicationState,
       locale,
@@ -700,10 +707,15 @@ export async function getProjects(options = {}) {
           populate: { person: PERSON_WITH_IMAGE_POPULATE },
         },
       },
-    });
+    };
 
-    const data = await fetchAPI(`/projects?${params.toString()}`);
-    return data.data || [];
+    if (page) {
+      const params = createParams({ ...baseOptions, pagination: { page, pageSize } });
+      const data = await fetchAPI(`/projects?${params.toString()}`);
+      return data.data || [];
+    }
+
+    return await fetchAllEntries('/projects', baseOptions, pageSize);
   } catch (error) {
     console.error('Failed to fetch projects:', error);
     return [];
@@ -782,6 +794,12 @@ export async function getProjectBySlug(slug, locale = null) {
         },
         news: {
           fields: ['title', 'slug', 'summary', 'category', 'publishedDate', 'linkUrl', 'tags'],
+          populate: {
+            heroImage: { fields: ['url', 'formats', 'alternativeText'] },
+          },
+        },
+        events: {
+          fields: ['title', 'slug', 'startDate', 'endDate', 'category', 'format', 'location', 'locationType', 'description', 'ctaLabel', 'ctaUrl'],
           populate: {
             heroImage: { fields: ['url', 'formats', 'alternativeText'] },
           },
@@ -2540,6 +2558,38 @@ export function transformProjectData(strapiProjects) {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
 
+    const events = toArray(attributes.events?.data ?? attributes.events)
+      .map((eventItem) => {
+        const eventData = eventItem?.attributes ?? eventItem ?? {};
+        const parsedStartDate = eventData.startDate ? new Date(eventData.startDate) : null;
+        const startDate = parsedStartDate && !Number.isNaN(parsedStartDate.getTime()) ? parsedStartDate.toISOString() : '';
+        const parsedEndDate = eventData.endDate ? new Date(eventData.endDate) : null;
+        const endDate = parsedEndDate && !Number.isNaN(parsedEndDate.getTime()) ? parsedEndDate.toISOString() : '';
+
+        return {
+          id: eventItem?.id ?? null,
+          title: eventData.title || '',
+          slug: eventData.slug || '',
+          category: eventData.category || 'event',
+          startDate,
+          endDate,
+          format: eventData.format || 'onsite',
+          location: eventData.location || '',
+          locationType: eventData.locationType || 'airi_utcn',
+          description: stripHtml(eventData.description || ''),
+          ctaLabel: eventData.ctaLabel || '',
+          ctaUrl: normalizeExternalUrl(eventData.ctaUrl),
+          image: resolveMediaUrl(eventData.heroImage),
+        };
+      })
+      .filter((item) => item.title || item.slug)
+      .sort((a, b) => {
+        if (!a.startDate && !b.startDate) return 0;
+        if (!a.startDate) return 1;
+        if (!b.startDate) return -1;
+        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+      });
+
     const isArchived = (() => {
       if (!attributes.endDate) return false;
       const end = new Date(attributes.endDate);
@@ -2598,6 +2648,7 @@ export function transformProjectData(strapiProjects) {
       publications,
       resources,
       news,
+      events,
       _strapi: project,
       _isFallback: project._isFallback || false,
     };
