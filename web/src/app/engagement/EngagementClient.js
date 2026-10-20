@@ -1086,7 +1086,6 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
     { id: 'industry', label: pageData?.tabIndustry || "Industry", icon: FaIndustry },
     { id: 'high-school', label: pageData?.tabHighSchool || "High-School", icon: FaSchool },
     { id: 'partners', label: pageData?.tabPartners || "Partners", icon: FaHandshake },
-    { id: 'phd', label: pageData?.tabIndustrialPhd || "Industrial PhD", icon: FaFlask },
   ];
 
   const setTab = useCallback((tab) => {
