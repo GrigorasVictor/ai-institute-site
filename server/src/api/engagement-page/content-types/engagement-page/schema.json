@@ -150,35 +150,19 @@
         }
       }
     },
-    "publicTitle": {
-      "type": "string",
-      "default": "Public Engagement",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "publicDesc": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "publicBtnMedia": {
-      "type": "string",
-      "default": "View Media & Press",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "publicBtnNews": {
-      "type": "string",
-      "default": "News & Events",
+    "publicContent": {
+      "type": "dynamiczone",
+      "components": [
+        "shared.cta",
+        "shared.card-grid",
+        "shared.card",
+        "shared.focus-item",
+        "shared.section",
+        "shared.rich-text",
+        "shared.media",
+        "shared.slider",
+        "shared.quote"
+      ],
       "pluginOptions": {
         "i18n": {
           "localized": true

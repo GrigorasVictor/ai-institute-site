@@ -1,0 +1,59 @@
+{
+  "collectionName": "components_shared_ctas",
+  "info": {
+    "displayName": "Call to action",
+    "description": "Banner or call-to-action block with buttons",
+    "icon": "bullhorn"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "primaryButtonText": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "primaryButtonUrl": {
+      "type": "string"
+    },
+    "secondaryButtonText": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "secondaryButtonUrl": {
+      "type": "string"
+    },
+    "theme": {
+      "type": "enumeration",
+      "default": "blue",
+      "enum": [
+        "blue",
+        "gradient",
+        "gray"
+      ]
+    }
+  }
+}

@@ -27,6 +27,7 @@ import {
 import { containerVariants, itemVariants } from '@/lib/animations';
 import PartnerRoleBadge, { getPartnerRoleConfig } from '@/components/PartnerRoleBadge';
 import { PARTNER_ROLES, PARTNER_ROLE_ORDER } from '@/lib/strapi';
+import DynamicZone from '@/components/shared/DynamicZone';
 
 const SUB_TABS_TEXTS = {
   partnerships: "Partnerships",
@@ -36,19 +37,6 @@ const SUB_TABS_TEXTS = {
   overview: "Overview",
   projects: "Projects",
   engagement: "How We Work",
-};
-
-const PUBLIC_TEXTS = {
-  title: "Public Engagement",
-  desc: "We actively engage with the public to demystify AI and share our findings.",
-  btnMedia: "Media Appearances",
-  btnNews: "News & Events",
-  outreachTitle: "Community Outreach",
-  outreachDesc: "Organizing open days, public lectures, and interactive demonstrations to bring AI closer to the community.",
-  eduTitle: "Educational Content",
-  eduDesc: "Creating accessible materials, blogs, and videos explaining complex AI concepts to a general audience.",
-  mediaTitle: "Media & Press",
-  mediaDesc: "Regular contributions to media outlets, expert commentary on AI trends, and press releases about our major discoveries.",
 };
 
 const ACADEMIC_TEXTS = {
@@ -248,50 +236,8 @@ function SectionCard({ title, children }) {
 // CONTENT SECTIONS
 // ============================================================================
 
-function PublicContent() {
-  const t = (k) => PUBLIC_TEXTS[k] || k;
-  return (
-    <motion.div key="public" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <SectionCard title={t('title')}>
-        <p className="text-gray-700 dark:text-gray-300 mb-4">
-          {t('desc')}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/media"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <FaExternalLinkAlt className="w-4 h-4" />
-            {t('btnMedia')}
-          </Link>
-          <Link
-            href="/news&events"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            {t('btnNews')}
-          </Link>
-        </div>
-      </SectionCard>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <FeatureCard
-          icon={FaUsers}
-          title={t('outreachTitle')}
-          desc={t('outreachDesc')}
-        />
-        <FeatureCard
-          icon={FaBook}
-          title={t('eduTitle')}
-          desc={t('eduDesc')}
-        />
-        <FeatureCard
-          icon={FaGlobe}
-          title={t('mediaTitle')}
-          desc={t('mediaDesc')}
-        />
-      </div>
-    </motion.div>
-  );
+function PublicContent({ blocks }) {
+  return <DynamicZone blocks={blocks} />;
 }
 
 function AcademicContent({ subTab, setSubTab }) {
@@ -1156,7 +1102,9 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {activeTab === 'public' && <PublicContent />}
+            {activeTab === 'public' && (
+              <PublicContent blocks={pageData?.publicContent} />
+            )}
             {activeTab === 'academic' && <AcademicContent subTab={subTab} setSubTab={setSubTab} />}
             {activeTab === 'industry' && <IndustryContent projects={transformedProjects} subTab={subTab} setSubTab={setSubTab} />}
             {activeTab === 'high-school' && <HighSchoolContent />}

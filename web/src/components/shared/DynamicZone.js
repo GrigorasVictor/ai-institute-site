@@ -1,5 +1,21 @@
 'use client';
 
+import Link from 'next/link';
+import {
+  FaUsers,
+  FaBook,
+  FaGlobe,
+  FaNewspaper,
+  FaLightbulb,
+  FaGraduationCap,
+  FaHandshake,
+  FaCalendarAlt,
+  FaLink,
+  FaExternalLinkAlt,
+  FaRocket,
+  FaFlask,
+  FaArrowRight,
+} from 'react-icons/fa';
 import RichMarkdown from '@/components/shared/RichMarkdown';
 import BodyContentImage from '@/components/shared/BodyContentImage';
 import MediaPlayer from '@/components/shared/MediaPlayer';
@@ -11,7 +27,13 @@ const resolveMediaUrl = (media) => {
   if (typeof media === 'string') {
     url = media;
   } else {
-    url = media.url || media.src || media.data?.attributes?.url || '';
+    url =
+      media.url ||
+      media.src ||
+      media.attributes?.url ||
+      media.data?.attributes?.url ||
+      media.data?.url ||
+      '';
   }
   if (!url) return null;
   if (/^https?:\/\//i.test(url)) return url;
@@ -19,6 +41,231 @@ const resolveMediaUrl = (media) => {
   const baseUrl = (process.env.NEXT_PUBLIC_STRAPI_URL || '').replace(/\/+$/, '');
   return `${baseUrl}${url.startsWith('/') ? url : `/${url}`}`;
 };
+
+const ICON_MAP = {
+  users: FaUsers,
+  book: FaBook,
+  globe: FaGlobe,
+  newspaper: FaNewspaper,
+  lightbulb: FaLightbulb,
+  'graduation-cap': FaGraduationCap,
+  graduationcap: FaGraduationCap,
+  handshake: FaHandshake,
+  calendar: FaCalendarAlt,
+  link: FaLink,
+  external: FaExternalLinkAlt,
+  rocket: FaRocket,
+  flask: FaFlask,
+};
+
+function resolveIcon(iconName) {
+  if (!iconName) return null;
+  const key = String(iconName).toLowerCase().trim();
+  return ICON_MAP[key] || FaLightbulb;
+}
+
+function DynamicCard({ card, className = '' }) {
+  if (!card) return null;
+  const Icon = resolveIcon(card.icon);
+  const imageUrl = resolveMediaUrl(card.image);
+  const href = card.linkUrl;
+  const isExternal = href && (/^https?:\/\//i.test(href) || href.startsWith('//'));
+
+  const cardContent = (
+    <div
+      className={`h-full rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm transition-all duration-300 flex flex-col justify-between ${
+        href ? 'hover:shadow-lg hover:border-blue-500/50 dark:hover:border-blue-400/50 cursor-pointer group' : ''
+      } ${className}`}
+    >
+      <div>
+        <div className="flex items-start justify-between gap-3 mb-4">
+          {imageUrl ? (
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 border border-gray-100 dark:border-gray-800">
+              <img src={imageUrl} alt={card.title || 'Card image'} className="w-full h-full object-cover" />
+            </div>
+          ) : Icon ? (
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-xl flex-shrink-0 group-hover:scale-105 transition-transform">
+              <Icon className="w-5 h-5" />
+            </div>
+          ) : null}
+
+          {card.badge && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
+              {card.badge}
+            </span>
+          )}
+        </div>
+
+        <h3 className={`text-lg font-bold text-gray-900 dark:text-white leading-snug ${href ? 'group-hover:text-blue-600 dark:group-hover:text-blue-400' : ''} transition-colors`}>
+          {card.title}
+        </h3>
+
+        {card.description && (
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            {card.description}
+          </p>
+        )}
+      </div>
+
+      {href && (
+        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:underline">
+          <span>{card.linkText || (isExternal ? 'Learn more' : 'Read details')}</span>
+          {isExternal ? (
+            <FaExternalLinkAlt className="w-3.5 h-3.5" />
+          ) : (
+            <FaArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  if (!href) return cardContent;
+
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="block h-full">
+        {cardContent}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className="block h-full">
+      {cardContent}
+    </Link>
+  );
+}
+
+function DynamicCardGrid({ block }) {
+  const cards = Array.isArray(block.cards?.data ?? block.cards) ? (block.cards?.data ?? block.cards) : [];
+  const cols =
+    block.columns === '2'
+      ? 'sm:grid-cols-2'
+      : block.columns === '4'
+      ? 'sm:grid-cols-2 lg:grid-cols-4'
+      : 'sm:grid-cols-2 lg:grid-cols-3';
+
+  return (
+    <section className="my-8 space-y-6">
+      {(block.heading || block.subheading) && (
+        <div className="text-center max-w-3xl mx-auto space-y-2">
+          {block.heading && (
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {block.heading}
+            </h2>
+          )}
+          {block.subheading && (
+            <p className="text-base text-gray-600 dark:text-gray-400">
+              {block.subheading}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className={`grid gap-6 grid-cols-1 ${cols}`}>
+        {cards.map((card, idx) => (
+          <DynamicCard key={`card-${idx}`} card={card?.attributes ?? card} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DynamicCta({ block }) {
+  const theme = block.theme || 'blue';
+
+  const themeStyles = {
+    blue: 'bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-xl',
+    gradient: 'bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 text-white shadow-xl border border-white/10',
+    gray: 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 shadow-md',
+  };
+
+  const isLight = theme === 'gray';
+
+  return (
+    <section className={`my-8 rounded-2xl p-8 md:p-10 ${themeStyles[theme] || themeStyles.blue} relative overflow-hidden`}>
+      <div className="relative z-10 max-w-3xl">
+        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">
+          {block.title}
+        </h2>
+        {block.description && (
+          <p className={`mt-3 text-base md:text-lg leading-relaxed ${isLight ? 'text-gray-600 dark:text-gray-300' : 'text-blue-100'}`}>
+            {block.description}
+          </p>
+        )}
+
+        {(block.primaryButtonText || block.secondaryButtonText) && (
+          <div className="mt-6 flex flex-wrap gap-4 items-center">
+            {block.primaryButtonText && block.primaryButtonUrl && (
+              <CtaButton
+                href={block.primaryButtonUrl}
+                label={block.primaryButtonText}
+                primary={true}
+                isLight={isLight}
+              />
+            )}
+            {block.secondaryButtonText && block.secondaryButtonUrl && (
+              <CtaButton
+                href={block.secondaryButtonUrl}
+                label={block.secondaryButtonText}
+                primary={false}
+                isLight={isLight}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CtaButton({ href, label, primary, isLight }) {
+  const isExternal = /^https?:\/\//i.test(href) || href.startsWith('//');
+
+  let btnClasses = '';
+  if (primary) {
+    btnClasses = isLight
+      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
+      : 'bg-white text-blue-900 hover:bg-blue-50 shadow-md font-semibold';
+  } else {
+    btnClasses = isLight
+      ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'
+      : 'bg-white/10 hover:bg-white/20 text-white border border-white/20';
+  }
+
+  const content = (
+    <span className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${btnClasses}`}>
+      <span>{label}</span>
+      {isExternal ? <FaExternalLinkAlt className="w-3.5 h-3.5" /> : <FaArrowRight className="w-3.5 h-3.5" />}
+    </span>
+  );
+
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {content}
+      </a>
+    );
+  }
+  return <Link href={href}>{content}</Link>;
+}
+
+function DynamicFocusItem({ block }) {
+  return (
+    <div className="my-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        {block.title}
+      </h3>
+      {block.description && (
+        <p className="text-gray-600 dark:text-gray-400 mb-4">{block.description}</p>
+      )}
+      {block.richContent && (
+        <RichMarkdown content={block.richContent} />
+      )}
+    </div>
+  );
+}
 
 export default function DynamicZone({ blocks, className = '' }) {
   if (!Array.isArray(blocks) || blocks.length === 0) return null;
@@ -31,6 +278,18 @@ export default function DynamicZone({ blocks, className = '' }) {
         if (!block) return null;
 
         switch (block.__component) {
+          case 'shared.card':
+            return <DynamicCard key={`card-${index}`} card={block} />;
+
+          case 'shared.card-grid':
+            return <DynamicCardGrid key={`cg-${index}`} block={block} />;
+
+          case 'shared.cta':
+            return <DynamicCta key={`cta-${index}`} block={block} />;
+
+          case 'shared.focus-item':
+            return <DynamicFocusItem key={`fi-${index}`} block={block} />;
+
           case 'shared.rich-text':
             return (
               <RichMarkdown
@@ -96,7 +355,6 @@ export default function DynamicZone({ blocks, className = '' }) {
               
               const mimeStr = mediaData.mime || mediaData.data?.attributes?.mime;
               const isVideo = mimeStr?.startsWith('video/') || /\.(mp4|webm|ogg|mov)$/i.test(mediaSrc);
-              console.log("DYNAMICZONE: ", { isVideo, mediaSrc, mimeStr });
 
               return (
                 <div key={`media-${index}`} className="my-8 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
@@ -147,8 +405,6 @@ export default function DynamicZone({ blocks, className = '' }) {
               const images = files.map(f => resolveMediaUrl(f)).filter(Boolean);
               if (images.length === 0) return null;
               
-              // Depending on requirements, we can use a Slideshow or Stack.
-              // Let's use GallerySlideshow if there's more than one, else BodyContentImage
               if (images.length === 1) {
                 const singleFile = files[0];
                 const mimeStr = singleFile?.mime || singleFile?.data?.attributes?.mime;

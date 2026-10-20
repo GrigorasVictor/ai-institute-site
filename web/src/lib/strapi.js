@@ -3313,17 +3313,17 @@ export async function getGlobal(locale = "en") {
   return DEFAULT_GLOBAL;
 }
 
-export async function getSingleType(endpoint, locale = "en", populate = "*") {
+export async function getSingleType(endpoint, locale = "en", populate = "*", fetchOptions = {}) {
   try {
     const params = createParams({
       locale,
       populate,
     });
-    let res = await fetchAPI(`/${endpoint}?${params.toString()}`);
+    let res = await fetchAPI(`/${endpoint}?${params.toString()}`, fetchOptions);
     if (!res?.data && locale && locale !== "en") {
       const fallbackParams = new URLSearchParams(params);
       fallbackParams.set("locale", "en");
-      const fallbackRes = await fetchAPI(`/${endpoint}?${fallbackParams.toString()}`);
+      const fallbackRes = await fetchAPI(`/${endpoint}?${fallbackParams.toString()}`, fetchOptions);
       if (fallbackRes?.data) {
         res = fallbackRes;
         res.data._isFallback = true;

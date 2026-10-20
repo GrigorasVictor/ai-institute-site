@@ -5,10 +5,65 @@ import EngagementClient from "./EngagementClient";
 import CollaboratorsClient from "../collaborators/CollaboratorsClient";
 import { getPartners, getProjects, transformPartnerData, transformProjectData, getSingleType } from "@/lib/strapi";
 
+const ENGAGEMENT_PAGE_POPULATE = {
+  publicContent: {
+    on: {
+      "shared.cta": {},
+      "shared.card": {
+        populate: {
+          image: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+      "shared.card-grid": {
+        populate: {
+          cards: {
+            populate: {
+              image: {
+                fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+              },
+            },
+          },
+        },
+      },
+      "shared.rich-text": {},
+      "shared.quote": {},
+      "shared.section": {
+        populate: {
+          media: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+      "shared.media": {
+        populate: {
+          file: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+      "shared.slider": {
+        populate: {
+          files: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+    },
+  },
+};
+const ENGAGEMENT_PAGE_FETCH_OPTIONS = { cache: "no-store" };
+
 export async function generateMetadata() {
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
-  const engagement = await getSingleType("engagement-page", locale);
+  const engagement = await getSingleType(
+    "engagement-page",
+    locale,
+    ENGAGEMENT_PAGE_POPULATE,
+    ENGAGEMENT_PAGE_FETCH_OPTIONS,
+  );
 
   return {
     title: engagement?.heroTitle || "Engagement",
@@ -23,7 +78,12 @@ export default async function EngagementPage() {
   const [strapiProjects, partnerRows, pageData] = await Promise.all([
     getProjects({ locale }),
     getPartners({ locale }),
-    getSingleType("engagement-page", locale),
+    getSingleType(
+      "engagement-page",
+      locale,
+      ENGAGEMENT_PAGE_POPULATE,
+      ENGAGEMENT_PAGE_FETCH_OPTIONS,
+    ),
   ]);
 
   const projects = transformProjectData(strapiProjects);
