@@ -18,6 +18,8 @@ import {
   FaFilePdf,
   FaUserTie,
   FaNewspaper,
+  FaCalendar,
+  FaVideo,
   FaFlask,
   FaPhone,
   FaCog,
@@ -69,7 +71,10 @@ const PROJECT_DETAIL_DEFAULTS = {
   "tabs.research": "Research",
   "tabs.publications": "Publications",
   "tabs.results": "Results",
-  "tabs.news": "News",
+  "tabs.news": "News & Events",
+  "tabs.newsAndEvents": "News & Events",
+  events: "Events",
+  news: "News",
   "tabs.partners": "Partners",
   "tabs.contact": "Contact",
   "tabs.resources": "Resources",
@@ -95,6 +100,7 @@ const PROJECT_DETAIL_DEFAULTS = {
   noResearch: "No research content available",
   noResults: "No results available",
   noNews: "No news linked to this project yet.",
+  noNewsOrEvents: "No news or events linked to this project yet.",
   openArticle: "Open article",
   "newsCategories.announcement": "Announcement",
   "newsCategories.construction": "Construction",
@@ -560,6 +566,107 @@ function NewsCard({ item, t }) {
   );
 }
 
+function EventCard({ item, t }) {
+  const eventSlug = item?.slug ? encodeURIComponent(item.slug) : '';
+  const startFormatted = formatProjectDate(item.startDate);
+  const endFormatted = item.endDate && item.endDate !== item.startDate ? formatProjectDate(item.endDate) : null;
+  const dateLabel = endFormatted ? `${startFormatted} – ${endFormatted}` : startFormatted;
+  const viewDetailsLabel = t.has('viewDetails') ? t('viewDetails') : 'View Details';
+
+  const getFormatIcon = (format) => {
+    switch (format) {
+      case 'online':
+        return <FaVideo className="w-3.5 h-3.5 text-blue-500" />;
+      case 'hybrid':
+        return <FaMapMarkerAlt className="w-3.5 h-3.5 text-purple-500" />;
+      default:
+        return <FaMapMarkerAlt className="w-3.5 h-3.5 text-emerald-500" />;
+    }
+  };
+
+  const categoryLabel = item.category ? item.category.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()) : 'Event';
+
+  return (
+    <motion.article
+      variants={itemVariants}
+      className="group flex flex-col h-full overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+    >
+      <div className="relative h-52 bg-gray-100 dark:bg-gray-800 overflow-hidden">
+        {item.image ? (
+          <img
+            src={item.image}
+            alt={item.title || 'Event'}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-indigo-900 to-blue-700 flex items-center justify-center text-white/50 text-4xl">
+            <FaCalendar className="w-10 h-10 opacity-70" />
+          </div>
+        )}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-gray-900/90 text-gray-800 dark:text-gray-200 backdrop-blur-sm border border-black/5 dark:border-white/10 shadow-sm">
+            {categoryLabel}
+          </span>
+          {item.format && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-900/80 text-white backdrop-blur-sm border border-white/10 shadow-sm capitalize">
+              {getFormatIcon(item.format)}
+              {item.format}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col flex-1 p-6">
+        {dateLabel && (
+          <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">
+            <FaCalendar className="w-3 h-3 flex-shrink-0" />
+            <span>{dateLabel}</span>
+          </div>
+        )}
+
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 mb-3">
+          {item.slug ? (
+            <Link href={`/news&events/events/${eventSlug}`}>
+              {item.title || 'Event'}
+            </Link>
+          ) : (
+            item.title || 'Event'
+          )}
+        </h3>
+
+        {item.description && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4 leading-relaxed">
+            {item.description}
+          </p>
+        )}
+
+        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3 text-xs">
+          {item.location ? (
+            <span className="text-gray-500 dark:text-gray-400 truncate max-w-[60%]">
+              {item.location}
+            </span>
+          ) : (
+            <span />
+          )}
+
+          {item.slug ? (
+            <Link
+              href={`/news&events/events/${eventSlug}`}
+              className="inline-flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 ml-auto"
+            >
+              <span>{viewDetailsLabel}</span>
+              <FaExternalLinkAlt className="w-3 h-3" />
+            </Link>
+          ) : (
+            <span />
+          )}
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
 export default function ProjectDetails({ project, pageData }) {
   const [activeTab, setActiveTab] = useState('about');
   const t = (key, params) => {
@@ -615,6 +722,8 @@ export default function ProjectDetails({ project, pageData }) {
     ? project.partnersData
     : (project.partners || []).map((name) => ({ name, slug: '' }));
   const projectNews = project.news || [];
+  const projectEvents = project.events || [];
+  const newsAndEventsCount = projectNews.length + projectEvents.length;
 
   const phase = getProjectPhase(project.startDate, project.endDate);
   const phaseLabelKey = phase.status === 'ended'
@@ -641,7 +750,7 @@ export default function ProjectDetails({ project, pageData }) {
     { id: 'research', label: t('tabs.research'), icon: FaFlask },
     { id: 'publications', label: t('tabs.publications'), icon: FaBookOpen, count: project.publications?.length },
     { id: 'results', label: t('tabs.results'), icon: FaCog, count: resultsCount > 0 ? resultsCount : undefined },
-    { id: 'news', label: t('tabs.news'), icon: FaNewspaper, count: projectNews.length > 0 ? projectNews.length : undefined },
+    { id: 'news', label: t('tabs.news'), icon: FaNewspaper, count: newsAndEventsCount > 0 ? newsAndEventsCount : undefined },
     { id: 'partners', label: t('tabs.partners'), icon: FaHandshake, count: partners.length > 0 ? partners.length : undefined },
     { id: 'contact', label: t('tabs.contact'), icon: FaPhone },
   ];
@@ -1100,29 +1209,75 @@ export default function ProjectDetails({ project, pageData }) {
             </div>
           )}
 
-          {/* News Tab */}
+          {/* News & Events Tab */}
           {activeTab === 'news' && (
-            <div className="space-y-6">
-              {projectNews.length > 0 ? (
-                <motion.div
-                  initial="hidden"
-                  animate="visible"
-                  variants={containerVariants}
-                  className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
-                >
-                  {projectNews.map((item) => (
-                    <NewsCard
-                      key={item.id || item.slug || item.title}
-                      item={item}
-                      t={t}
-                    />
-                  ))}
-                </motion.div>
-              ) : (
+            <div className="space-y-10">
+              {/* Events Sub-section */}
+              {projectEvents.length > 0 && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                      <FaCalendar className="text-blue-600 dark:text-blue-400 w-5 h-5" />
+                      <span>{t('events')}</span>
+                    </h3>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                      {projectEvents.length}
+                    </span>
+                  </div>
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+                  >
+                    {projectEvents.map((item) => (
+                      <EventCard
+                        key={item.id || item.slug || item.title}
+                        item={item}
+                        t={t}
+                      />
+                    ))}
+                  </motion.div>
+                </div>
+              )}
+
+              {/* News Sub-section */}
+              {projectNews.length > 0 && (
+                <div className="space-y-6">
+                  {projectEvents.length > 0 && (
+                    <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                        <FaNewspaper className="text-blue-600 dark:text-blue-400 w-5 h-5" />
+                        <span>{t('news')}</span>
+                      </h3>
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                        {projectNews.length}
+                      </span>
+                    </div>
+                  )}
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+                  >
+                    {projectNews.map((item) => (
+                      <NewsCard
+                        key={item.id || item.slug || item.title}
+                        item={item}
+                        t={t}
+                      />
+                    ))}
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Empty state when neither events nor news exist */}
+              {projectEvents.length === 0 && projectNews.length === 0 && (
                 <div className="text-center py-12">
                   <FaNewspaper className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-500 dark:text-gray-400">
-                    {t('noNews')}
+                    {t('noNewsOrEvents')}
                   </p>
                 </div>
               )}
