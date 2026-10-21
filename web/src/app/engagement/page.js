@@ -14,6 +14,7 @@ const ENGAGEMENT_PAGE_POPULATE = {
         populate: {
           image: {
             fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+            "shared.separator": {},
           },
         },
       },

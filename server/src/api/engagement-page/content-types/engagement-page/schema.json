@@ -125,7 +125,8 @@
         "shared.rich-text",
         "shared.media",
         "shared.slider",
-        "shared.quote"
+        "shared.quote",
+        "shared.separator"
       ],
       "pluginOptions": {
         "i18n": {
