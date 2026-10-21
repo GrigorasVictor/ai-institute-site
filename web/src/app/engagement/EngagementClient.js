@@ -26,9 +26,11 @@ import {
 } from 'react-icons/fa';
 import PartnerRoleBadge, { getPartnerRoleConfig } from '@/components/PartnerRoleBadge';
 import { PARTNER_ROLES, PARTNER_ROLE_ORDER } from '@/lib/strapi';
+import { containerVariants, itemVariants } from '@/lib/animations';
 import DynamicZone from '@/components/shared/DynamicZone';
 
 const SUB_TABS_TEXTS = {
+  info: "Info",
   partnerships: "Partnerships",
   teaching: "Teaching",
   courses: "Courses",
@@ -72,26 +74,11 @@ const ACADEMIC_TEXTS = {
 };
 
 const INDUSTRY_TEXTS = {
-  statProjects: "Industry Projects",
-  statDomains: "Research Domains",
-  statPartners: "Industry Partners",
-  collabTitle: "Industry Collaboration",
-  collabDesc: "AIRi partners with leading companies to translate cutting-edge AI research into real-world applications.",
   searchPlaceholder: "Search industry projects...",
   allDomains: "All domains",
   clear: "Clear filters",
   noProjects: "No industry projects found.",
   leadLabel: "Lead:",
-  workTitle: "How We Work With Industry",
-  workDesc: "We offer flexible engagement models tailored to industry needs.",
-  rdTitle: "Joint R&D",
-  rdDesc: "Collaborative research projects solving complex industrial challenges.",
-  consTitle: "Consulting",
-  consDesc: "Expert advisory services on AI strategy and implementation.",
-  trainTitle: "Corporate Training",
-  trainDesc: "Customized AI training programs for industry professionals.",
-  techTitle: "Technology Transfer",
-  techDesc: "Licensing and spin-off creation from our research outputs.",
 };
 
 const HIGHSCHOOL_TEXTS = {
@@ -381,14 +368,12 @@ function AcademicContent({ subTab, setSubTab }) {
   );
 }
 
-function IndustryContent({ projects, subTab, setSubTab }) {
-  const tTab = (k) => SUB_TABS_TEXTS[k] || k;
+function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab }) {
   const t = (k) => INDUSTRY_TEXTS[k] || k;
 
   const INDUSTRY_SUBTABS = [
-    { id: 'overview', label: tTab('overview') },
-    { id: 'projects', label: tTab('projects') },
-    { id: 'engagement', label: tTab('engagement') },
+    { id: 'info', label: infoLabel || SUB_TABS_TEXTS.info },
+    { id: 'projects', label: SUB_TABS_TEXTS.projects },
   ];
 
   const [query, setQuery] = useState('');
@@ -416,20 +401,6 @@ function IndustryContent({ projects, subTab, setSubTab }) {
     });
   }, [industryProjects, query, domainFilter]);
 
-  const stats = useMemo(() => {
-    const domains = new Set();
-    const partners = new Set();
-    industryProjects.forEach(p => {
-      (p.domains || []).forEach(d => d && domains.add(d));
-      (p.partners || []).forEach(x => x && partners.add(x));
-    });
-    return {
-      projectCount: industryProjects.length,
-      domainCount: domains.size,
-      partnerCount: partners.size,
-    };
-  }, [industryProjects]);
-
   return (
     <div className="space-y-6">
       {/* Subtabs */}
@@ -453,38 +424,9 @@ function IndustryContent({ projects, subTab, setSubTab }) {
           exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
           className="space-y-6"
         >
-          {subTab === 'overview' && (
-            <div className="space-y-6">
-              {/* Stats */}
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {stats.projectCount}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('statProjects')}</div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {stats.domainCount}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('statDomains')}</div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {stats.partnerCount}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('statPartners')}</div>
-                </div>
-              </div>
-
-              <SectionCard title={t('collabTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('collabDesc')}
-                </p>
-              </SectionCard>
-            </div>
+          {subTab === 'info' && (
+            <DynamicZone blocks={infoBlocks} />
           )}
-
           {subTab === 'projects' && (
             <div className="space-y-6">
               {/* Filters */}
@@ -588,37 +530,6 @@ function IndustryContent({ projects, subTab, setSubTab }) {
             </div>
           )}
 
-          {subTab === 'engagement' && (
-            <div className="space-y-6">
-              <SectionCard title={t('workTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('workDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('rdTitle')}
-                  desc={t('rdDesc')}
-                />
-                <FeatureCard
-                  icon={FaInfoCircle}
-                  title={t('consTitle')}
-                  desc={t('consDesc')}
-                />
-                <FeatureCard
-                  icon={FaUserGraduate}
-                  title={t('trainTitle')}
-                  desc={t('trainDesc')}
-                />
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('techTitle')}
-                  desc={t('techDesc')}
-                />
-              </div>
-            </div>
-          )}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -1020,7 +931,7 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
   const searchParams = useSearchParams();
 
   const activeTab = searchParams.get('tab') || 'public';
-  const subTab = searchParams.get('sub') || (activeTab === 'academic' ? 'partnerships' : activeTab === 'industry' ? 'overview' : null);
+  const subTab = searchParams.get('sub') || (activeTab === 'academic' ? 'partnerships' : activeTab === 'industry' ? 'info' : null);
 
   const heroTitle = pageData?.heroTitle || "Engagement";
   const heroSubtitle = pageData?.heroSubtitle || "Building bridges between research, industry, and society";
@@ -1105,7 +1016,15 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
               <PublicContent blocks={pageData?.publicContent} />
             )}
             {activeTab === 'academic' && <AcademicContent subTab={subTab} setSubTab={setSubTab} />}
-            {activeTab === 'industry' && <IndustryContent projects={transformedProjects} subTab={subTab} setSubTab={setSubTab} />}
+            {activeTab === 'industry' && (
+              <IndustryContent
+                projects={transformedProjects}
+                infoBlocks={pageData?.industryContent}
+                infoLabel={pageData?.subtabInfo}
+                subTab={subTab}
+                setSubTab={setSubTab}
+              />
+            )}
             {activeTab === 'high-school' && <HighSchoolContent />}
             {activeTab === 'partners' && <PartnersContent partners={partners} CollaboratorsClient={CollaboratorsClient} />}
             {activeTab === 'phd' && <IndustrialPhDContent />}

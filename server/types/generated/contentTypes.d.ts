@@ -1405,33 +1405,25 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'High-school engagement'>;
-    industryBtnContact: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Contact the industry team'>;
-    industryBtnExplore: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Explore all projects'>;
-    industryDescription: Schema.Attribute.Text &
+    industryContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.card-grid',
+        'shared.card',
+        'shared.cta',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote',
+        'shared.separator'
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    industryTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Industry engagement'>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1493,7 +1485,8 @@ export interface ApiEngagementPageEngagementPage
         'shared.rich-text',
         'shared.media',
         'shared.slider',
-        'shared.quote'
+        'shared.quote',
+        'shared.separator'
       ]
     > &
       Schema.Attribute.SetPluginOptions<{
@@ -1502,20 +1495,13 @@ export interface ApiEngagementPageEngagementPage
         };
       }>;
     publishedAt: Schema.Attribute.DateTime;
-    subtabEngagement: Schema.Attribute.String &
+    subtabInfo: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }> &
-      Schema.Attribute.DefaultTo<'How We Work'>;
-    subtabOverview: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Overview'>;
+      Schema.Attribute.DefaultTo<'Info'>;
     subtabProjects: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

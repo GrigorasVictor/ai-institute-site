@@ -87,9 +87,9 @@
         }
       }
     },
-    "subtabOverview": {
+    "subtabInfo": {
       "type": "string",
-      "default": "Overview",
+      "default": "Info",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -99,15 +99,6 @@
     "subtabProjects": {
       "type": "string",
       "default": "Projects",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "subtabEngagement": {
-      "type": "string",
-      "default": "How We Work",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -135,6 +126,26 @@
       }
     },
     "academicContent": {
+      "type": "dynamiczone",
+      "components": [
+        "shared.card-grid",
+        "shared.card",
+        "shared.cta",
+        "shared.focus-item",
+        "shared.section",
+        "shared.rich-text",
+        "shared.media",
+        "shared.slider",
+        "shared.quote",
+        "shared.separator"
+      ],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "industryContent": {
       "type": "dynamiczone",
       "components": [
         "shared.card-grid",
@@ -216,41 +227,6 @@
     "phdBtnContact": {
       "type": "string",
       "default": "Contact Us",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "industryTitle": {
-      "type": "string",
-      "default": "Industry engagement",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "industryDescription": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "industryBtnContact": {
-      "type": "string",
-      "default": "Contact the industry team",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "industryBtnExplore": {
-      "type": "string",
-      "default": "Explore all projects",
       "pluginOptions": {
         "i18n": {
           "localized": true
