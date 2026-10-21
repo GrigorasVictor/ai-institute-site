@@ -165,26 +165,20 @@
         }
       }
     },
-    "highSchoolTitle": {
-      "type": "string",
-      "default": "High-school engagement",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "highSchoolDescription": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "highSchoolBtnFramework": {
-      "type": "string",
-      "default": "AILIT Framework – Resources",
+    "highSchoolContent": {
+      "type": "dynamiczone",
+      "components": [
+        "shared.card-grid",
+        "shared.card",
+        "shared.cta",
+        "shared.focus-item",
+        "shared.section",
+        "shared.rich-text",
+        "shared.media",
+        "shared.slider",
+        "shared.quote",
+        "shared.separator"
+      ],
       "pluginOptions": {
         "i18n": {
           "localized": true

@@ -118,8 +118,8 @@ const setPopulate = (params, baseKey, config = {}) => {
   const isLeafPopulate = !fields.length && !hasNestedPopulate;
 
   if (isLeafPopulate) {
-    // Nested populate leaf expects '*' or an object.
-    params.set(baseKey, isNestedPopulateKey ? '*' : 'true');
+    // Nested populate leaves use true; wildcard nested media values are rejected by Strapi v5.
+    params.set(baseKey, 'true');
   } else {
     // Ensure we don't leave an incompatible scalar value around.
     params.delete(baseKey);

@@ -10,16 +10,11 @@ import {
   FaIndustry,
   FaSchool,
   FaHandshake,
-  FaFlask,
   FaSearch,
   FaTimes,
   FaExternalLinkAlt,
   FaGlobe,
-  FaInfoCircle,
   FaProjectDiagram,
-  FaBook,
-  FaChalkboardTeacher,
-  FaPlane,
   FaUserGraduate,
   FaMapMarkerAlt,
   FaArrowRight
@@ -40,57 +35,12 @@ const SUB_TABS_TEXTS = {
   engagement: "How We Work",
 };
 
-const ACADEMIC_TEXTS = {
-  partnerTitle: "Academic Partnerships",
-  partnerDesc: "Building strong relationships with universities and research centers worldwide.",
-  uniTitle: "University Collaborations",
-  uniDesc: "Joint research projects and shared resources with leading academic institutions.",
-  netTitle: "Research Networks",
-  netDesc: "Active participation in international AI research consortia.",
-  teachTitle: "Teaching & Seminars",
-  teachDesc: "Contributing to the academic community through dedicated teaching activities.",
-  summerTitle: "Summer Schools",
-  summerDesc: "Intensive programs for students and early-career researchers.",
-  workTitle: "Workshops & Seminars",
-  workDesc: "Regular academic seminars presenting cutting-edge AI research.",
-  courseTitle: "University Courses",
-  courseDesc: "We design and deliver specialized AI courses at various academic levels.",
-  mlTitle: "Machine Learning",
-  mlDesc: "Fundamental and advanced courses in ML algorithms and applications.",
-  robotTitle: "Robotics & Vision",
-  robotDesc: "Specialized modules focusing on computer vision and intelligent robotics.",
-  hpcTitle: "High Performance Computing",
-  hpcDesc: "Training in utilizing supercomputing clusters for AI.",
-  ethicsTitle: "AI Ethics",
-  ethicsDesc: "Dedicated courses on responsible AI development and deployment.",
-  mobTitle: "Mobility & Exchange",
-  mobDesc: "Fostering international academic exchange and researcher mobility.",
-  supTitle: "PhD Supervision",
-  supDesc: "Co-supervision of doctoral candidates across international institutions.",
-  grantTitle: "Mobility Grants",
-  grantDesc: "Support for short and long-term research visits.",
-  exTitle: "Exchange Programs",
-  exDesc: "Facilitating researcher and student exchanges with partner universities.",
-};
-
 const INDUSTRY_TEXTS = {
   searchPlaceholder: "Search industry projects...",
   allDomains: "All domains",
   clear: "Clear filters",
   noProjects: "No industry projects found.",
   leadLabel: "Lead:",
-};
-
-const HIGHSCHOOL_TEXTS = {
-  title: "High-School Engagement",
-  desc: "Inspiring the next generation of AI researchers and engineers.",
-  compTitle: "Competitions",
-  compDesc: "Organizing AI and programming challenges for high-school students.",
-  eventTitle: "Open Events",
-  eventDesc: "Hosting lab tours and interactive workshops for schools.",
-  eduTitle: "Educational Resources",
-  eduDesc: "Providing materials for teachers to introduce AI in classrooms.",
-  btnLabel: "View AI Literacy Framework",
 };
 
 const PARTNERS_TEXTS = {
@@ -226,146 +176,8 @@ function PublicContent({ blocks }) {
   return <DynamicZone blocks={blocks} />;
 }
 
-function AcademicContent({ subTab, setSubTab }) {
-  const tTab = (k) => SUB_TABS_TEXTS[k] || k;
-  const t = (k) => ACADEMIC_TEXTS[k] || k;
-
-  const ACADEMIC_SUBTABS = [
-    { id: 'partnerships', label: tTab('partnerships'), icon: FaHandshake },
-    { id: 'teaching', label: tTab('teaching'), icon: FaChalkboardTeacher },
-    { id: 'courses', label: tTab('courses'), icon: FaBook },
-    { id: 'mobility', label: tTab('mobility'), icon: FaPlane },
-  ];
-
-  return (
-    <div className="space-y-6">
-      {/* Subtabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {ACADEMIC_SUBTABS.map(tab => (
-          <SubTab
-            key={tab.id}
-            active={subTab === tab.id}
-            onClick={() => setSubTab(tab.id)}
-            label={tab.label}
-          />
-        ))}
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={subTab}
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
-          className="space-y-6"
-        >
-          {subTab === 'partnerships' && (
-            <div className="space-y-6">
-              <SectionCard title={t('partnerTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('partnerDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2">
-                <FeatureCard
-                  icon={FaGraduationCap}
-                  title={t('uniTitle')}
-                  desc={t('uniDesc')}
-                />
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('netTitle')}
-                  desc={t('netDesc')}
-                />
-              </div>
-            </div>
-          )}
-
-          {subTab === 'teaching' && (
-            <div className="space-y-6">
-              <SectionCard title={t('teachTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('teachDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2">
-                <FeatureCard
-                  icon={FaChalkboardTeacher}
-                  title={t('summerTitle')}
-                  desc={t('summerDesc')}
-                />
-                <FeatureCard
-                  icon={FaUsers}
-                  title={t('workTitle')}
-                  desc={t('workDesc')}
-                />
-              </div>
-            </div>
-          )}
-
-          {subTab === 'courses' && (
-            <div className="space-y-6">
-              <SectionCard title={t('courseTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('courseDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <FeatureCard
-                  icon={FaBook}
-                  title={t('mlTitle')}
-                  desc={t('mlDesc')}
-                />
-                <FeatureCard
-                  icon={FaIndustry}
-                  title={t('robotTitle')}
-                  desc={t('robotDesc')}
-                />
-                <FeatureCard
-                  icon={FaFlask}
-                  title={t('hpcTitle')}
-                  desc={t('hpcDesc')}
-                />
-                <FeatureCard
-                  icon={FaInfoCircle}
-                  title={t('ethicsTitle')}
-                  desc={t('ethicsDesc')}
-                />
-              </div>
-            </div>
-          )}
-
-          {subTab === 'mobility' && (
-            <div className="space-y-6">
-              <SectionCard title={t('mobTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('mobDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-3">
-                <FeatureCard
-                  icon={FaGraduationCap}
-                  title={t('supTitle')}
-                  desc={t('supDesc')}
-                />
-                <FeatureCard
-                  icon={FaPlane}
-                  title={t('grantTitle')}
-                  desc={t('grantDesc')}
-                />
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('exTitle')}
-                  desc={t('exDesc')}
-                />
-              </div>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
+function AcademicContent({ blocks }) {
+  return <DynamicZone blocks={blocks} />;
 }
 
 function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab }) {
@@ -536,47 +348,8 @@ function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab })
   );
 }
 
-function HighSchoolContent() {
-  const t = (k) => HIGHSCHOOL_TEXTS[k] || k;
-  return (
-    <motion.div key="highschool" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <SectionCard title={t('title')}>
-        <p className="text-gray-700 dark:text-gray-300">
-          {t('desc')}
-        </p>
-      </SectionCard>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <FeatureCard
-          icon={FaGraduationCap}
-          title={t('compTitle')}
-          desc={t('compDesc')}
-        />
-        <FeatureCard
-          icon={FaUsers}
-          title={t('eventTitle')}
-          desc={t('eventDesc')}
-        />
-        <FeatureCard
-          icon={FaBook}
-          title={t('eduTitle')}
-          desc={t('eduDesc')}
-        />
-      </div>
-
-      <motion.div variants={itemVariants}>
-        <a
-          href="https://ailiteracyframework.org/wp-content/uploads/2025/05/AILitFramework_ReviewDraft.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <FaExternalLinkAlt className="w-4 h-4" />
-          {t('btnLabel')}
-        </a>
-      </motion.div>
-    </motion.div>
-  );
+function HighSchoolContent({ blocks }) {
+  return <DynamicZone blocks={blocks} />;
 }
 
 function PartnersContent({ partners, CollaboratorsClient }) {
@@ -931,7 +704,7 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
   const searchParams = useSearchParams();
 
   const activeTab = searchParams.get('tab') || 'public';
-  const subTab = searchParams.get('sub') || (activeTab === 'academic' ? 'partnerships' : activeTab === 'industry' ? 'info' : null);
+  const subTab = searchParams.get('sub') || (activeTab === 'industry' ? 'info' : null);
 
   const heroTitle = pageData?.heroTitle || "Engagement";
   const heroSubtitle = pageData?.heroSubtitle || "Building bridges between research, industry, and society";
@@ -1015,7 +788,7 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
             {activeTab === 'public' && (
               <PublicContent blocks={pageData?.publicContent} />
             )}
-            {activeTab === 'academic' && <AcademicContent subTab={subTab} setSubTab={setSubTab} />}
+            {activeTab === 'academic' && <AcademicContent blocks={pageData?.academicContent} />}
             {activeTab === 'industry' && (
               <IndustryContent
                 projects={transformedProjects}
@@ -1025,7 +798,7 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
                 setSubTab={setSubTab}
               />
             )}
-            {activeTab === 'high-school' && <HighSchoolContent />}
+            {activeTab === 'high-school' && <HighSchoolContent blocks={pageData?.highSchoolContent} />}
             {activeTab === 'partners' && <PartnersContent partners={partners} CollaboratorsClient={CollaboratorsClient} />}
             {activeTab === 'phd' && <IndustrialPhDContent />}
           </motion.div>

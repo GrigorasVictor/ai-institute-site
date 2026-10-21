@@ -1385,26 +1385,25 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Engagement'>;
-    highSchoolBtnFramework: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'AILIT Framework \u2013 Resources'>;
-    highSchoolDescription: Schema.Attribute.Text &
+    highSchoolContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.card-grid',
+        'shared.card',
+        'shared.cta',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote',
+        'shared.separator'
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    highSchoolTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'High-school engagement'>;
     industryContent: Schema.Attribute.DynamicZone<
       [
         'shared.card-grid',
