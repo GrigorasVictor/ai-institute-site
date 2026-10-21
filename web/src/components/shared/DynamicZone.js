@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
 import {
   FaUsers,
   FaBook,
@@ -70,6 +71,7 @@ function DynamicCard({ card, className = '' }) {
   const imageUrl = resolveMediaUrl(card.image);
   const href = card.linkUrl;
   const isExternal = href && (/^https?:\/\//i.test(href) || href.startsWith('//'));
+  const isAnchor = typeof href === 'string' && href.startsWith('#');
 
   const cardContent = (
     <div
@@ -125,6 +127,14 @@ function DynamicCard({ card, className = '' }) {
   if (isExternal) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className="block h-full">
+        {cardContent}
+      </a>
+    );
+  }
+
+  if (isAnchor) {
+    return (
+      <a href={href} className="block h-full">
         {cardContent}
       </a>
     );
@@ -220,6 +230,32 @@ function DynamicCta({ block }) {
   );
 }
 
+function DynamicSeparator({ block }) {
+  const anchorId = String(block.anchorId || '').trim().replace(/^#/, '');
+  const style = block.style || 'heading';
+
+  return (
+    <section
+      id={anchorId || undefined}
+      className={`scroll-mt-24 ${style === 'spacer' ? 'h-8' : 'pt-4'}`}
+      aria-label={block.label || undefined}
+    >
+      {style === 'heading' && (
+        <div className="space-y-2">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {block.label}
+          </h2>
+          {block.subheading && (
+            <p className="text-base text-gray-600 dark:text-gray-400">{block.subheading}</p>
+          )}
+          <div className="h-px bg-gray-200 dark:bg-gray-800" />
+        </div>
+      )}
+      {style === 'line' && <div className="h-px bg-gray-200 dark:bg-gray-800" />}
+    </section>
+  );
+}
+
 function CtaButton({ href, label, primary, isLight }) {
   const isExternal = /^https?:\/\//i.test(href) || href.startsWith('//');
 
@@ -268,6 +304,20 @@ function DynamicFocusItem({ block }) {
 }
 
 export default function DynamicZone({ blocks, className = '' }) {
+  useEffect(() => {
+    const anchorId = window.location.hash.slice(1);
+    if (!anchorId) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(decodeURIComponent(anchorId))?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [blocks]);
+
   if (!Array.isArray(blocks) || blocks.length === 0) return null;
 
   const markdownClassName = `prose prose-lg prose-blue dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 ${className}`.trim();
@@ -286,6 +336,9 @@ export default function DynamicZone({ blocks, className = '' }) {
 
           case 'shared.cta':
             return <DynamicCta key={`cta-${index}`} block={block} />;
+
+          case 'shared.separator':
+            return <DynamicSeparator key={`separator-${index}`} block={block} />;
 
           case 'shared.focus-item':
             return <DynamicFocusItem key={`fi-${index}`} block={block} />;

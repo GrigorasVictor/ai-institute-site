@@ -87,42 +87,6 @@
         }
       }
     },
-    "subtabPartnerships": {
-      "type": "string",
-      "default": "Partnerships",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "subtabTeaching": {
-      "type": "string",
-      "default": "Teaching",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "subtabCourses": {
-      "type": "string",
-      "default": "Courses",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "subtabMobility": {
-      "type": "string",
-      "default": "Mobility",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
     "subtabOverview": {
       "type": "string",
       "default": "Overview",
@@ -169,26 +133,20 @@
         }
       }
     },
-    "academicTitle": {
-      "type": "string",
-      "default": "Academic engagement",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "academicDescription": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "academicContactButton": {
-      "type": "string",
-      "default": "Contact the academic team",
+    "academicContent": {
+      "type": "dynamiczone",
+      "components": [
+        "shared.card-grid",
+        "shared.card",
+        "shared.cta",
+        "shared.focus-item",
+        "shared.section",
+        "shared.rich-text",
+        "shared.media",
+        "shared.slider",
+        "shared.quote",
+        "shared.separator"
+      ],
       "pluginOptions": {
         "i18n": {
           "localized": true

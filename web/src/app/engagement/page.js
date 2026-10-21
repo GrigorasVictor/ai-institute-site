@@ -9,6 +9,7 @@ const ENGAGEMENT_PAGE_POPULATE = {
   publicContent: {
     on: {
       "shared.cta": {},
+      "shared.focus-item": {},
       "shared.card": {
         populate: {
           image: {
@@ -50,6 +51,54 @@ const ENGAGEMENT_PAGE_POPULATE = {
           },
         },
       },
+    },
+  },
+  academicContent: {
+    on: {
+      "shared.cta": {},
+      "shared.focus-item": {},
+      "shared.card": {
+        populate: {
+          image: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+      "shared.card-grid": {
+        populate: {
+          cards: {
+            populate: {
+              image: {
+                fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+              },
+            },
+          },
+        },
+      },
+      "shared.rich-text": {},
+      "shared.quote": {},
+      "shared.section": {
+        populate: {
+          media: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+      "shared.media": {
+        populate: {
+          file: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+      "shared.slider": {
+        populate: {
+          files: {
+            fields: ["url", "mime", "alternativeText", "caption", "formats", "width", "height"],
+          },
+        },
+      },
+      "shared.separator": {},
     },
   },
 };

@@ -24,7 +24,6 @@ import {
   FaMapMarkerAlt,
   FaArrowRight
 } from 'react-icons/fa';
-import { containerVariants, itemVariants } from '@/lib/animations';
 import PartnerRoleBadge, { getPartnerRoleConfig } from '@/components/PartnerRoleBadge';
 import { PARTNER_ROLES, PARTNER_ROLE_ORDER } from '@/lib/strapi';
 import DynamicZone from '@/components/shared/DynamicZone';

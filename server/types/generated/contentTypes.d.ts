@@ -1350,26 +1350,25 @@ export interface ApiEngagementPageEngagementPage
     };
   };
   attributes: {
-    academicContactButton: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Contact the academic team'>;
-    academicDescription: Schema.Attribute.Text &
+    academicContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.card-grid',
+        'shared.card',
+        'shared.cta',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote',
+        'shared.separator'
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    academicTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Academic engagement'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1484,41 +1483,25 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Industrial PhD Program'>;
-    publicBtnMedia: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'View Media & Press'>;
-    publicBtnNews: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'News & Events'>;
-    publicDesc: Schema.Attribute.Text &
+    publicContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.cta',
+        'shared.card-grid',
+        'shared.card',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote'
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    publicTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Public Engagement'>;
     publishedAt: Schema.Attribute.DateTime;
-    subtabCourses: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Courses'>;
     subtabEngagement: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1526,13 +1509,6 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'How We Work'>;
-    subtabMobility: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Mobility'>;
     subtabOverview: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1540,13 +1516,6 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Overview'>;
-    subtabPartnerships: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Partnerships'>;
     subtabProjects: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1554,13 +1523,6 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Projects'>;
-    subtabTeaching: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Teaching'>;
     tabAcademic: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
