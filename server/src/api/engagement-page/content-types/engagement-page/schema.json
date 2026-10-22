@@ -96,6 +96,51 @@
       },
       "default": "Projects"
     },
+    "industrySearchPlaceholder": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Search industry projects..."
+    },
+    "industryAllDomains": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "All domains"
+    },
+    "industryLeadLabel": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Lead:"
+    },
+    "industryNoProjects": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "No industry projects found."
+    },
+    "industryClearFilters": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Clear filters"
+    },
     "publicContent": {
       "type": "dynamiczone",
       "pluginOptions": {
@@ -193,6 +238,168 @@
         }
       },
       "default": "Partners Map"
+    },
+    "partnersEyebrow": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Strategic Network"
+    },
+    "partnersDescription": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "We are proud to collaborate with leading organizations across academia and industry."
+    },
+    "partnersStatsPartners": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Partners"
+    },
+    "partnersStatsCountries": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Countries"
+    },
+    "partnersStatsProjects": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Projects"
+    },
+    "partnersSearchPlaceholder": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Search by partner, country, project"
+    },
+    "partnersAllCountries": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "All countries"
+    },
+    "partnersCurrentPartners": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Current partners"
+    },
+    "partnersFormerPartners": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Former partners"
+    },
+    "partnersAllStatuses": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "All statuses"
+    },
+    "partnersAllRoles": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "All roles"
+    },
+    "partnersClearFilters": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Clear"
+    },
+    "partnersStatusCurrent": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Current"
+    },
+    "partnersStatusFormer": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Former"
+    },
+    "partnersActiveProjects": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Active Projects"
+    },
+    "partnersExploreProfile": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Explore Profile"
+    },
+    "partnersVisitWebsite": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "Visit website"
+    },
+    "partnersEmptyFiltered": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": "No partners match your filters."
     }
   }
 }

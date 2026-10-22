@@ -24,52 +24,6 @@ import { PARTNER_ROLES, PARTNER_ROLE_ORDER } from '@/lib/strapi';
 import { containerVariants, itemVariants } from '@/lib/animations';
 import DynamicZone from '@/components/shared/DynamicZone';
 
-const SUB_TABS_TEXTS = {
-  info: "Info",
-  partnerships: "Partnerships",
-  teaching: "Teaching",
-  courses: "Courses",
-  mobility: "Mobility",
-  overview: "Overview",
-  projects: "Projects",
-  engagement: "How We Work",
-};
-
-const INDUSTRY_TEXTS = {
-  searchPlaceholder: "Search industry projects...",
-  allDomains: "All domains",
-  clear: "Clear filters",
-  noProjects: "No industry projects found.",
-  leadLabel: "Lead:",
-};
-
-const PARTNERS_TEXTS = {
-  title: "Our Partners",
-  desc: "We are proud to collaborate with leading organizations across academia and industry.",
-  mapTitle: "Partner Map",
-  eyebrow: "Strategic Network",
-  "stats.partners": "Partners",
-  "stats.countries": "Countries",
-  "stats.projects": "Projects",
-  "filters.searchPlaceholder": "Search by partner, country, project",
-  "filters.allCountries": "All countries",
-  "filters.allStatuses": "All statuses",
-  "filters.currentPartners": "Current partners",
-  "filters.formerPartners": "Former partners",
-  "filters.allRoles": "All roles",
-  "filters.clear": "Clear",
-  "stats.currentPartners": "Current",
-  "stats.formerPartners": "Former",
-  activeProjects: "Active Projects",
-  pastProjects: "Past Projects",
-  noProjects: "Collaborative partner",
-  "status.current": "Current",
-  "status.former": "Former",
-  "actions.exploreProfile": "Explore Profile",
-  "actions.visitWebsite": "Visit website",
-  "empty.filtered": "No partners match your filters.",
-};
-
 // ============================================================================
 // SHARED COMPONENTS
 // ============================================================================
@@ -167,12 +121,22 @@ function AcademicContent({ blocks }) {
   return <DynamicZone blocks={blocks} />;
 }
 
-function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab }) {
-  const t = (k) => INDUSTRY_TEXTS[k] || k;
-
+function IndustryContent({
+  projects,
+  infoBlocks,
+  infoLabel,
+  projectsLabel,
+  searchPlaceholder,
+  allDomainsLabel,
+  leadLabel,
+  noProjectsLabel,
+  clearFiltersLabel,
+  subTab,
+  setSubTab,
+}) {
   const INDUSTRY_SUBTABS = [
-    { id: 'info', label: infoLabel || SUB_TABS_TEXTS.info },
-    { id: 'projects', label: SUB_TABS_TEXTS.projects },
+    { id: 'info', label: infoLabel || 'Info' },
+    { id: 'projects', label: projectsLabel || 'Projects' },
   ];
 
   const [query, setQuery] = useState('');
@@ -236,7 +200,7 @@ function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab })
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={t('searchPlaceholder')}
+                    placeholder={searchPlaceholder || 'Search industry projects...'}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   {query && (
@@ -253,7 +217,7 @@ function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab })
                   onChange={(e) => setDomainFilter(e.target.value)}
                   className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">{t('allDomains')}</option>
+                  <option value="">{allDomainsLabel || 'All domains'}</option>
                   {domainOptions.map(d => (
                     <option key={d} value={d}>{d}</option>
                   ))}
@@ -298,7 +262,7 @@ function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab })
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700 text-xs">
                         {p.lead && (
                           <span className="text-gray-500">
-                            {t('leadLabel')} {p.lead}
+                        {leadLabel || 'Lead:'} {p.lead}
                           </span>
                         )}
                         {p.slug && (
@@ -315,13 +279,13 @@ function IndustryContent({ projects, infoBlocks, infoLabel, subTab, setSubTab })
                 </div>
               ) : (
                 <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
-                  <p className="text-gray-500 dark:text-gray-400">{t('noProjects')}</p>
+                  <p className="text-gray-500 dark:text-gray-400">{noProjectsLabel || 'No industry projects found.'}</p>
                   {(query || domainFilter) && (
                     <button
                       onClick={() => { setQuery(''); setDomainFilter(''); }}
                       className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                     >
-                      {t('clear')}
+                      {clearFiltersLabel || 'Clear filters'}
                     </button>
                   )}
                 </div>
@@ -339,10 +303,30 @@ function HighSchoolContent({ blocks }) {
   return <DynamicZone blocks={blocks} />;
 }
 
-function PartnersContent({ partners, CollaboratorsClient }) {
-  const t = (k) => PARTNERS_TEXTS[k] || k;
-  const tr = (key, fallback) => PARTNERS_TEXTS[key] || fallback;
-
+function PartnersContent({
+  partners,
+  CollaboratorsClient,
+  title,
+  mapTitle,
+  eyebrow,
+  description,
+  statsPartners,
+  statsCountries,
+  statsProjects,
+  searchPlaceholder,
+  allCountries,
+  currentPartners,
+  formerPartners,
+  allStatuses,
+  allRoles,
+  clearFilters,
+  statusCurrent,
+  statusFormer,
+  activeProjects,
+  exploreProfile,
+  visitWebsite,
+  emptyFiltered,
+}) {
   const partnerList = useMemo(() => (Array.isArray(partners) ? partners : []), [partners]);
   const [searchQuery, setSearchQuery] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
@@ -415,25 +399,25 @@ function PartnersContent({ partners, CollaboratorsClient }) {
         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-white/5 dark:bg-black/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 
         <div className="relative z-10 max-w-2xl">
-          <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-gray-400 dark:text-gray-500">{tr('eyebrow', 'Strategic Network')}</p>
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">{t('title')}</h2>
-          <p className="text-lg text-gray-400 dark:text-gray-600 leading-relaxed md:max-w-xl">{t('desc')}</p>
+          <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-gray-400 dark:text-gray-500">{eyebrow || 'Strategic Network'}</p>
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">{title || 'Partners'}</h2>
+          <p className="text-lg text-gray-400 dark:text-gray-600 leading-relaxed md:max-w-xl">{description || 'We are proud to collaborate with leading organizations across academia and industry.'}</p>
         </div>
 
         <div className="relative z-10 flex flex-wrap items-center gap-8 md:gap-12">
           <div className="flex flex-col">
             <span className="text-4xl md:text-5xl font-bold tracking-tighter">{partnerList.length}</span>
-            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{tr('stats.partners', 'Partners')}</span>
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{statsPartners || 'Partners'}</span>
           </div>
           <div className="w-px h-16 bg-white/10 dark:bg-black/10 hidden sm:block" />
           <div className="flex flex-col">
             <span className="text-4xl md:text-5xl font-bold tracking-tighter">{countryOptions.length}</span>
-            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{tr('stats.countries', 'Countries')}</span>
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{statsCountries || 'Countries'}</span>
           </div>
           <div className="w-px h-16 bg-white/10 dark:bg-black/10 hidden sm:block" />
           <div className="flex flex-col">
             <span className="text-4xl md:text-5xl font-bold tracking-tighter">{totalProjects}</span>
-            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{tr('stats.projects', 'Projects')}</span>
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{statsProjects || 'Projects'}</span>
           </div>
         </div>
       </motion.section>
@@ -448,7 +432,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                   type="text"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder={tr('filters.searchPlaceholder', 'Search by partner, country, project')}
+                  placeholder={searchPlaceholder || 'Search by partner, country, project'}
                   className="w-full h-12 rounded-xl bg-white pl-11 pr-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow"
                 />
               </div>
@@ -458,7 +442,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                 onChange={(event) => setCountryFilter(event.target.value)}
                 className="h-12 rounded-xl bg-white px-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow cursor-pointer min-w-[170px]"
               >
-                <option value="">{tr('filters.allCountries', 'All countries')}</option>
+                <option value="">{allCountries || 'All countries'}</option>
                 {countryOptions.map((country) => (
                   <option key={country} value={country}>
                     {country}
@@ -471,9 +455,9 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                 onChange={(event) => setStatusFilter(event.target.value)}
                 className="h-12 rounded-xl bg-white px-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow cursor-pointer min-w-[170px]"
               >
-                <option value="current">{tr('filters.currentPartners', 'Current partners')}</option>
-                <option value="former">{tr('filters.formerPartners', 'Former partners')}</option>
-                <option value="all">{tr('filters.allStatuses', 'All statuses')}</option>
+                <option value="current">{currentPartners || 'Current partners'}</option>
+                <option value="former">{formerPartners || 'Former partners'}</option>
+                <option value="all">{allStatuses || 'All statuses'}</option>
               </select>
 
               <select
@@ -481,7 +465,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                 onChange={(event) => setRoleFilter(event.target.value)}
                 className="h-12 rounded-xl bg-white px-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow cursor-pointer min-w-[150px]"
               >
-                <option value="">{tr('filters.allRoles', 'All roles')}</option>
+                <option value="">{allRoles || 'All roles'}</option>
                 {(PARTNER_ROLES || []).map((r) => (
                   <option key={r} value={r}>
                     {r}
@@ -500,7 +484,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                   className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors shrink-0"
                 >
                   <FaTimes className="w-3.5 h-3.5" />
-                  {tr('filters.clear', 'Clear')}
+                  {clearFilters || 'Clear'}
                 </button>
               ) : null}
             </div>
@@ -558,8 +542,8 @@ function PartnersContent({ partners, CollaboratorsClient }) {
 
                             <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${p.partnerStatus === 'current' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'}`}>
                               {p.partnerStatus === 'current'
-                                ? tr('status.current', 'Current')
-                                : tr('status.former', 'Former')}
+                                ? (statusCurrent || 'Current')
+                                : (statusFormer || 'Former')}
                             </span>
                           </div>
                         </div>
@@ -570,7 +554,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                           <div className="space-y-3">
                             <span className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                               <FaProjectDiagram className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                              {tr('activeProjects', 'Active Projects')}
+                              {activeProjects || 'Active Projects'}
                             </span>
                             <div className="flex flex-wrap gap-2">
                               {p.projects.slice(0, 3).map((project) => (
@@ -599,7 +583,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                             href={`/engagement/partners/${encodeURIComponent(p.slug)}`}
                             className="inline-flex items-center gap-2 text-sm font-bold text-black dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all group/btn"
                           >
-                            {tr('actions.exploreProfile', 'Explore Profile')}
+                            {exploreProfile || 'Explore Profile'}
                             <FaArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                           </Link>
                         ) : <span />}
@@ -610,7 +594,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 w-10 h-10 justify-center rounded-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title={tr('actions.visitWebsite', 'Visit website')}
+                            title={visitWebsite || 'Visit website'}
                           >
                             <FaExternalLinkAlt className="w-3.5 h-3.5" />
                           </a>
@@ -625,7 +609,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
           ) : (
             <motion.div variants={itemVariants} className="rounded-2xl border border-dashed border-gray-300 bg-white py-12 text-center dark:border-gray-700 dark:bg-gray-800">
               <FaSearch className="mx-auto mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
-              <p className="text-sm text-gray-600 dark:text-gray-300">{tr('empty.filtered', 'No partners match your filters.')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{emptyFiltered || 'No partners match your filters.'}</p>
             </motion.div>
           )}
         </>
@@ -633,7 +617,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
 
       {CollaboratorsClient && (
         <motion.div variants={itemVariants}>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('mapTitle')}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{mapTitle || 'Partner Map'}</h2>
           <CollaboratorsClient partners={partners} />
         </motion.div>
       )}
@@ -740,12 +724,43 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
                 projects={transformedProjects}
                 infoBlocks={pageData?.industryContent}
                 infoLabel={pageData?.subtabInfo}
+                projectsLabel={pageData?.subtabProjects}
+                searchPlaceholder={pageData?.industrySearchPlaceholder}
+                allDomainsLabel={pageData?.industryAllDomains}
+                leadLabel={pageData?.industryLeadLabel}
+                noProjectsLabel={pageData?.industryNoProjects}
+                clearFiltersLabel={pageData?.industryClearFilters}
                 subTab={subTab}
                 setSubTab={setSubTab}
               />
             )}
             {activeTab === 'high-school' && <HighSchoolContent blocks={pageData?.highSchoolContent} />}
-            {activeTab === 'partners' && <PartnersContent partners={partners} CollaboratorsClient={CollaboratorsClient} />}
+            {activeTab === 'partners' && (
+              <PartnersContent
+                partners={partners}
+                CollaboratorsClient={CollaboratorsClient}
+                title={pageData?.partnersTitle}
+                mapTitle={pageData?.partnersMapTitle}
+                eyebrow={pageData?.partnersEyebrow}
+                description={pageData?.partnersDescription}
+                statsPartners={pageData?.partnersStatsPartners}
+                statsCountries={pageData?.partnersStatsCountries}
+                statsProjects={pageData?.partnersStatsProjects}
+                searchPlaceholder={pageData?.partnersSearchPlaceholder}
+                allCountries={pageData?.partnersAllCountries}
+                currentPartners={pageData?.partnersCurrentPartners}
+                formerPartners={pageData?.partnersFormerPartners}
+                allStatuses={pageData?.partnersAllStatuses}
+                allRoles={pageData?.partnersAllRoles}
+                clearFilters={pageData?.partnersClearFilters}
+                statusCurrent={pageData?.partnersStatusCurrent}
+                statusFormer={pageData?.partnersStatusFormer}
+                activeProjects={pageData?.partnersActiveProjects}
+                exploreProfile={pageData?.partnersExploreProfile}
+                visitWebsite={pageData?.partnersVisitWebsite}
+                emptyFiltered={pageData?.partnersEmptyFiltered}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
