@@ -51,6 +51,8 @@ services:
       SMTP_DEFAULT_REPLY_TO: ${SMTP_DEFAULT_REPLY_TO}
       DRAFT_NOTIFICATION_ROLE: ${DRAFT_NOTIFICATION_ROLE}
       DRAFT_NOTIFICATION_CRON: ${DRAFT_NOTIFICATION_CRON}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
     ports:
       - "1337:1337"
     volumes:
@@ -87,6 +89,8 @@ services:
       GRAPH_MESO_MIN_NODES: ${GRAPH_MESO_MIN_NODES:-8}
       SNIPEIT_URL: ${SNIPEIT_URL}
       SNIPEIT_API_KEY: ${SNIPEIT_API_KEY}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
     ports:
       - "3000:3000"
     depends_on:

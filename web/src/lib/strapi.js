@@ -118,8 +118,8 @@ const setPopulate = (params, baseKey, config = {}) => {
   const isLeafPopulate = !fields.length && !hasNestedPopulate;
 
   if (isLeafPopulate) {
-    // Nested populate leaf expects '*' or an object.
-    params.set(baseKey, isNestedPopulateKey ? '*' : 'true');
+    // Nested populate leaves use true; wildcard nested media values are rejected by Strapi v5.
+    params.set(baseKey, 'true');
   } else {
     // Ensure we don't leave an incompatible scalar value around.
     params.delete(baseKey);
@@ -196,6 +196,7 @@ const createParams = ({
   sort = null,
   pagination = null,
   publicationState = null,
+  status = null,
   locale = null,
 }) => {
   const params = new URLSearchParams();
@@ -204,6 +205,7 @@ const createParams = ({
   appendSort(params, sort);
   appendPagination(params, pagination || {});
   if (publicationState) params.set('publicationState', publicationState);
+  if (status) params.set('status', status);
   if (filters) appendFilters(params, filters);
   if (typeof populate === 'string') {
     params.set('populate', populate);
@@ -3313,17 +3315,24 @@ export async function getGlobal(locale = "en") {
   return DEFAULT_GLOBAL;
 }
 
-export async function getSingleType(endpoint, locale = "en", populate = "*") {
+export async function getSingleType(
+  endpoint,
+  locale = "en",
+  populate = "*",
+  fetchOptions = {},
+  queryOptions = {},
+) {
   try {
     const params = createParams({
       locale,
       populate,
+      ...queryOptions,
     });
-    let res = await fetchAPI(`/${endpoint}?${params.toString()}`);
+    let res = await fetchAPI(`/${endpoint}?${params.toString()}`, fetchOptions);
     if (!res?.data && locale && locale !== "en") {
       const fallbackParams = new URLSearchParams(params);
       fallbackParams.set("locale", "en");
-      const fallbackRes = await fetchAPI(`/${endpoint}?${fallbackParams.toString()}`);
+      const fallbackRes = await fetchAPI(`/${endpoint}?${fallbackParams.toString()}`, fetchOptions);
       if (fallbackRes?.data) {
         res = fallbackRes;
         res.data._isFallback = true;

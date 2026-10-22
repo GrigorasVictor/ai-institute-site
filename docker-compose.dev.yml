@@ -43,6 +43,8 @@ services:
       NODE_ENV: development
       PUBLIC_STRAPI_URL: ${PUBLIC_STRAPI_URL}
       STRAPI_ADMIN_URL: ${STRAPI_ADMIN_URL}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
@@ -101,6 +103,7 @@ services:
       HOSTNAME: "0.0.0.0"
       STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
       REVALIDATION_SECRET: ${REVALIDATION_SECRET}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
       # Public URL used by the browser (same host, different port in dev)
       PUBLIC_STRAPI_URL: ${PUBLIC_STRAPI_URL}
       NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:-${PUBLIC_STRAPI_URL}}
@@ -112,7 +115,7 @@ services:
       SNIPEIT_URL: ${SNIPEIT_URL}
       SNIPEIT_API_KEY: ${SNIPEIT_API_KEY}
     ports:
-      - "3002:3000"
+      - "3000:3000"
     depends_on:
       - strapi
     develop:

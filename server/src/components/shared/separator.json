@@ -1,0 +1,47 @@
+{
+  "collectionName": "components_shared_separators",
+  "info": {
+    "displayName": "Separator",
+    "description": "Anchored divider for grouping dynamic-zone content",
+    "icon": "horizontal"
+  },
+  "options": {},
+  "attributes": {
+    "anchorId": {
+      "type": "uid",
+      "targetField": "label",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "label": {
+      "type": "string",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "subheading": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "style": {
+      "type": "enumeration",
+      "enum": [
+        "line",
+        "heading",
+        "spacer"
+      ],
+      "default": "heading"
+    }
+  }
+}
