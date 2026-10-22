@@ -10,154 +10,19 @@ import {
   FaIndustry,
   FaSchool,
   FaHandshake,
-  FaFlask,
   FaSearch,
   FaTimes,
   FaExternalLinkAlt,
   FaGlobe,
-  FaInfoCircle,
   FaProjectDiagram,
-  FaBook,
-  FaChalkboardTeacher,
-  FaPlane,
   FaUserGraduate,
   FaMapMarkerAlt,
   FaArrowRight
 } from 'react-icons/fa';
-import { containerVariants, itemVariants } from '@/lib/animations';
 import PartnerRoleBadge, { getPartnerRoleConfig } from '@/components/PartnerRoleBadge';
 import { PARTNER_ROLES, PARTNER_ROLE_ORDER } from '@/lib/strapi';
-
-const SUB_TABS_TEXTS = {
-  partnerships: "Partnerships",
-  teaching: "Teaching",
-  courses: "Courses",
-  mobility: "Mobility",
-  overview: "Overview",
-  projects: "Projects",
-  engagement: "How We Work",
-};
-
-const PUBLIC_TEXTS = {
-  title: "Public Engagement",
-  desc: "We actively engage with the public to demystify AI and share our findings.",
-  btnMedia: "Media Appearances",
-  btnNews: "News & Events",
-  outreachTitle: "Community Outreach",
-  outreachDesc: "Organizing open days, public lectures, and interactive demonstrations to bring AI closer to the community.",
-  eduTitle: "Educational Content",
-  eduDesc: "Creating accessible materials, blogs, and videos explaining complex AI concepts to a general audience.",
-  mediaTitle: "Media & Press",
-  mediaDesc: "Regular contributions to media outlets, expert commentary on AI trends, and press releases about our major discoveries.",
-};
-
-const ACADEMIC_TEXTS = {
-  partnerTitle: "Academic Partnerships",
-  partnerDesc: "Building strong relationships with universities and research centers worldwide.",
-  uniTitle: "University Collaborations",
-  uniDesc: "Joint research projects and shared resources with leading academic institutions.",
-  netTitle: "Research Networks",
-  netDesc: "Active participation in international AI research consortia.",
-  teachTitle: "Teaching & Seminars",
-  teachDesc: "Contributing to the academic community through dedicated teaching activities.",
-  summerTitle: "Summer Schools",
-  summerDesc: "Intensive programs for students and early-career researchers.",
-  workTitle: "Workshops & Seminars",
-  workDesc: "Regular academic seminars presenting cutting-edge AI research.",
-  courseTitle: "University Courses",
-  courseDesc: "We design and deliver specialized AI courses at various academic levels.",
-  mlTitle: "Machine Learning",
-  mlDesc: "Fundamental and advanced courses in ML algorithms and applications.",
-  robotTitle: "Robotics & Vision",
-  robotDesc: "Specialized modules focusing on computer vision and intelligent robotics.",
-  hpcTitle: "High Performance Computing",
-  hpcDesc: "Training in utilizing supercomputing clusters for AI.",
-  ethicsTitle: "AI Ethics",
-  ethicsDesc: "Dedicated courses on responsible AI development and deployment.",
-  mobTitle: "Mobility & Exchange",
-  mobDesc: "Fostering international academic exchange and researcher mobility.",
-  supTitle: "PhD Supervision",
-  supDesc: "Co-supervision of doctoral candidates across international institutions.",
-  grantTitle: "Mobility Grants",
-  grantDesc: "Support for short and long-term research visits.",
-  exTitle: "Exchange Programs",
-  exDesc: "Facilitating researcher and student exchanges with partner universities.",
-};
-
-const INDUSTRY_TEXTS = {
-  statProjects: "Industry Projects",
-  statDomains: "Research Domains",
-  statPartners: "Industry Partners",
-  collabTitle: "Industry Collaboration",
-  collabDesc: "AIRi partners with leading companies to translate cutting-edge AI research into real-world applications.",
-  searchPlaceholder: "Search industry projects...",
-  allDomains: "All domains",
-  clear: "Clear filters",
-  noProjects: "No industry projects found.",
-  leadLabel: "Lead:",
-  workTitle: "How We Work With Industry",
-  workDesc: "We offer flexible engagement models tailored to industry needs.",
-  rdTitle: "Joint R&D",
-  rdDesc: "Collaborative research projects solving complex industrial challenges.",
-  consTitle: "Consulting",
-  consDesc: "Expert advisory services on AI strategy and implementation.",
-  trainTitle: "Corporate Training",
-  trainDesc: "Customized AI training programs for industry professionals.",
-  techTitle: "Technology Transfer",
-  techDesc: "Licensing and spin-off creation from our research outputs.",
-};
-
-const HIGHSCHOOL_TEXTS = {
-  title: "High-School Engagement",
-  desc: "Inspiring the next generation of AI researchers and engineers.",
-  compTitle: "Competitions",
-  compDesc: "Organizing AI and programming challenges for high-school students.",
-  eventTitle: "Open Events",
-  eventDesc: "Hosting lab tours and interactive workshops for schools.",
-  eduTitle: "Educational Resources",
-  eduDesc: "Providing materials for teachers to introduce AI in classrooms.",
-  btnLabel: "View AI Literacy Framework",
-};
-
-const PARTNERS_TEXTS = {
-  title: "Our Partners",
-  desc: "We are proud to collaborate with leading organizations across academia and industry.",
-  mapTitle: "Partner Map",
-  eyebrow: "Strategic Network",
-  "stats.partners": "Partners",
-  "stats.countries": "Countries",
-  "stats.projects": "Projects",
-  "filters.searchPlaceholder": "Search by partner, country, project",
-  "filters.allCountries": "All countries",
-  "filters.allStatuses": "All statuses",
-  "filters.currentPartners": "Current partners",
-  "filters.formerPartners": "Former partners",
-  "filters.allRoles": "All roles",
-  "filters.clear": "Clear",
-  "stats.currentPartners": "Current",
-  "stats.formerPartners": "Former",
-  activeProjects: "Active Projects",
-  pastProjects: "Past Projects",
-  noProjects: "Collaborative partner",
-  "status.current": "Current",
-  "status.former": "Former",
-  "actions.exploreProfile": "Explore Profile",
-  "actions.visitWebsite": "Visit website",
-  "empty.filtered": "No partners match your filters.",
-};
-
-const PHD_TEXTS = {
-  title: "Industrial PhD Program",
-  p1: "Bridging the gap between academic research and industrial application.",
-  p2: "Our Industrial PhD program allows candidates to conduct rigorous academic research while solving real-world challenges within a partner company.",
-  compTitle: "For Companies",
-  compDesc: "Drive innovation by sponsoring a dedicated researcher to tackle your specific challenges.",
-  candTitle: "For Candidates",
-  candDesc: "Earn your PhD while gaining invaluable industry experience and a competitive salary.",
-  collabTitle: "Joint Supervision",
-  collabDesc: "Benefit from the combined expertise of academic supervisors and industry mentors.",
-  btnContact: "Contact Us About Industrial PhDs",
-};
+import { containerVariants, itemVariants } from '@/lib/animations';
+import DynamicZone from '@/components/shared/DynamicZone';
 
 // ============================================================================
 // SHARED COMPONENTS
@@ -248,202 +113,30 @@ function SectionCard({ title, children }) {
 // CONTENT SECTIONS
 // ============================================================================
 
-function PublicContent() {
-  const t = (k) => PUBLIC_TEXTS[k] || k;
-  return (
-    <motion.div key="public" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <SectionCard title={t('title')}>
-        <p className="text-gray-700 dark:text-gray-300 mb-4">
-          {t('desc')}
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/media"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <FaExternalLinkAlt className="w-4 h-4" />
-            {t('btnMedia')}
-          </Link>
-          <Link
-            href="/news&events"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            {t('btnNews')}
-          </Link>
-        </div>
-      </SectionCard>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <FeatureCard
-          icon={FaUsers}
-          title={t('outreachTitle')}
-          desc={t('outreachDesc')}
-        />
-        <FeatureCard
-          icon={FaBook}
-          title={t('eduTitle')}
-          desc={t('eduDesc')}
-        />
-        <FeatureCard
-          icon={FaGlobe}
-          title={t('mediaTitle')}
-          desc={t('mediaDesc')}
-        />
-      </div>
-    </motion.div>
-  );
+function PublicContent({ blocks }) {
+  return <DynamicZone blocks={blocks} />;
 }
 
-function AcademicContent({ subTab, setSubTab }) {
-  const tTab = (k) => SUB_TABS_TEXTS[k] || k;
-  const t = (k) => ACADEMIC_TEXTS[k] || k;
-
-  const ACADEMIC_SUBTABS = [
-    { id: 'partnerships', label: tTab('partnerships'), icon: FaHandshake },
-    { id: 'teaching', label: tTab('teaching'), icon: FaChalkboardTeacher },
-    { id: 'courses', label: tTab('courses'), icon: FaBook },
-    { id: 'mobility', label: tTab('mobility'), icon: FaPlane },
-  ];
-
-  return (
-    <div className="space-y-6">
-      {/* Subtabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {ACADEMIC_SUBTABS.map(tab => (
-          <SubTab
-            key={tab.id}
-            active={subTab === tab.id}
-            onClick={() => setSubTab(tab.id)}
-            label={tab.label}
-          />
-        ))}
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={subTab}
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
-          className="space-y-6"
-        >
-          {subTab === 'partnerships' && (
-            <div className="space-y-6">
-              <SectionCard title={t('partnerTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('partnerDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2">
-                <FeatureCard
-                  icon={FaGraduationCap}
-                  title={t('uniTitle')}
-                  desc={t('uniDesc')}
-                />
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('netTitle')}
-                  desc={t('netDesc')}
-                />
-              </div>
-            </div>
-          )}
-
-          {subTab === 'teaching' && (
-            <div className="space-y-6">
-              <SectionCard title={t('teachTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('teachDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2">
-                <FeatureCard
-                  icon={FaChalkboardTeacher}
-                  title={t('summerTitle')}
-                  desc={t('summerDesc')}
-                />
-                <FeatureCard
-                  icon={FaUsers}
-                  title={t('workTitle')}
-                  desc={t('workDesc')}
-                />
-              </div>
-            </div>
-          )}
-
-          {subTab === 'courses' && (
-            <div className="space-y-6">
-              <SectionCard title={t('courseTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('courseDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <FeatureCard
-                  icon={FaBook}
-                  title={t('mlTitle')}
-                  desc={t('mlDesc')}
-                />
-                <FeatureCard
-                  icon={FaIndustry}
-                  title={t('robotTitle')}
-                  desc={t('robotDesc')}
-                />
-                <FeatureCard
-                  icon={FaFlask}
-                  title={t('hpcTitle')}
-                  desc={t('hpcDesc')}
-                />
-                <FeatureCard
-                  icon={FaInfoCircle}
-                  title={t('ethicsTitle')}
-                  desc={t('ethicsDesc')}
-                />
-              </div>
-            </div>
-          )}
-
-          {subTab === 'mobility' && (
-            <div className="space-y-6">
-              <SectionCard title={t('mobTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('mobDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-3">
-                <FeatureCard
-                  icon={FaGraduationCap}
-                  title={t('supTitle')}
-                  desc={t('supDesc')}
-                />
-                <FeatureCard
-                  icon={FaPlane}
-                  title={t('grantTitle')}
-                  desc={t('grantDesc')}
-                />
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('exTitle')}
-                  desc={t('exDesc')}
-                />
-              </div>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
+function AcademicContent({ blocks }) {
+  return <DynamicZone blocks={blocks} />;
 }
 
-function IndustryContent({ projects, subTab, setSubTab }) {
-  const tTab = (k) => SUB_TABS_TEXTS[k] || k;
-  const t = (k) => INDUSTRY_TEXTS[k] || k;
-
+function IndustryContent({
+  projects,
+  infoBlocks,
+  infoLabel,
+  projectsLabel,
+  searchPlaceholder,
+  allDomainsLabel,
+  leadLabel,
+  noProjectsLabel,
+  clearFiltersLabel,
+  subTab,
+  setSubTab,
+}) {
   const INDUSTRY_SUBTABS = [
-    { id: 'overview', label: tTab('overview') },
-    { id: 'projects', label: tTab('projects') },
-    { id: 'engagement', label: tTab('engagement') },
+    { id: 'info', label: infoLabel || 'Info' },
+    { id: 'projects', label: projectsLabel || 'Projects' },
   ];
 
   const [query, setQuery] = useState('');
@@ -471,20 +164,6 @@ function IndustryContent({ projects, subTab, setSubTab }) {
     });
   }, [industryProjects, query, domainFilter]);
 
-  const stats = useMemo(() => {
-    const domains = new Set();
-    const partners = new Set();
-    industryProjects.forEach(p => {
-      (p.domains || []).forEach(d => d && domains.add(d));
-      (p.partners || []).forEach(x => x && partners.add(x));
-    });
-    return {
-      projectCount: industryProjects.length,
-      domainCount: domains.size,
-      partnerCount: partners.size,
-    };
-  }, [industryProjects]);
-
   return (
     <div className="space-y-6">
       {/* Subtabs */}
@@ -508,38 +187,9 @@ function IndustryContent({ projects, subTab, setSubTab }) {
           exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
           className="space-y-6"
         >
-          {subTab === 'overview' && (
-            <div className="space-y-6">
-              {/* Stats */}
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {stats.projectCount}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('statProjects')}</div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {stats.domainCount}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('statDomains')}</div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {stats.partnerCount}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{t('statPartners')}</div>
-                </div>
-              </div>
-
-              <SectionCard title={t('collabTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('collabDesc')}
-                </p>
-              </SectionCard>
-            </div>
+          {subTab === 'info' && (
+            <DynamicZone blocks={infoBlocks} />
           )}
-
           {subTab === 'projects' && (
             <div className="space-y-6">
               {/* Filters */}
@@ -550,7 +200,7 @@ function IndustryContent({ projects, subTab, setSubTab }) {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={t('searchPlaceholder')}
+                    placeholder={searchPlaceholder || 'Search industry projects...'}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   {query && (
@@ -567,7 +217,7 @@ function IndustryContent({ projects, subTab, setSubTab }) {
                   onChange={(e) => setDomainFilter(e.target.value)}
                   className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">{t('allDomains')}</option>
+                  <option value="">{allDomainsLabel || 'All domains'}</option>
                   {domainOptions.map(d => (
                     <option key={d} value={d}>{d}</option>
                   ))}
@@ -612,7 +262,7 @@ function IndustryContent({ projects, subTab, setSubTab }) {
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700 text-xs">
                         {p.lead && (
                           <span className="text-gray-500">
-                            {t('leadLabel')} {p.lead}
+                        {leadLabel || 'Lead:'} {p.lead}
                           </span>
                         )}
                         {p.slug && (
@@ -629,13 +279,13 @@ function IndustryContent({ projects, subTab, setSubTab }) {
                 </div>
               ) : (
                 <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
-                  <p className="text-gray-500 dark:text-gray-400">{t('noProjects')}</p>
+                  <p className="text-gray-500 dark:text-gray-400">{noProjectsLabel || 'No industry projects found.'}</p>
                   {(query || domainFilter) && (
                     <button
                       onClick={() => { setQuery(''); setDomainFilter(''); }}
                       className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                     >
-                      {t('clear')}
+                      {clearFiltersLabel || 'Clear filters'}
                     </button>
                   )}
                 </div>
@@ -643,90 +293,40 @@ function IndustryContent({ projects, subTab, setSubTab }) {
             </div>
           )}
 
-          {subTab === 'engagement' && (
-            <div className="space-y-6">
-              <SectionCard title={t('workTitle')}>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {t('workDesc')}
-                </p>
-              </SectionCard>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('rdTitle')}
-                  desc={t('rdDesc')}
-                />
-                <FeatureCard
-                  icon={FaInfoCircle}
-                  title={t('consTitle')}
-                  desc={t('consDesc')}
-                />
-                <FeatureCard
-                  icon={FaUserGraduate}
-                  title={t('trainTitle')}
-                  desc={t('trainDesc')}
-                />
-                <FeatureCard
-                  icon={FaHandshake}
-                  title={t('techTitle')}
-                  desc={t('techDesc')}
-                />
-              </div>
-            </div>
-          )}
         </motion.div>
       </AnimatePresence>
     </div>
   );
 }
 
-function HighSchoolContent() {
-  const t = (k) => HIGHSCHOOL_TEXTS[k] || k;
-  return (
-    <motion.div key="highschool" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <SectionCard title={t('title')}>
-        <p className="text-gray-700 dark:text-gray-300">
-          {t('desc')}
-        </p>
-      </SectionCard>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <FeatureCard
-          icon={FaGraduationCap}
-          title={t('compTitle')}
-          desc={t('compDesc')}
-        />
-        <FeatureCard
-          icon={FaUsers}
-          title={t('eventTitle')}
-          desc={t('eventDesc')}
-        />
-        <FeatureCard
-          icon={FaBook}
-          title={t('eduTitle')}
-          desc={t('eduDesc')}
-        />
-      </div>
-
-      <motion.div variants={itemVariants}>
-        <a
-          href="https://ailiteracyframework.org/wp-content/uploads/2025/05/AILitFramework_ReviewDraft.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <FaExternalLinkAlt className="w-4 h-4" />
-          {t('btnLabel')}
-        </a>
-      </motion.div>
-    </motion.div>
-  );
+function HighSchoolContent({ blocks }) {
+  return <DynamicZone blocks={blocks} />;
 }
 
-function PartnersContent({ partners, CollaboratorsClient }) {
-  const t = (k) => PARTNERS_TEXTS[k] || k;
-  const tr = (key, fallback) => PARTNERS_TEXTS[key] || fallback;
-
+function PartnersContent({
+  partners,
+  CollaboratorsClient,
+  title,
+  mapTitle,
+  eyebrow,
+  description,
+  statsPartners,
+  statsCountries,
+  statsProjects,
+  searchPlaceholder,
+  allCountries,
+  currentPartners,
+  formerPartners,
+  allStatuses,
+  allRoles,
+  clearFilters,
+  statusCurrent,
+  statusFormer,
+  activeProjects,
+  exploreProfile,
+  visitWebsite,
+  emptyFiltered,
+}) {
   const partnerList = useMemo(() => (Array.isArray(partners) ? partners : []), [partners]);
   const [searchQuery, setSearchQuery] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
@@ -799,25 +399,25 @@ function PartnersContent({ partners, CollaboratorsClient }) {
         <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-white/5 dark:bg-black/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 
         <div className="relative z-10 max-w-2xl">
-          <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-gray-400 dark:text-gray-500">{tr('eyebrow', 'Strategic Network')}</p>
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">{t('title')}</h2>
-          <p className="text-lg text-gray-400 dark:text-gray-600 leading-relaxed md:max-w-xl">{t('desc')}</p>
+          <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-gray-400 dark:text-gray-500">{eyebrow || 'Strategic Network'}</p>
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 leading-tight">{title || 'Partners'}</h2>
+          <p className="text-lg text-gray-400 dark:text-gray-600 leading-relaxed md:max-w-xl">{description || 'We are proud to collaborate with leading organizations across academia and industry.'}</p>
         </div>
 
         <div className="relative z-10 flex flex-wrap items-center gap-8 md:gap-12">
           <div className="flex flex-col">
             <span className="text-4xl md:text-5xl font-bold tracking-tighter">{partnerList.length}</span>
-            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{tr('stats.partners', 'Partners')}</span>
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{statsPartners || 'Partners'}</span>
           </div>
           <div className="w-px h-16 bg-white/10 dark:bg-black/10 hidden sm:block" />
           <div className="flex flex-col">
             <span className="text-4xl md:text-5xl font-bold tracking-tighter">{countryOptions.length}</span>
-            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{tr('stats.countries', 'Countries')}</span>
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{statsCountries || 'Countries'}</span>
           </div>
           <div className="w-px h-16 bg-white/10 dark:bg-black/10 hidden sm:block" />
           <div className="flex flex-col">
             <span className="text-4xl md:text-5xl font-bold tracking-tighter">{totalProjects}</span>
-            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{tr('stats.projects', 'Projects')}</span>
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-2">{statsProjects || 'Projects'}</span>
           </div>
         </div>
       </motion.section>
@@ -832,7 +432,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                   type="text"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder={tr('filters.searchPlaceholder', 'Search by partner, country, project')}
+                  placeholder={searchPlaceholder || 'Search by partner, country, project'}
                   className="w-full h-12 rounded-xl bg-white pl-11 pr-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow"
                 />
               </div>
@@ -842,7 +442,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                 onChange={(event) => setCountryFilter(event.target.value)}
                 className="h-12 rounded-xl bg-white px-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow cursor-pointer min-w-[170px]"
               >
-                <option value="">{tr('filters.allCountries', 'All countries')}</option>
+                <option value="">{allCountries || 'All countries'}</option>
                 {countryOptions.map((country) => (
                   <option key={country} value={country}>
                     {country}
@@ -855,9 +455,9 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                 onChange={(event) => setStatusFilter(event.target.value)}
                 className="h-12 rounded-xl bg-white px-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow cursor-pointer min-w-[170px]"
               >
-                <option value="current">{tr('filters.currentPartners', 'Current partners')}</option>
-                <option value="former">{tr('filters.formerPartners', 'Former partners')}</option>
-                <option value="all">{tr('filters.allStatuses', 'All statuses')}</option>
+                <option value="current">{currentPartners || 'Current partners'}</option>
+                <option value="former">{formerPartners || 'Former partners'}</option>
+                <option value="all">{allStatuses || 'All statuses'}</option>
               </select>
 
               <select
@@ -865,7 +465,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                 onChange={(event) => setRoleFilter(event.target.value)}
                 className="h-12 rounded-xl bg-white px-4 text-sm text-gray-900 border-none shadow-sm focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-[#0a0a0a] dark:text-white transition-shadow cursor-pointer min-w-[150px]"
               >
-                <option value="">{tr('filters.allRoles', 'All roles')}</option>
+                <option value="">{allRoles || 'All roles'}</option>
                 {(PARTNER_ROLES || []).map((r) => (
                   <option key={r} value={r}>
                     {r}
@@ -884,7 +484,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                   className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors shrink-0"
                 >
                   <FaTimes className="w-3.5 h-3.5" />
-                  {tr('filters.clear', 'Clear')}
+                  {clearFilters || 'Clear'}
                 </button>
               ) : null}
             </div>
@@ -942,8 +542,8 @@ function PartnersContent({ partners, CollaboratorsClient }) {
 
                             <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${p.partnerStatus === 'current' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'}`}>
                               {p.partnerStatus === 'current'
-                                ? tr('status.current', 'Current')
-                                : tr('status.former', 'Former')}
+                                ? (statusCurrent || 'Current')
+                                : (statusFormer || 'Former')}
                             </span>
                           </div>
                         </div>
@@ -954,7 +554,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                           <div className="space-y-3">
                             <span className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                               <FaProjectDiagram className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                              {tr('activeProjects', 'Active Projects')}
+                              {activeProjects || 'Active Projects'}
                             </span>
                             <div className="flex flex-wrap gap-2">
                               {p.projects.slice(0, 3).map((project) => (
@@ -983,7 +583,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                             href={`/engagement/partners/${encodeURIComponent(p.slug)}`}
                             className="inline-flex items-center gap-2 text-sm font-bold text-black dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all group/btn"
                           >
-                            {tr('actions.exploreProfile', 'Explore Profile')}
+                            {exploreProfile || 'Explore Profile'}
                             <FaArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                           </Link>
                         ) : <span />}
@@ -994,7 +594,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 w-10 h-10 justify-center rounded-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title={tr('actions.visitWebsite', 'Visit website')}
+                            title={visitWebsite || 'Visit website'}
                           >
                             <FaExternalLinkAlt className="w-3.5 h-3.5" />
                           </a>
@@ -1009,7 +609,7 @@ function PartnersContent({ partners, CollaboratorsClient }) {
           ) : (
             <motion.div variants={itemVariants} className="rounded-2xl border border-dashed border-gray-300 bg-white py-12 text-center dark:border-gray-700 dark:bg-gray-800">
               <FaSearch className="mx-auto mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
-              <p className="text-sm text-gray-600 dark:text-gray-300">{tr('empty.filtered', 'No partners match your filters.')}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{emptyFiltered || 'No partners match your filters.'}</p>
             </motion.div>
           )}
         </>
@@ -1017,51 +617,10 @@ function PartnersContent({ partners, CollaboratorsClient }) {
 
       {CollaboratorsClient && (
         <motion.div variants={itemVariants}>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('mapTitle')}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{mapTitle || 'Partner Map'}</h2>
           <CollaboratorsClient partners={partners} />
         </motion.div>
       )}
-    </motion.div>
-  );
-}
-
-function IndustrialPhDContent() {
-  const t = (k) => PHD_TEXTS[k] || k;
-  return (
-    <motion.div key="phd" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <SectionCard title={t('title')}>
-        <div className="space-y-4 text-gray-700 dark:text-gray-300">
-          <p>{t('p1')}</p>
-          <p>{t('p2')}</p>
-        </div>
-      </SectionCard>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <FeatureCard
-          icon={FaIndustry}
-          title={t('compTitle')}
-          desc={t('compDesc')}
-        />
-        <FeatureCard
-          icon={FaUserGraduate}
-          title={t('candTitle')}
-          desc={t('candDesc')}
-        />
-        <FeatureCard
-          icon={FaHandshake}
-          title={t('collabTitle')}
-          desc={t('collabDesc')}
-        />
-      </div>
-
-      <motion.div variants={itemVariants}>
-        <Link
-          href="/contact"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          {t('btnContact')}
-        </Link>
-      </motion.div>
     </motion.div>
   );
 }
@@ -1075,7 +634,7 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
   const searchParams = useSearchParams();
 
   const activeTab = searchParams.get('tab') || 'public';
-  const subTab = searchParams.get('sub') || (activeTab === 'academic' ? 'partnerships' : activeTab === 'industry' ? 'overview' : null);
+  const subTab = searchParams.get('sub') || (activeTab === 'industry' ? 'info' : null);
 
   const heroTitle = pageData?.heroTitle || "Engagement";
   const heroSubtitle = pageData?.heroSubtitle || "Building bridges between research, industry, and society";
@@ -1086,7 +645,6 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
     { id: 'industry', label: pageData?.tabIndustry || "Industry", icon: FaIndustry },
     { id: 'high-school', label: pageData?.tabHighSchool || "High-School", icon: FaSchool },
     { id: 'partners', label: pageData?.tabPartners || "Partners", icon: FaHandshake },
-    { id: 'phd', label: pageData?.tabIndustrialPhd || "Industrial PhD", icon: FaFlask },
   ];
 
   const setTab = useCallback((tab) => {
@@ -1157,12 +715,52 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {activeTab === 'public' && <PublicContent />}
-            {activeTab === 'academic' && <AcademicContent subTab={subTab} setSubTab={setSubTab} />}
-            {activeTab === 'industry' && <IndustryContent projects={transformedProjects} subTab={subTab} setSubTab={setSubTab} />}
-            {activeTab === 'high-school' && <HighSchoolContent />}
-            {activeTab === 'partners' && <PartnersContent partners={partners} CollaboratorsClient={CollaboratorsClient} />}
-            {activeTab === 'phd' && <IndustrialPhDContent />}
+            {activeTab === 'public' && (
+              <PublicContent blocks={pageData?.publicContent} />
+            )}
+            {activeTab === 'academic' && <AcademicContent blocks={pageData?.academicContent} />}
+            {activeTab === 'industry' && (
+              <IndustryContent
+                projects={transformedProjects}
+                infoBlocks={pageData?.industryContent}
+                infoLabel={pageData?.subtabInfo}
+                projectsLabel={pageData?.subtabProjects}
+                searchPlaceholder={pageData?.industrySearchPlaceholder}
+                allDomainsLabel={pageData?.industryAllDomains}
+                leadLabel={pageData?.industryLeadLabel}
+                noProjectsLabel={pageData?.industryNoProjects}
+                clearFiltersLabel={pageData?.industryClearFilters}
+                subTab={subTab}
+                setSubTab={setSubTab}
+              />
+            )}
+            {activeTab === 'high-school' && <HighSchoolContent blocks={pageData?.highSchoolContent} />}
+            {activeTab === 'partners' && (
+              <PartnersContent
+                partners={partners}
+                CollaboratorsClient={CollaboratorsClient}
+                title={pageData?.partnersTitle}
+                mapTitle={pageData?.partnersMapTitle}
+                eyebrow={pageData?.partnersEyebrow}
+                description={pageData?.partnersDescription}
+                statsPartners={pageData?.partnersStatsPartners}
+                statsCountries={pageData?.partnersStatsCountries}
+                statsProjects={pageData?.partnersStatsProjects}
+                searchPlaceholder={pageData?.partnersSearchPlaceholder}
+                allCountries={pageData?.partnersAllCountries}
+                currentPartners={pageData?.partnersCurrentPartners}
+                formerPartners={pageData?.partnersFormerPartners}
+                allStatuses={pageData?.partnersAllStatuses}
+                allRoles={pageData?.partnersAllRoles}
+                clearFilters={pageData?.partnersClearFilters}
+                statusCurrent={pageData?.partnersStatusCurrent}
+                statusFormer={pageData?.partnersStatusFormer}
+                activeProjects={pageData?.partnersActiveProjects}
+                exploreProfile={pageData?.partnersExploreProfile}
+                visitWebsite={pageData?.partnersVisitWebsite}
+                emptyFiltered={pageData?.partnersEmptyFiltered}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

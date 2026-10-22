@@ -453,14 +453,12 @@ export interface ProjectTeamMember extends Struct.ComponentSchema {
   collectionName: 'components_project_team_members';
   info: {
     description: 'Link a person to a project role';
-    displayName: 'Team member';
+    displayName: 'Individual Contributor';
     icon: 'users';
   };
   attributes: {
-    isLead: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     person: Schema.Attribute.Relation<'oneToOne', 'api::person.person'>;
     role: Schema.Attribute.String &
-      Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -494,6 +492,87 @@ export interface ProjectTimelineEntry extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedCard extends Struct.ComponentSchema {
+  collectionName: 'components_shared_cards';
+  info: {
+    description: 'Content card with icon or image, text, and optional link';
+    displayName: 'Card';
+    icon: 'id-card';
+  };
+  attributes: {
+    badge: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    icon: Schema.Attribute.Enumeration<
+      [
+        'users',
+        'book',
+        'globe',
+        'newspaper',
+        'lightbulb',
+        'graduation-cap',
+        'handshake',
+        'calendar',
+        'link',
+        'external',
+        'rocket',
+        'flask',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'users'>;
+    image: Schema.Attribute.Media<'images'>;
+    linkText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    linkUrl: Schema.Attribute.String;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
+export interface SharedCardGrid extends Struct.ComponentSchema {
+  collectionName: 'components_shared_card_grids';
+  info: {
+    description: 'Grid of feature cards';
+    displayName: 'Card Grid';
+    icon: 'grid';
+  };
+  attributes: {
+    cards: Schema.Attribute.Component<'shared.card', true>;
+    columns: Schema.Attribute.Enumeration<['2', '3', '4']> &
+      Schema.Attribute.DefaultTo<'3'>;
+    heading: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    subheading: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
 export interface SharedContactLink extends Struct.ComponentSchema {
   collectionName: 'components_shared_contact_links';
   info: {
@@ -514,6 +593,46 @@ export interface SharedContactLink extends Struct.ComponentSchema {
         };
       }>;
     url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedCta extends Struct.ComponentSchema {
+  collectionName: 'components_shared_ctas';
+  info: {
+    description: 'Banner or call-to-action block with buttons';
+    displayName: 'Call to action';
+    icon: 'bullhorn';
+  };
+  attributes: {
+    description: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    primaryButtonText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    primaryButtonUrl: Schema.Attribute.String;
+    secondaryButtonText: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    secondaryButtonUrl: Schema.Attribute.String;
+    theme: Schema.Attribute.Enumeration<['blue', 'gradient', 'gray']> &
+      Schema.Attribute.DefaultTo<'blue'>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
   };
 }
 
@@ -655,6 +774,39 @@ export interface SharedSeo extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedSeparator extends Struct.ComponentSchema {
+  collectionName: 'components_shared_separators';
+  info: {
+    description: 'Anchored divider for grouping dynamic-zone content';
+    displayName: 'Separator';
+    icon: 'horizontal';
+  };
+  attributes: {
+    anchorId: Schema.Attribute.UID<'label'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    label: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    style: Schema.Attribute.Enumeration<['line', 'heading', 'spacer']> &
+      Schema.Attribute.DefaultTo<'heading'>;
+    subheading: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
 export interface SharedSlider extends Struct.ComponentSchema {
   collectionName: 'components_shared_sliders';
   info: {
@@ -698,13 +850,17 @@ declare module '@strapi/strapi' {
       'project.contact-info': ProjectContactInfo;
       'project.team-member': ProjectTeamMember;
       'project.timeline-entry': ProjectTimelineEntry;
+      'shared.card': SharedCard;
+      'shared.card-grid': SharedCardGrid;
       'shared.contact-link': SharedContactLink;
+      'shared.cta': SharedCta;
       'shared.focus-item': SharedFocusItem;
       'shared.media': SharedMedia;
       'shared.quote': SharedQuote;
       'shared.rich-text': SharedRichText;
       'shared.section': SharedSection;
       'shared.seo': SharedSeo;
+      'shared.separator': SharedSeparator;
       'shared.slider': SharedSlider;
       'team.membership': TeamMembership;
     }

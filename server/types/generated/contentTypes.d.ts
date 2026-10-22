@@ -1342,7 +1342,7 @@ export interface ApiEngagementPageEngagementPage
     singularName: 'engagement-page';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   pluginOptions: {
     i18n: {
@@ -1350,26 +1350,25 @@ export interface ApiEngagementPageEngagementPage
     };
   };
   attributes: {
-    academicContactButton: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Contact the academic team'>;
-    academicDescription: Schema.Attribute.Text &
+    academicContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.card-grid',
+        'shared.card',
+        'shared.cta',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote',
+        'shared.separator',
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    academicTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Academic engagement'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1386,58 +1385,161 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Engagement'>;
-    highSchoolBtnFramework: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'AILIT Framework \u2013 Resources'>;
-    highSchoolDescription: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
-    highSchoolTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'High-school engagement'>;
-    industryBtnContact: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Contact the industry team'>;
-    industryBtnExplore: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Explore all projects'>;
-    industryDescription: Schema.Attribute.Text &
+    highSchoolContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.card-grid',
+        'shared.card',
+        'shared.cta',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote',
+        'shared.separator',
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    industryTitle: Schema.Attribute.String &
+    industryAllDomains: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }> &
-      Schema.Attribute.DefaultTo<'Industry engagement'>;
+      Schema.Attribute.DefaultTo<'All domains'>;
+    industryClearFilters: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Clear filters'>;
+    industryContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.card-grid',
+        'shared.card',
+        'shared.cta',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote',
+        'shared.separator',
+      ]
+    > &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    industryLeadLabel: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Lead:'>;
+    industryNoProjects: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'No industry projects found.'>;
+    industrySearchPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Search industry projects...'>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::engagement-page.engagement-page'
     >;
+    partnersActiveProjects: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Active Projects'>;
+    partnersAllCountries: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'All countries'>;
+    partnersAllRoles: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'All roles'>;
+    partnersAllStatuses: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'All statuses'>;
+    partnersClearFilters: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Clear'>;
+    partnersCurrentPartners: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Current partners'>;
+    partnersDescription: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'We are proud to collaborate with leading organizations across academia and industry.'>;
+    partnersEmptyFiltered: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'No partners match your filters.'>;
+    partnersExploreProfile: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Explore Profile'>;
+    partnersEyebrow: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Strategic Network'>;
+    partnersFormerPartners: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Former partners'>;
     partnersMapTitle: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1445,6 +1547,48 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Partners Map'>;
+    partnersSearchPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Search by partner, country, project'>;
+    partnersStatsCountries: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Countries'>;
+    partnersStatsPartners: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Partners'>;
+    partnersStatsProjects: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Projects'>;
+    partnersStatusCurrent: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Current'>;
+    partnersStatusFormer: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Former'>;
     partnersTitle: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1452,101 +1596,40 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Partners'>;
-    phdBtnContact: Schema.Attribute.String &
+    partnersVisitWebsite: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }> &
-      Schema.Attribute.DefaultTo<'Contact Us'>;
-    phdP1: Schema.Attribute.Text &
+      Schema.Attribute.DefaultTo<'Visit website'>;
+    publicContent: Schema.Attribute.DynamicZone<
+      [
+        'shared.cta',
+        'shared.card-grid',
+        'shared.card',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.quote',
+        'shared.separator',
+      ]
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
-    phdP2: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
-    phdP3: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
-    phdTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Industrial PhD Program'>;
-    publicBtnMedia: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'View Media & Press'>;
-    publicBtnNews: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'News & Events'>;
-    publicDesc: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
-    publicTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Public Engagement'>;
     publishedAt: Schema.Attribute.DateTime;
-    subtabCourses: Schema.Attribute.String &
+    subtabInfo: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }> &
-      Schema.Attribute.DefaultTo<'Courses'>;
-    subtabEngagement: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'How We Work'>;
-    subtabMobility: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Mobility'>;
-    subtabOverview: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Overview'>;
-    subtabPartnerships: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Partnerships'>;
+      Schema.Attribute.DefaultTo<'Info'>;
     subtabProjects: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1554,13 +1637,6 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Projects'>;
-    subtabTeaching: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Teaching'>;
     tabAcademic: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1589,13 +1665,6 @@ export interface ApiEngagementPageEngagementPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Partners'>;
-    tabPhd: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Industrial PhD'>;
     tabPublic: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -3525,10 +3594,6 @@ export interface ApiPersonPerson extends Struct.CollectionTypeSchema {
   };
   attributes: {
     bio: Schema.Attribute.RichText;
-    contributingProjects: Schema.Attribute.Relation<
-      'manyToMany',
-      'api::project.project'
-    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -3632,7 +3697,6 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
         };
       }>;
     contactInfo: Schema.Attribute.Component<'project.contact-info', false>;
-    contributors: Schema.Attribute.Relation<'manyToMany', 'api::person.person'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -3641,7 +3705,12 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
       'api::department.department'
     >;
     endDate: Schema.Attribute.Date;
+    events: Schema.Attribute.Relation<'manyToMany', 'api::event.event'>;
     heroImage: Schema.Attribute.Media<'images'>;
+    individualContributors: Schema.Attribute.Component<
+      'project.team-member',
+      true
+    >;
     isIndustryEngagement: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String;

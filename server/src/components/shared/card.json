@@ -1,0 +1,73 @@
+{
+  "collectionName": "components_shared_cards",
+  "info": {
+    "displayName": "Card",
+    "description": "Content card with icon or image, text, and optional link",
+    "icon": "id-card"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "icon": {
+      "type": "enumeration",
+      "enum": [
+        "users",
+        "book",
+        "globe",
+        "newspaper",
+        "lightbulb",
+        "graduation-cap",
+        "handshake",
+        "calendar",
+        "link",
+        "external",
+        "rocket",
+        "flask"
+      ],
+      "default": "users"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "badge": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "linkUrl": {
+      "type": "string"
+    },
+    "linkText": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}
