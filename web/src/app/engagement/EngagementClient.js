@@ -70,19 +70,6 @@ const PARTNERS_TEXTS = {
   "empty.filtered": "No partners match your filters.",
 };
 
-const PHD_TEXTS = {
-  title: "Industrial PhD Program",
-  p1: "Bridging the gap between academic research and industrial application.",
-  p2: "Our Industrial PhD program allows candidates to conduct rigorous academic research while solving real-world challenges within a partner company.",
-  compTitle: "For Companies",
-  compDesc: "Drive innovation by sponsoring a dedicated researcher to tackle your specific challenges.",
-  candTitle: "For Candidates",
-  candDesc: "Earn your PhD while gaining invaluable industry experience and a competitive salary.",
-  collabTitle: "Joint Supervision",
-  collabDesc: "Benefit from the combined expertise of academic supervisors and industry mentors.",
-  btnContact: "Contact Us About Industrial PhDs",
-};
-
 // ============================================================================
 // SHARED COMPONENTS
 // ============================================================================
@@ -654,47 +641,6 @@ function PartnersContent({ partners, CollaboratorsClient }) {
   );
 }
 
-function IndustrialPhDContent() {
-  const t = (k) => PHD_TEXTS[k] || k;
-  return (
-    <motion.div key="phd" variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <SectionCard title={t('title')}>
-        <div className="space-y-4 text-gray-700 dark:text-gray-300">
-          <p>{t('p1')}</p>
-          <p>{t('p2')}</p>
-        </div>
-      </SectionCard>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <FeatureCard
-          icon={FaIndustry}
-          title={t('compTitle')}
-          desc={t('compDesc')}
-        />
-        <FeatureCard
-          icon={FaUserGraduate}
-          title={t('candTitle')}
-          desc={t('candDesc')}
-        />
-        <FeatureCard
-          icon={FaHandshake}
-          title={t('collabTitle')}
-          desc={t('collabDesc')}
-        />
-      </div>
-
-      <motion.div variants={itemVariants}>
-        <Link
-          href="/contact"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          {t('btnContact')}
-        </Link>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -800,7 +746,6 @@ export default function EngagementClient({ projects = [], partners = [], Collabo
             )}
             {activeTab === 'high-school' && <HighSchoolContent blocks={pageData?.highSchoolContent} />}
             {activeTab === 'partners' && <PartnersContent partners={partners} CollaboratorsClient={CollaboratorsClient} />}
-            {activeTab === 'phd' && <IndustrialPhDContent />}
           </motion.div>
         </AnimatePresence>
       </div>

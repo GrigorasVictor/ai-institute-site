@@ -18,12 +18,12 @@
   "attributes": {
     "heroTitle": {
       "type": "string",
-      "default": "Engagement",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Engagement"
     },
     "heroSubtitle": {
       "type": "text",
@@ -35,78 +35,74 @@
     },
     "tabPublic": {
       "type": "string",
-      "default": "Public",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Public"
     },
     "tabAcademic": {
       "type": "string",
-      "default": "Academic",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Academic"
     },
     "tabIndustry": {
       "type": "string",
-      "default": "Industry",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Industry"
     },
     "tabHighSchool": {
       "type": "string",
-      "default": "High-School",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "High-School"
     },
     "tabPartners": {
       "type": "string",
-      "default": "Partners",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
-    },
-    "tabPhd": {
-      "type": "string",
-      "default": "Industrial PhD",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      },
+      "default": "Partners"
     },
     "subtabInfo": {
       "type": "string",
-      "default": "Info",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Info"
     },
     "subtabProjects": {
       "type": "string",
-      "default": "Projects",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Projects"
     },
     "publicContent": {
       "type": "dynamiczone",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "components": [
         "shared.cta",
         "shared.card-grid",
@@ -118,15 +114,15 @@
         "shared.slider",
         "shared.quote",
         "shared.separator"
-      ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      ]
     },
     "academicContent": {
       "type": "dynamiczone",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "components": [
         "shared.card-grid",
         "shared.card",
@@ -138,15 +134,15 @@
         "shared.slider",
         "shared.quote",
         "shared.separator"
-      ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      ]
     },
     "industryContent": {
       "type": "dynamiczone",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "components": [
         "shared.card-grid",
         "shared.card",
@@ -158,15 +154,15 @@
         "shared.slider",
         "shared.quote",
         "shared.separator"
-      ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      ]
     },
     "highSchoolContent": {
       "type": "dynamiczone",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "components": [
         "shared.card-grid",
         "shared.card",
@@ -178,72 +174,25 @@
         "shared.slider",
         "shared.quote",
         "shared.separator"
-      ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "phdTitle": {
-      "type": "string",
-      "default": "Industrial PhD Program",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "phdP1": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "phdP2": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "phdP3": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "phdBtnContact": {
-      "type": "string",
-      "default": "Contact Us",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      ]
     },
     "partnersTitle": {
       "type": "string",
-      "default": "Partners",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Partners"
     },
     "partnersMapTitle": {
       "type": "string",
-      "default": "Partners Map",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "default": "Partners Map"
     }
   }
 }
