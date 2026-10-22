@@ -30,38 +30,9 @@ Modeled after the operational patterns of `research-paper-graph`, both processin
 
 ## 1. Architecture & Data Flow
 
-The pipeline is split into independent services communicating through RabbitMQ queues:
+The pipeline is split into independent services communicating through RabbitMQ message queues (`tasks_queue` and `results_queue`):
 
-```mermaid
-flowchart TD
-    subgraph Data Sources
-        Strapi[("Public Strapi API\n(GET /api/publications)\nStrictly Read-Only")]
-        LocalPDFs["Local Test PDFs / URLs\n(ACK_TEST_PDF_URLS)"]
-    end
-
-    subgraph Service 1: Coordinator
-        CoordEntry["entrypoint.sh\n(cron -f)"] -->|Start or Cron trigger| CoordMain["ack_sync.py\n(Process 1-by-1)"]
-        CoordMain -->|1. Fetch publication & PDF URL| Strapi
-        CoordMain -->|2. Stream 64KB chunks in RAM| Hash["Compute SHA-256"]
-        Hash -->|3. Check if already processed| DB[("pdf-ack-sqlite\nprocessed_papers.db\n(WAL Mode)")]
-        CoordMain -->|4. If new, push TaskMessage| Q1[("RabbitMQ\ntasks_queue (Queue 1)")]
-        CoordRes["result_consumer.py\n(wait_for_paper_result)"] <--|6. Consume ResultMessage| Q2[("RabbitMQ\nresults_queue (Queue 2)")]
-        CoordRes -->|7. Mark COMPLETED + Save Ack Text| DB
-    end
-
-    subgraph Service 2: Worker AI
-        WorkerEntry["entrypoint.sh\n(cron -f)"] -->|Start or Cron trigger| WorkerMain["worker_service/main.py"]
-        WorkerMain -->|5. Pop TaskMessage| Q1
-        WorkerMain -->|Stream PDF in RAM via httpx| Chunker["pdf_chunker.py\n(PyMuPDF / fitz)"]
-        Chunker -->|Candidate Paragraphs| Extractor["semantic_extractor.py\n2-Stage AI Pipeline"]
-        subgraph AI Extraction
-            Extractor -->|Stage 1: Top-K candidate chunks| BiEncoder["Bi-Encoder\nall-MiniLM-L6-v2"]
-            BiEncoder -->|Stage 2: Joint attention reranking| CrossEncoder["Cross-Encoder\nms-marco-MiniLM-L-6-v2"]
-        end
-        Extractor -->|Package ResultMessage| WorkerMain
-        WorkerMain -->|Publish ResultMessage| Q2
-    end
-```
+![Pipeline Sequence Diagram](docs/sequence.png)
 
 ---
 
@@ -85,7 +56,7 @@ The pipeline has no write permissions on the public Strapi instance (`https://ai
 ### Zero Disk PDF Storage (In-Memory Streaming)
 - PDFs are **never saved to disk or mounted Docker volumes**.
 - `coordinator_service` computes SHA-256 digests on-the-fly by streaming remote PDFs in 64 KB memory chunks (`httpx.stream`).
-- `worker_service` loads PDFs into RAM using `httpx.get` and passes the byte stream directly to `pymupdf.open(stream=..., filetype="pdf")`.
+- `worker_service` loads PDFs into RAM using `httpx.get` and passes the byte stream directly to `pymupdf.open(stream=..., filetype=\"pdf\")`.
 - Only persistent model weights (`.model_cache`) and the SQLite database (`sqlite_state_data`) are mounted on volumes.
 
 ---
@@ -98,6 +69,7 @@ The pipeline has no write permissions on the public Strapi instance (`https://ai
 | `.env` / `sample.env` | Config | Environment variables for RabbitMQ, Strapi endpoints, cron schedules, AI thresholds, batch limits, and timeouts. |
 | `.dockerignore` | Build | Prevents caches, `.venv`, model weights, and tests from being sent into Docker build contexts. |
 | `.gitignore` | Git | Ignores `.env`, virtualenvs, runtime SQLite databases, and downloaded model weights. |
+| `docs/` | Documentation | Contains architecture visual assets (`sequence.png`). |
 | **`shared/`** | | **Shared common modules imported by both services** |
 | `shared/config.py` | Config | Strongly-typed, immutable `PipelineConfig` dataclass and `load_config()` loader with fallback defaults. |
 | `shared/schemas.py` | Schemas | Pydantic models for queue contracts: `TaskMessage`, `ResultMessage`, `TaskStatus`. |
@@ -167,11 +139,11 @@ The dedicated `pdf-ack-sqlite` container remains permanently running. You can qu
 
 ```powershell
 # View all processed papers in a tabular layout
-docker exec -it pdf-ack-sqlite sqlite3 -header -column /data/state/processed_papers.db `
+docker exec -it pdf-ack-sqlite sqlite3 -header -column /data/state/processed_papers.db \
   "SELECT paper_id, status, ROUND(confidence_score, 3) AS score, retry_count, substr(acknowledgment_text, 1, 80) AS ack_preview FROM processed_papers;"
 
 # View detailed multiline records including full acknowledgment text
-docker exec -it pdf-ack-sqlite sqlite3 -line /data/state/processed_papers.db `
+docker exec -it pdf-ack-sqlite sqlite3 -line /data/state/processed_papers.db \
   "SELECT paper_id, status, confidence_score, acknowledgment_text, completed_at FROM processed_papers WHERE status = 'COMPLETED';"
 
 # Open an interactive SQLite3 shell
