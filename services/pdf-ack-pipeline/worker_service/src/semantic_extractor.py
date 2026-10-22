@@ -1,7 +1,5 @@
-import gc
 import json
 import logging
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -17,11 +15,13 @@ DEFAULT_THRESHOLD = 0.55
 DEFAULT_BI_THRESHOLD = 0.60
 DEFAULT_CROSS_THRESHOLD = 0.05
 DEFAULT_TOP_K = 5
-DEFAULT_IDLE_TIMEOUT = 600  # 10 minutes
 
-ANCHORS_FILE = Path(__file__).parent / "semantic_anchors.json"
-QUERIES_FILE = Path(__file__).parent / "semantic_queries.json"
-MODEL_CACHE_DIR = Path(__file__).parent / ".model_cache"
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SEMANTIC_DATA_DIR = BASE_DIR / "semantic_data"
+ANCHORS_FILE = SEMANTIC_DATA_DIR / "semantic_anchors.json"
+QUERIES_FILE = SEMANTIC_DATA_DIR / "semantic_queries.json"
+MODEL_CACHE_DIR = BASE_DIR / ".model_cache"
 
 
 def _normalize(vectors: np.ndarray) -> np.ndarray:
@@ -66,12 +66,10 @@ class SemanticExtractor:
         cross_model_name: str = DEFAULT_CROSS_MODEL,
         anchors_path: Path = ANCHORS_FILE,
         queries_path: Path = QUERIES_FILE,
-        idle_timeout: int = DEFAULT_IDLE_TIMEOUT,
         cache_dir: Path = MODEL_CACHE_DIR,
     ) -> None:
         self.bi_model_name = bi_model_name
         self.cross_model_name = cross_model_name
-        self.idle_timeout = idle_timeout
         self.cache_dir = str(cache_dir)
         self.anchors = self._read_json_list(anchors_path)
         self.queries = self._read_json_list(queries_path)
@@ -79,7 +77,6 @@ class SemanticExtractor:
         self._bi_model: Optional[SentenceTransformer] = None
         self._cross_model: Optional[CrossEncoder] = None
         self._anchor_embeddings: Optional[np.ndarray] = None
-        self._last_used: float = 0.0
 
     @staticmethod
     def _read_json_list(path: Path) -> List[str]:
@@ -89,10 +86,9 @@ class SemanticExtractor:
     def _load_models(self) -> None:
         """Lazily loads both Bi-Encoder and Cross-Encoder from local cache (or downloads once)."""
         if self._bi_model is not None and self._cross_model is not None:
-            self._last_used = time.time()
             return
 
-        logger.info("Loading Bi-Encoder '%s' into RAM...", self.bi_model_name)
+        logger.info("Loading Bi-Encoder '%s'...", self.bi_model_name)
         try:
             self._bi_model = SentenceTransformer(
                 self.bi_model_name,
@@ -107,7 +103,7 @@ class SemanticExtractor:
                 local_files_only=False,
             )
 
-        logger.info("Loading Cross-Encoder '%s' into RAM...", self.cross_model_name)
+        logger.info("Loading Cross-Encoder '%s'...", self.cross_model_name)
         try:
             self._cross_model = CrossEncoder(
                 self.cross_model_name,
@@ -123,26 +119,10 @@ class SemanticExtractor:
             )
 
         self._anchor_embeddings = self._encode(self.anchors)
-        self._last_used = time.time()
 
     def _encode(self, texts: List[str]) -> np.ndarray:
         embeddings = self._bi_model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
         return _normalize(np.asarray(embeddings, dtype=np.float32))
-
-    def unload_if_idle(self) -> bool:
-        """Frees models from RAM if idle for longer than idle_timeout."""
-        if self._bi_model is None and self._cross_model is None:
-            return False
-
-        if time.time() - self._last_used < self.idle_timeout:
-            return False
-
-        logger.info("Model idle timeout reached. Unloading models from RAM.")
-        self._bi_model = None
-        self._cross_model = None
-        self._anchor_embeddings = None
-        gc.collect()
-        return True
 
     def extract(
         self,

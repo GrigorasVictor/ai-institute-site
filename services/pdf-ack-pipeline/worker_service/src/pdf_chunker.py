@@ -2,6 +2,9 @@ import logging
 import math
 from pathlib import Path
 from typing import List, Union
+from urllib.parse import urlparse
+
+import httpx
 
 try:
     import pymupdf
@@ -60,32 +63,54 @@ def get_target_page_indices(total_pages: int, tail_percentage: float = 0.33) -> 
     return [0] + list(range(tail_start, total_pages))
 
 
+def _is_url(source: Union[str, Path]) -> bool:
+    if isinstance(source, Path):
+        return False
+    parsed = urlparse(str(source).strip())
+    return parsed.scheme in ("http", "https")
+
+
+def _open_pdf_document(pdf_source: Union[str, Path]):
+    """
+    Opens a PDF either directly from a HTTP/HTTPS URL (in RAM, without saving to disk)
+    or from a local filesystem path.
+    """
+    if _is_url(pdf_source):
+        url = str(pdf_source).strip()
+        logger.info("Fetching PDF in memory from URL: %s", url)
+        response = httpx.get(url, follow_redirects=True, timeout=30.0)
+        response.raise_for_status()
+        return pymupdf.open(stream=response.content, filetype="pdf"), url.split("/")[-1]
+
+    path = Path(pdf_source)
+    if not path.is_file():
+        raise FileNotFoundError(f"PDF file not found: {path}")
+    return pymupdf.open(path), path.name
+
+
 def extract_candidate_chunks(
-    pdf_path: Union[str, Path],
+    pdf_source: Union[str, Path],
     tail_percentage: float = 0.33,
 ) -> List[str]:
     """
-    Opens a PDF file using PyMuPDF (fitz) and extracts normalized candidate
-    paragraphs from the first page and the end portion of the document.
-    Short blocks (section titles) are merged into the paragraph below them.
+    Opens a PDF from a URL (in RAM) or local file path using PyMuPDF (fitz)
+    and extracts normalized candidate paragraphs from the first page and the
+    end portion of the document.
     """
-    path = Path(pdf_path)
-    if not path.is_file():
-        raise FileNotFoundError(f"PDF file not found: {path}")
-
     chunks: List[str] = []
     seen_chunks = set()
 
-    with pymupdf.open(path) as doc:
+    doc, doc_label = _open_pdf_document(pdf_source)
+    with doc:
         total_pages = len(doc)
         if total_pages == 0:
-            logger.warning("Empty PDF document (0 pages): %s", path)
+            logger.warning("Empty PDF document (0 pages): %s", doc_label)
             return []
 
         target_pages = get_target_page_indices(total_pages, tail_percentage=tail_percentage)
         logger.info(
             "Extracting paragraphs from '%s' (total pages: %d, selected pages: %s)",
-            path.name,
+            doc_label,
             total_pages,
             target_pages,
         )
@@ -123,5 +148,5 @@ def extract_candidate_chunks(
                         seen_chunks.add(cleaned)
                         chunks.append(cleaned)
 
-    logger.info("Extracted %d candidate paragraphs from '%s'.", len(chunks), path.name)
+    logger.info("Extracted %d candidate paragraphs from '%s'.", len(chunks), doc_label)
     return chunks
