@@ -1342,7 +1342,7 @@ export interface ApiEngagementPageEngagementPage
     singularName: 'engagement-page';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   pluginOptions: {
     i18n: {

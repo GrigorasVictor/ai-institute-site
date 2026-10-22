@@ -196,6 +196,7 @@ const createParams = ({
   sort = null,
   pagination = null,
   publicationState = null,
+  status = null,
   locale = null,
 }) => {
   const params = new URLSearchParams();
@@ -204,6 +205,7 @@ const createParams = ({
   appendSort(params, sort);
   appendPagination(params, pagination || {});
   if (publicationState) params.set('publicationState', publicationState);
+  if (status) params.set('status', status);
   if (filters) appendFilters(params, filters);
   if (typeof populate === 'string') {
     params.set('populate', populate);
@@ -3313,11 +3315,18 @@ export async function getGlobal(locale = "en") {
   return DEFAULT_GLOBAL;
 }
 
-export async function getSingleType(endpoint, locale = "en", populate = "*", fetchOptions = {}) {
+export async function getSingleType(
+  endpoint,
+  locale = "en",
+  populate = "*",
+  fetchOptions = {},
+  queryOptions = {},
+) {
   try {
     const params = createParams({
       locale,
       populate,
+      ...queryOptions,
     });
     let res = await fetchAPI(`/${endpoint}?${params.toString()}`, fetchOptions);
     if (!res?.data && locale && locale !== "en") {

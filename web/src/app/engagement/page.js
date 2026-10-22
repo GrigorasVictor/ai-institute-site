@@ -1,5 +1,5 @@
 import FallbackDisclaimer from "@/components/FallbackDisclaimer";
-import { cookies } from "next/headers";
+import { cookies, draftMode } from "next/headers";
 import { Suspense } from "react";
 import EngagementClient from "./EngagementClient";
 import CollaboratorsClient from "../collaborators/CollaboratorsClient";
@@ -54,12 +54,14 @@ const ENGAGEMENT_PAGE_FETCH_OPTIONS = { cache: "no-store" };
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
+  const { isEnabled } = await draftMode();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
   const engagement = await getSingleType(
     "engagement-page",
     locale,
     ENGAGEMENT_PAGE_POPULATE,
     ENGAGEMENT_PAGE_FETCH_OPTIONS,
+    isEnabled ? { status: "draft" } : {},
   );
 
   return {
@@ -70,6 +72,7 @@ export async function generateMetadata() {
 
 export default async function EngagementPage() {
   const cookieStore = await cookies();
+  const { isEnabled } = await draftMode();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
 
   const [strapiProjects, partnerRows, pageData] = await Promise.all([
@@ -80,6 +83,7 @@ export default async function EngagementPage() {
       locale,
       ENGAGEMENT_PAGE_POPULATE,
       ENGAGEMENT_PAGE_FETCH_OPTIONS,
+      isEnabled ? { status: "draft" } : {},
     ),
   ]);
 
