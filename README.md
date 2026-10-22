@@ -109,7 +109,7 @@ The platform includes an automated equipment reservation system. It syncs Next.j
 
 - [Development Setup](./SETUP.md) - Detailed setup and troubleshooting
 - [Contributing Guide](./CONTRIBUTING.md) - How to contribute to the project
-- [Engagement Page Author Manual](./docs/ENGAGEMENT_CONTENT_MANUAL.md) - Populate and preview the Engagement page in Strapi
+- [Strapi Author Manual](./docs/StrapiAuthorDocs/) - Guides on using Strapi for content management
 - [Strapi Documentation](https://docs.strapi.io/) - Official CMS docs
 
 ## Support
