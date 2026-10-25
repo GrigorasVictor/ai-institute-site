@@ -8,6 +8,7 @@ import MediaPlayer from '@/components/shared/MediaPlayer';
 import RichMarkdown from '@/components/shared/RichMarkdown';
 import GallerySlideshow from '@/components/shared/GallerySlideshow';
 import DynamicZone from '@/components/shared/DynamicZone';
+import NewsShareBar from '@/components/news/NewsShareBar';
 
 export default function NewsArticleClient({ article, pageData }) {
   const locale = useLocale();
@@ -145,6 +146,9 @@ export default function NewsArticleClient({ article, pageData }) {
             )}
           </div>
         </header>
+
+        {/* Social Sharing, PDF Export & Utilities */}
+        <NewsShareBar article={article} />
 
         {/* Dynamic Zone Body Content */}
         {bodyBlocks.length > 0 ? (
