@@ -32,7 +32,7 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
   return (
     <div className="w-full">
       {/* Main Slideshow */}
-      <div className="relative group">
+      <div className="relative group print:hidden">
         <div className="relative aspect-video bg-gray-100 dark:bg-gray-900 rounded-2xl overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.img
@@ -113,6 +113,27 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
             ))}
           </div>
         )}
+      </div>
+
+      {/* Print Gallery: displays all gallery images in a clean grid for PDF/print export */}
+      <div className={`hidden print:grid ${items.length === 1 ? 'print:grid-cols-1 max-w-md mx-auto' : 'print:grid-cols-2'} print:gap-4 print:my-4 print-gallery-grid`}>
+        {items.map((src, index) => (
+          <figure
+            key={`print-thumb-${index}`}
+            className="print-gallery-item rounded-lg border border-gray-200 p-2 break-inside-avoid"
+          >
+            <img
+              src={src}
+              alt={`${alt} ${index + 1}`}
+              className="w-full h-44 object-cover rounded"
+            />
+            {items.length > 1 && (
+              <figcaption className="text-[10pt] text-gray-500 mt-1 text-center font-medium">
+                Photo {index + 1}
+              </figcaption>
+            )}
+          </figure>
+        ))}
       </div>
 
       {/* Lightbox */}

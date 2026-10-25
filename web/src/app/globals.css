@@ -393,6 +393,32 @@
     text-shadow: none !important;
   }
 
+  /* Print Gallery Grid */
+  .print-gallery-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12pt !important;
+    margin: 12pt 0 !important;
+    break-inside: auto !important;
+  }
+
+  .print-gallery-item {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 6pt !important;
+    padding: 6pt !important;
+    background: #ffffff !important;
+  }
+
+  .print-gallery-item img {
+    width: 100% !important;
+    height: 140pt !important;
+    max-height: 140pt !important;
+    object-fit: cover !important;
+    border-radius: 4pt !important;
+  }
+
   /* Clear links for reading */
   a {
     color: #1d4ed8 !important;
