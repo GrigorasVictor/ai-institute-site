@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaBars, FaTimes, FaSearch } from 'react-icons/fa';
+import { FaBars, FaTimes, FaSearch, FaRss } from 'react-icons/fa';
 import EUT_Logo from '../../public/media/Logos/UT&EUT_Logo.png';
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useGlobalData } from "@/context/LocaleContext";
@@ -425,6 +425,19 @@ export default function Navbar({ navbarData: customNavbarData }) {
             </div>
           </li>
 
+          {/* RSS Feed */}
+          <li>
+            <Link
+              href="/rss.xml"
+              prefetch={false}
+              aria-label="RSS Feed"
+              title="Subscribe to RSS Feed"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors inline-flex items-center text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400"
+            >
+              <FaRss className="w-4 h-4" />
+            </Link>
+          </li>
+
           {/* Desktop Language Switcher (compact) */}
           <li className="ml-2">
             <LanguageSwitcher compact />
@@ -522,6 +535,17 @@ export default function Navbar({ navbarData: customNavbarData }) {
             setOpen={setAboutMobileOpen}
             items={aboutMenu}
           />
+          <li className="px-4 py-1">
+            <Link
+              href="/rss.xml"
+              prefetch={false}
+              className="flex items-center gap-2 w-full rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-4 py-3 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+              onClick={() => setIsOpen(false)}
+            >
+              <FaRss className="w-4 h-4 text-orange-500" />
+              <span>RSS Feed</span>
+            </Link>
+          </li>
         </ul>
       )}
     </nav>
