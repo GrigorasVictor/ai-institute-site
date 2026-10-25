@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaLinkedin, FaFacebook, FaEnvelope, FaLink, FaCheck, FaShareAlt } from 'react-icons/fa';
+import { FaLinkedin, FaFacebook, FaEnvelope, FaLink, FaCheck, FaShareAlt, FaFilePdf } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 
 /**
- * NewsShareBar provides social sharing and copy-link utilities for news articles.
+ * NewsShareBar provides social sharing, copy-link, and PDF export utilities for news articles.
  * Follows modern accessibility standards with keyboard navigation, aria labels,
  * and live region feedback when copying the article link.
  */
@@ -68,6 +68,13 @@ export default function NewsShareBar({ article }) {
       if (err.name !== 'AbortError') {
         console.error('Native share failed:', err);
       }
+    }
+  };
+
+  // Trigger browser print to allow saving as a clean PDF or printing directly
+  const handlePrintPdf = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
     }
   };
 
@@ -175,6 +182,20 @@ export default function NewsShareBar({ article }) {
           <span className="sr-only" aria-live="polite">
             {copied ? 'Article link copied to clipboard' : ''}
           </span>
+        </div>
+
+        {/* Document Actions (Print / PDF) */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrintPdf}
+            aria-label="Save or print this article as PDF"
+            title="Save or print article as PDF"
+            className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 text-xs font-medium cursor-pointer"
+          >
+            <FaFilePdf className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+            <span>Save as PDF</span>
+          </button>
         </div>
       </div>
     </div>

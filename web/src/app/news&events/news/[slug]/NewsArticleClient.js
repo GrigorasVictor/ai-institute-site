@@ -67,7 +67,7 @@ export default function NewsArticleClient({ article, pageData }) {
         {/* Back Link */}
         <Link
           href="/news&events/news"
-          className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline mb-6 font-medium"
+          className="print:hidden inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline mb-6 font-medium"
         >
           <FaArrowLeft className="w-3.5 h-3.5" />
           {tr('backToNews', 'Back to News')}
@@ -120,7 +120,7 @@ export default function NewsArticleClient({ article, pageData }) {
           )}
 
           {/* External Links */}
-          <div className="flex flex-wrap gap-3 mt-4">
+          <div className="print:hidden flex flex-wrap gap-3 mt-4">
             {article.linkUrl && (
               <a
                 href={article.linkUrl}

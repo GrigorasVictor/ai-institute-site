@@ -301,3 +301,56 @@
   color: var(--icia-date) !important;
   font-weight: 600;
 }
+
+
+/* ============================================
+   PRINT & PDF EXPORT STYLES
+   ============================================ */
+
+@media print {
+  @page {
+    margin: 1.5cm;
+    size: auto;
+  }
+
+  /* Hide navigation bars, footers, interactive buttons, and share utilities */
+  nav,
+  footer,
+  aside,
+  button,
+  .print\:hidden,
+  [data-print-hidden="true"] {
+    display: none !important;
+  }
+
+  /* Reset layout for clean paper and PDF export */
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Ensure headings, images, and tables do not break awkwardly across pages */
+  h1, h2, h3, h4, img, figure, table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Remove heavy shadows and background gradients */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Clear links for reading */
+  a {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+  }
+}
