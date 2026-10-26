@@ -2555,7 +2555,8 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    author: Schema.Attribute.Relation<'manyToOne', 'api::person.person'>;
+    author: Schema.Attribute.Relation<'manyToOne', 'api::person.person'> &
+      Schema.Attribute.Required;
     body: Schema.Attribute.DynamicZone<
       [
         'shared.section',
@@ -2587,9 +2588,10 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     featuredPeople: Schema.Attribute.Relation<
       'manyToMany',
       'api::person.person'
-    >;
+    > &
+      Schema.Attribute.Required;
     gallery: Schema.Attribute.Media<'images', true>;
-    heroImage: Schema.Attribute.Media<'images'>;
+    heroImage: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     linkUrl: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
@@ -2597,17 +2599,20 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
       'api::news-article.news-article'
     >;
     publishedAt: Schema.Attribute.DateTime;
-    publishedDate: Schema.Attribute.Date;
+    publishedDate: Schema.Attribute.Date & Schema.Attribute.Required;
     relatedDepartments: Schema.Attribute.Relation<
       'manyToMany',
       'api::department.department'
-    >;
+    > &
+      Schema.Attribute.Required;
     relatedProjects: Schema.Attribute.Relation<
       'manyToMany',
       'api::project.project'
-    >;
+    > &
+      Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'>;
     summary: Schema.Attribute.Text &
+      Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;

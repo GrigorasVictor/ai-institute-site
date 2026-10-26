@@ -22,7 +22,7 @@ export default async function Home() {
 
   let latestNews = [];
   try {
-    const newsData = await getNewsArticles({ pageSize: 3, locale });
+    const newsData = await getNewsArticles({ pageSize: 6, locale });
     latestNews = transformNewsData(newsData);
   } catch (error) {
     console.error("Failed to fetch news for homepage:", error);
