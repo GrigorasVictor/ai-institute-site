@@ -80,6 +80,18 @@ jobs:
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/paper-sync:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/paper-sync:buildcache,mode=max
 
+      # --- Build and Push Snipe-IT ---
+      - name: Build and push Snipe-IT
+        uses: docker/build-push-action@v5
+        with:
+          context: ./snipe-it
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:buildcache,mode=max
+
       # --- Deployment Summary (visible in GitHub Actions tab) ---
       - name: Write deployment summary
         run: |
