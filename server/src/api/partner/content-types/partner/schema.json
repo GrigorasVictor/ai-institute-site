@@ -331,6 +331,12 @@
       "relation": "manyToMany",
       "target": "api::project.project",
       "mappedBy": "partners"
+    },
+    "laboratories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::laboratory.laboratory",
+      "mappedBy": "partners"
     }
   }
 }

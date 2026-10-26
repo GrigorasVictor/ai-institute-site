@@ -955,6 +955,162 @@ export async function getPartnerBySlug(slug, locale = null) {
   }
 }
 
+const LABORATORY_POPULATE = {
+  fields: [
+    'title',
+    'slug',
+    'roomNumber',
+    'summary',
+    'capacity',
+    'videoUrl',
+    'videoTitle',
+    'videoDescription',
+    'virtualTour360Url',
+    'contactEmail',
+    'bookingUrl',
+    'openHours',
+  ],
+  populate: {
+    heroImage: { fields: ['url', 'formats', 'alternativeText', 'width', 'height', 'focalPoint'] },
+    videoFile: { fields: ['url', 'mime', 'alternativeText', 'caption', 'width', 'height'] },
+    videoPoster: { fields: ['url', 'formats', 'alternativeText', 'width', 'height'] },
+    gallery: { fields: ['url', 'formats', 'alternativeText', 'caption', 'width', 'height'] },
+    partners: {
+      fields: ['name', 'slug', 'website', 'country', 'role'],
+      populate: {
+        logo: { fields: ['url', 'formats', 'alternativeText'] },
+      },
+    },
+    coordinator: PERSON_FLAT_POPULATE,
+    researchers: PERSON_FLAT_POPULATE,
+    departments: DEPARTMENT_POPULATE,
+    researchThemes: { fields: ['name', 'slug'] },
+    projects: {
+      fields: ['title', 'slug', 'abstract', 'startDate', 'endDate'],
+      populate: {
+        heroImage: { fields: ['url', 'formats', 'alternativeText'] },
+      },
+    },
+    body: {
+      on: {
+        'shared.rich-text': { fields: ['body'] },
+        'shared.section': {
+          fields: ['heading', 'subheading', 'body'],
+          populate: { media: { fields: ['url', 'alternativeText', 'caption', 'width', 'height', 'mime'] } },
+        },
+        'shared.media': {
+          populate: { file: { fields: ['url', 'alternativeText', 'caption', 'width', 'height', 'mime'] } },
+        },
+        'shared.slider': {
+          populate: { files: { fields: ['url', 'alternativeText', 'caption', 'width', 'height'] } },
+        },
+        'shared.cta': {
+          fields: [
+            'title',
+            'description',
+            'primaryButtonText',
+            'primaryButtonUrl',
+            'secondaryButtonText',
+            'secondaryButtonUrl',
+            'theme',
+          ],
+        },
+        'shared.card-grid': {
+          fields: ['title', 'columns'],
+          populate: {
+            cards: {
+              fields: ['title', 'description', 'badge', 'linkUrl', 'icon'],
+              populate: { image: { fields: ['url', 'alternativeText'] } },
+            },
+          },
+        },
+        'shared.card': {
+          fields: ['title', 'description', 'badge', 'linkUrl', 'icon'],
+          populate: { image: { fields: ['url', 'alternativeText'] } },
+        },
+        'shared.focus-item': { fields: ['title', 'description', 'richContent'] },
+        'shared.separator': { fields: ['label', 'subheading', 'anchorId', 'style'] },
+      },
+    },
+  },
+};
+
+/**
+ * Get laboratories
+ * @param {Object} options - Query options
+ * @returns {Promise<Array>}
+ */
+export async function getLaboratories(options = {}) {
+  try {
+    const {
+      departmentSlug,
+      themeSlug,
+      publicationState = 'preview',
+      locale,
+      page,
+      pageSize = 100,
+    } = options;
+
+    const filters = {};
+    if (departmentSlug) filters.departments = { slug: { $eq: departmentSlug } };
+    if (themeSlug) filters.researchThemes = { slug: { $eq: themeSlug } };
+
+    const baseOptions = {
+      sort: 'title:asc',
+      publicationState,
+      locale,
+      filters: Object.keys(filters).length ? filters : null,
+      fields: LABORATORY_POPULATE.fields,
+      populate: LABORATORY_POPULATE.populate,
+    };
+
+    if (page) {
+      const params = createParams({ ...baseOptions, pagination: { page, pageSize } });
+      const data = await fetchAPI(`/laboratories?${params.toString()}`);
+      return data.data || [];
+    }
+
+    return await fetchAllEntries('/laboratories', baseOptions, pageSize);
+  } catch (error) {
+    console.error('Failed to fetch laboratories:', error);
+    return [];
+  }
+}
+
+/**
+ * Get a single laboratory by slug
+ * @param {string} slug - Laboratory slug
+ * @param {string} locale - Locale code
+ * @returns {Promise<Object|null>}
+ */
+export async function getLaboratoryBySlug(slug, locale = null) {
+  try {
+    if (!slug) return null;
+
+    const params = createParams({
+      filters: { slug: { $eq: slug } },
+      publicationState: 'preview',
+      locale,
+      fields: LABORATORY_POPULATE.fields,
+      populate: LABORATORY_POPULATE.populate,
+    });
+
+    const data = await fetchAPI(`/laboratories?${params.toString()}`);
+    if (!data.data?.length && locale && locale !== 'en') {
+      const fallbackParams = new URLSearchParams(params);
+      fallbackParams.set('locale', 'en');
+      const fallbackData = await fetchAPI(`/laboratories?${fallbackParams.toString()}`);
+      if (fallbackData.data?.[0]) {
+        return { ...fallbackData.data[0], _isFallback: true };
+      }
+    }
+    return data.data?.[0] || null;
+  } catch (error) {
+    console.error('Failed to fetch laboratory by slug:', error);
+    return null;
+  }
+}
+
 /**
  * Get graph-eligible publications for the paper graph views.
  * @param {Object} options
@@ -3224,6 +3380,121 @@ export function transformPartnerData(strapiPartners) {
       isArchived: isFormer,
       _strapi: partner,
       _isFallback: partner._isFallback || false,
+    };
+  });
+}
+
+/**
+ * Helper function to transform laboratory data for the frontend
+ */
+export function transformLaboratoryData(strapiLaboratories) {
+  const list = Array.isArray(strapiLaboratories)
+    ? strapiLaboratories
+    : strapiLaboratories
+    ? [strapiLaboratories]
+    : [];
+
+  return list.map((lab) => {
+    const attributes = lab?.attributes ?? lab ?? {};
+
+    const rawPartners = toArray(attributes.partners?.data ?? attributes.partners);
+    const partners = rawPartners.map((p) => {
+      const pAttr = p?.attributes ?? p ?? {};
+      return {
+        id: p?.id ?? null,
+        name: pAttr.name || '',
+        slug: pAttr.slug || '',
+        tier: pAttr.role || 'Partner',
+        country: pAttr.country || '',
+        website: pAttr.website || '',
+        logo: resolveMediaUrl(pAttr.logo),
+      };
+    });
+
+    const rawGallery = toArray(attributes.gallery?.data ?? attributes.gallery);
+    const gallery = rawGallery
+      .map((item) => {
+        const itemAttr = item?.attributes ?? item ?? {};
+        return {
+          url: resolveMediaUrl(item),
+          caption: itemAttr.caption || '',
+          alternativeText: itemAttr.alternativeText || '',
+          width: itemAttr.width || null,
+          height: itemAttr.height || null,
+        };
+      })
+      .filter((g) => Boolean(g.url));
+
+    const rawProjects = toArray(attributes.projects?.data ?? attributes.projects);
+    const projects = rawProjects.map((proj) => {
+      const projAttr = proj?.attributes ?? proj ?? {};
+      return {
+        id: proj?.id ?? null,
+        title: projAttr.title || '',
+        slug: projAttr.slug || '',
+        abstract: projAttr.abstract || '',
+        startDate: projAttr.startDate || null,
+        endDate: projAttr.endDate || null,
+        heroImage: resolveMediaUrl(projAttr.heroImage),
+      };
+    });
+
+    const rawResearchers = toArray(attributes.researchers?.data ?? attributes.researchers);
+    const researchers = rawResearchers.map(normalizePerson).filter(Boolean);
+
+    const rawDepartments = toArray(attributes.departments?.data ?? attributes.departments);
+    const departments = rawDepartments.map((d) => {
+      const dAttr = d?.attributes ?? d ?? {};
+      return {
+        name: dAttr.name || '',
+        slug: dAttr.slug || '',
+        code: dAttr.code || '',
+      };
+    });
+
+    const rawThemes = toArray(attributes.researchThemes?.data ?? attributes.researchThemes);
+    const researchThemes = rawThemes.map((t) => {
+      const tAttr = t?.attributes ?? t ?? {};
+      return {
+        name: tAttr.name || '',
+        slug: tAttr.slug || '',
+      };
+    });
+
+    const videoFile = resolveMediaUrl(attributes.videoFile);
+    const videoUrl = attributes.videoUrl || '';
+    const hasVideo = Boolean(videoFile || videoUrl);
+
+    return {
+      id: lab?.id ?? null,
+      documentId: lab?.documentId ?? null,
+      title: attributes.title || '',
+      slug: attributes.slug || '',
+      roomNumber: attributes.roomNumber || '',
+      summary: attributes.summary || '',
+      capacity: attributes.capacity || null,
+      heroImage: resolveMediaUrl(attributes.heroImage),
+      focalPoint: attributes.heroImage?.data?.attributes?.focalPoint ?? attributes.heroImage?.focalPoint ?? null,
+      videoFile,
+      videoUrl,
+      videoPoster: resolveMediaUrl(attributes.videoPoster),
+      videoTitle: attributes.videoTitle || '',
+      videoDescription: attributes.videoDescription || '',
+      hasVideo,
+      partners,
+      gallery,
+      virtualTour360Url: attributes.virtualTour360Url || '',
+      coordinator: normalizePerson(attributes.coordinator?.data ?? attributes.coordinator),
+      researchers,
+      departments,
+      researchThemes,
+      projects,
+      body: attributes.body || [],
+      contactEmail: attributes.contactEmail || '',
+      bookingUrl: attributes.bookingUrl || '',
+      openHours: attributes.openHours || '',
+      _strapi: lab,
+      _isFallback: lab._isFallback || false,
     };
   });
 }
