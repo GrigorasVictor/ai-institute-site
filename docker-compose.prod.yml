@@ -185,7 +185,7 @@ services:
       - mysql-snipeit-data:/var/lib/mysql
 
   snipe-it:
-    image: snipe/snipe-it:latest
+    image: ghcr.io/airi-utcn/ai-institute-site/snipe-it:latest
     restart: unless-stopped
     ports:
       - "127.0.0.1:8000:80"
@@ -196,7 +196,7 @@ services:
       APP_FORCE_TLS: "true"
       APP_TRUSTED_PROXIES: "*"
       APP_TRUSTED_HEADERS: "HEADER_X_FORWARDED_FOR,HEADER_X_FORWARDED_HOST,HEADER_X_FORWARDED_PROTO,HEADER_X_FORWARDED_PORT,HEADER_X_FORWARDED_PREFIX"
-      LIVEWIRE_URL_PREFIX: ${SNIPEIT_LIVEWIRE_PREFIX:-/snipeit}
+      LIVEWIRE_URL_PREFIX: ${SNIPEIT_LIVEWIRE_PREFIX:-/}
       DB_CONNECTION: mysql
       DB_HOST: mysql-snipeit
       DB_DATABASE: ${SNIPEIT_DB_DATABASE}
