@@ -7,6 +7,7 @@ import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/jsonld";
 import { getGlobal } from "@/lib/strapi";
 import { LocaleProvider } from "@/context/LocaleContext";
 import Script from "next/script";
+import { DARK_THEME, LIGHT_THEME, THEME_KEY } from "@/lib/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -88,11 +89,14 @@ export default async function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const stored = localStorage.getItem('theme');
+                const stored = localStorage.getItem(${JSON.stringify(THEME_KEY)});
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                const isDark = stored ? stored === 'dark' : prefersDark;
+                const isDark = stored === ${JSON.stringify(DARK_THEME)}
+                  || (stored !== ${JSON.stringify(LIGHT_THEME)} && prefersDark);
                 document.documentElement.classList.toggle('dark', isDark);
-                document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+                document.documentElement.dataset.theme = isDark
+                  ? ${JSON.stringify(DARK_THEME)}
+                  : ${JSON.stringify(LIGHT_THEME)};
               } catch (e) {}
             `,
           }}

@@ -6,6 +6,7 @@ import {
   getNewsArticles,
   getEvents,
   getSeminars,
+  getLaboratories,
   transformStaffData,
   transformProjectData,
   transformPublicationData,
@@ -13,6 +14,7 @@ import {
   transformNewsData,
   transformEventData,
   transformSeminarData,
+  transformLaboratoryData,
 } from "@/lib/strapi";
 
 const SITE_URL = "https://airi.utcluj.ro";
@@ -36,6 +38,7 @@ export default async function sitemap() {
     { url: `${SITE_URL}/people`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/research/departments`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/research/projects`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/research/laboratories`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/research/publications`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/research/themes`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/news&events/news`, changeFrequency: "weekly", priority: 0.7 },
@@ -55,7 +58,7 @@ export default async function sitemap() {
   let dynamicPages = [];
 
   try {
-    const [staffRaw, projectsRaw, publicationsRaw, departmentsRaw, newsRaw, eventsRaw, seminarsRaw] =
+    const [staffRaw, projectsRaw, publicationsRaw, departmentsRaw, newsRaw, eventsRaw, seminarsRaw, labsRaw] =
       await Promise.all([
         getStaff().catch(() => []),
         getProjects().catch(() => []),
@@ -64,6 +67,7 @@ export default async function sitemap() {
         getNewsArticles({ pageSize: 1000 }).catch(() => []),
         getEvents().catch(() => []),
         getSeminars().catch(() => []),
+        getLaboratories().catch(() => []),
       ]);
 
     const staff = transformStaffData(staffRaw);
@@ -73,6 +77,7 @@ export default async function sitemap() {
     const news = transformNewsData(newsRaw);
     const events = transformEventData(eventsRaw);
     const seminars = transformSeminarData(seminarsRaw);
+    const laboratories = transformLaboratoryData(labsRaw);
 
     // People profiles
     dynamicPages.push(
@@ -115,6 +120,17 @@ export default async function sitemap() {
           url: `${SITE_URL}/research/publications/${p.slug}`,
           changeFrequency: "yearly",
           priority: 0.5,
+        }))
+    );
+
+    // Laboratories
+    dynamicPages.push(
+      ...laboratories
+        .filter((l) => l.slug)
+        .map((l) => ({
+          url: `${SITE_URL}/research/laboratories/${l.slug}`,
+          changeFrequency: "monthly",
+          priority: 0.7,
         }))
     );
   } catch (error) {

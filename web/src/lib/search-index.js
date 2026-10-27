@@ -9,6 +9,7 @@ import {
   getResources,
   getSeminars,
   getStaff,
+  getLaboratories,
   transformDepartmentData,
   transformEventData,
   transformNewsData,
@@ -18,6 +19,7 @@ import {
   transformResourceData,
   transformSeminarData,
   transformStaffData,
+  transformLaboratoryData,
 } from "@/lib/strapi";
 import { toPublicationSlug } from "@/lib/slug";
 
@@ -39,6 +41,7 @@ const STATIC_ENTRIES = [
   { title: "Resources", route: "/resources", tags: ["resources", "tools", "apis"], snippet: "Research tools, APIs, and learning resources." },
   { title: "Research Themes", route: "/research/themes", tags: ["research", "themes", "areas"], snippet: "Research themes and linked projects and publications." },
   { title: "Research Departments", route: "/research/departments", tags: ["research", "departments"], snippet: "Research departments and their members." },
+  { title: "Laboratories", route: "/research/laboratories", tags: ["research", "laboratories", "labs", "facilities", "rooms", "sponsored"], snippet: "Research laboratories and sponsored spaces across AIRI." },
   { title: "Projects", route: "/research/projects", tags: ["research", "projects"], snippet: "Research projects across the institute." },
   { title: "Publications", route: "/research/publications", tags: ["research", "publications", "papers"], snippet: "Academic publications and papers." },
   { title: "Paper Graph", route: "/research/paper-graph", tags: ["research", "graph", "publications"], snippet: "Interactive publication graph and communities." },
@@ -243,6 +246,24 @@ function buildPartnerEntries(partners) {
   );
 }
 
+function buildLaboratoryEntries(laboratories) {
+  return laboratories.map((lab) =>
+    makeEntry({
+      title: lab.title,
+      route: lab.slug ? `/research/laboratories/${encodeURIComponent(lab.slug)}` : "/research/laboratories",
+      tags: [
+        "laboratory",
+        "lab",
+        "room",
+        lab.roomNumber,
+        ...asArray(lab.partners).map((p) => p.name),
+        ...asArray(lab.departments).map((d) => d.name),
+      ],
+      snippet: lab.summary || lab.roomNumber || "AIRI Research Laboratory",
+    })
+  );
+}
+
 export async function buildSearchIndex() {
   const [
     publicationRows,
@@ -255,6 +276,7 @@ export async function buildSearchIndex() {
     eventRows,
     seminarRows,
     partnerRows,
+    laboratoryRows,
   ] = await Promise.all([
     getPublications({ includeUnlisted: true, graphEligibleOnly: true }),
     getStaff(),
@@ -266,6 +288,7 @@ export async function buildSearchIndex() {
     getEvents(),
     getSeminars(),
     getPartners(),
+    getLaboratories().catch(() => []),
   ]);
 
   const publications = transformPublicationData(publicationRows);
@@ -277,6 +300,7 @@ export async function buildSearchIndex() {
   const events = transformEventData(eventRows);
   const seminars = transformSeminarData(seminarRows);
   const partners = transformPartnerData(partnerRows);
+  const laboratories = transformLaboratoryData(laboratoryRows);
 
   return dedupeEntries([
     ...STATIC_ENTRIES.map(makeEntry),
@@ -290,5 +314,6 @@ export async function buildSearchIndex() {
     ...buildEventEntries(events),
     ...buildSeminarEntries(seminars),
     ...buildPartnerEntries(partners),
+    ...buildLaboratoryEntries(laboratories),
   ]).sort((a, b) => a.title.localeCompare(b.title));
 }
