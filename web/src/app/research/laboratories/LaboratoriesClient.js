@@ -33,6 +33,16 @@ const normalizeText = (val) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 
+const resolveImageUrl = (image) => {
+  const media = image?.data?.attributes || image?.data || image?.attributes || image;
+  const url = media?.url;
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const baseUrl = (process.env.NEXT_PUBLIC_STRAPI_URL || '').replace(/\/+$/, '');
+  return `${baseUrl}${url.startsWith('/') ? url : `/${url}`}`;
+};
+
 export default function LaboratoriesClient({ laboratories = [], pageData }) {
   const [query, setQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
@@ -44,6 +54,7 @@ export default function LaboratoriesClient({ laboratories = [], pageData }) {
   const searchPlaceholder = pageData?.searchPlaceholder || 'Search laboratories, sponsors, or rooms...';
   const allDepartmentsLabel = pageData?.allDepartments || 'All Departments';
   const emptyStateMessage = pageData?.emptyState || 'No laboratories match your search criteria.';
+  const heroImageUrl = resolveImageUrl(pageData?.heroImage);
 
   // Extract distinct departments from laboratories list
   const departments = useMemo(() => {
@@ -93,7 +104,21 @@ export default function LaboratoriesClient({ laboratories = [], pageData }) {
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100">
       {/* Header Section */}
       <section className="relative overflow-hidden pt-12 pb-10 md:pt-16 md:pb-14 border-b border-gray-100 dark:border-gray-900 bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-gray-900/40 dark:via-[#0a0a0a] dark:to-[#0a0a0a]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {heroImageUrl && (
+          <>
+            <img
+              src={heroImageUrl}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover opacity-25 dark:opacity-30"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/70 to-white dark:from-gray-950/30 dark:via-gray-950/75 dark:to-[#0a0a0a]"
+              aria-hidden="true"
+            />
+          </>
+        )}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 mb-4">
               <FaFlask className="w-3 h-3" />
