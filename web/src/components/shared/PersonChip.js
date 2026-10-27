@@ -22,7 +22,7 @@ export default function PersonChip({ person, role, isLead, image }) {
       <div className="relative shrink-0">
         <img
           src={avatarUrl}
-          alt={name || "Avatar"}
+          alt={person?.imageAlt || name || "Avatar"}
           className="w-10 h-10 rounded-full object-cover ring-2 ring-white dark:ring-gray-800 shadow-sm"
         />
         {isLead && (

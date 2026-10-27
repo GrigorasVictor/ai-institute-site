@@ -53,7 +53,7 @@ export default function NewsArticleClient({ article, pageData }) {
         <div className="w-full h-64 md:h-80 xl:h-96 relative overflow-hidden">
           <img
             src={article.image}
-            alt={article.title}
+            alt={article.imageAlt || article.title}
             style={article.focalPoint ? { objectPosition: `${article.focalPoint.x || 50}% ${article.focalPoint.y || 25}%` } : undefined}
             className="w-full h-full object-cover object-[center_25%]"
           />

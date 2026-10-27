@@ -81,27 +81,47 @@ const resolveMediaUrl = (media) => {
   return `${baseUrl}${url.startsWith('/') ? url : `/${url}`}`;
 };
 
-const resolveMediaData = (media) => {
+/**
+ * Normalize a Strapi media value into the frontend media shape.
+ * Keep URL-only fields compatible while preserving metadata where available.
+ */
+export const resolveMediaData = (media) => {
   if (!media) return null;
+
+  if (typeof media === 'string') {
+    const url = resolveMediaUrl(media);
+    return url
+      ? {
+          id: null,
+          url,
+          name: '',
+          alt: '',
+          caption: '',
+          mime: '',
+          width: null,
+          height: null,
+          focalPoint: null,
+        }
+      : null;
+  }
 
   const data = Array.isArray(media?.data) ? media.data[0] : media?.data ?? media;
   if (!data) return null;
 
   const attrs = data?.attributes ?? data ?? {};
-  const url = attrs.url;
+  const url = resolveMediaUrl(data);
   if (!url) return null;
 
-  const fullUrl = /^https?:\/\//i.test(url)
-    ? url
-    : `${getStrapiPublicUrl()}${url.startsWith('/') ? url : `/${url}`}`;
-
   return {
-    url: fullUrl,
+    id: data?.id ?? null,
+    url,
+    name: attrs.name || '',
     mime: attrs.mime || '',
     alt: attrs.alternativeText || '',
     caption: attrs.caption || '',
     width: attrs.width || null,
     height: attrs.height || null,
+    focalPoint: attrs.focalPoint || null,
   };
 };
 
@@ -114,6 +134,7 @@ const normalizePerson = (person) => {
     slug: attrs.slug || '',
     title: attrs.title || '',
     image: resolveMediaUrl(attrs.portrait || attrs.profileImage),
+    imageAlt: resolveMediaData(attrs.portrait || attrs.profileImage)?.alt || '',
   };
 };
 
@@ -2428,11 +2449,12 @@ export function transformNewsData(strapiNews) {
         date: normalizeDate(attributes.publishedDate),
         linkUrl: normalizeExternalUrl(attributes.linkUrl),
         image: resolveMediaUrl(attributes.heroImage),
+        imageAlt: resolveMediaData(attributes.heroImage)?.alt || '',
         focalPoint: attributes.heroImage?.data?.attributes?.focalPoint ?? attributes.heroImage?.focalPoint ?? null,
         tags,
         // Full article data
         author: normalizePerson(rawAuthor),
-        gallery: toArray(rawGallery).map(resolveMediaUrl).filter(Boolean),
+        gallery: toArray(rawGallery).map(resolveMediaData).filter(Boolean),
         body: normalizeBodyBlocks(rawBody),
         relatedDepartments: toArray(rawDepartments).map((d) => {
           const da = d?.attributes ?? d ?? {};
@@ -2447,6 +2469,7 @@ export function transformNewsData(strapiNews) {
             abstract: pa.abstract || '',
             phase: pa.phase || derivePhase(pa.startDate, pa.endDate),
             image: resolveMediaUrl(pa.heroImage),
+            imageAlt: resolveMediaData(pa.heroImage)?.alt || '',
           };
         }),
         featuredPeople: toArray(rawPeople).map(normalizePerson).filter(Boolean),
@@ -2593,6 +2616,8 @@ export function transformProjectData(strapiProjects) {
         descriptionMarkdown: typeof partnerData.description === 'string' ? partnerData.description : '',
         url: normalizeExternalUrl(partnerData.website),
         logo: resolveMediaUrl(partnerData.logo),
+        logoAlt: resolveMediaData(partnerData.logo)?.alt || '',
+        heroImageAlt: resolveMediaData(partnerData.heroImage)?.alt || '',
         projects: partnerProjects,
       };
     });
@@ -2709,6 +2734,7 @@ export function transformProjectData(strapiProjects) {
           date,
           linkUrl: normalizeExternalUrl(newsData.linkUrl),
           image: resolveMediaUrl(newsData.heroImage),
+          imageAlt: resolveMediaData(newsData.heroImage)?.alt || '',
           tags,
         };
       })
@@ -2742,6 +2768,7 @@ export function transformProjectData(strapiProjects) {
           ctaLabel: eventData.ctaLabel || '',
           ctaUrl: normalizeExternalUrl(eventData.ctaUrl),
           image: resolveMediaUrl(eventData.heroImage),
+          imageAlt: resolveMediaData(eventData.heroImage)?.alt || '',
         };
       })
       .filter((item) => item.title || item.slug)
@@ -2794,6 +2821,7 @@ export function transformProjectData(strapiProjects) {
       }),
       isIndustryEngagement: !!attributes.isIndustryEngagement,
       heroImage: resolveMediaUrl(attributes.heroImage),
+      heroImageAlt: resolveMediaData(attributes.heroImage)?.alt || '',
       // Map themes relation to simple array for frontend compatibility
       themes: themes.map(t => t.name).filter(Boolean),
       // Map partners relation to simple array for frontend compatibility
@@ -3165,6 +3193,7 @@ export function transformEventData(strapiEvents) {
       ctaLabel: attributes.ctaLabel || '',
       url: attributes.ctaUrl || '',
       image: resolveMediaUrl(attributes.heroImage),
+      imageAlt: resolveMediaData(attributes.heroImage)?.alt || '',
       focalPoint: attributes.heroImage?.data?.attributes?.focalPoint ?? attributes.heroImage?.focalPoint ?? null,
       body: attributes.body || [],
       _strapi: evt,
@@ -3374,7 +3403,9 @@ export function transformPartnerData(strapiPartners) {
       url: website,
       website,
       logo: resolveMediaUrl(attributes.logo),
+      logoAlt: resolveMediaData(attributes.logo)?.alt || '',
       heroImage: resolveMediaUrl(attributes.heroImage),
+      heroImageAlt: resolveMediaData(attributes.heroImage)?.alt || '',
       body: normalizeBodyBlocks(attributes.body),
       projects: partnerProjects,
       partnerStatus: status,
@@ -3412,22 +3443,14 @@ export function transformLaboratoryData(strapiLaboratories) {
         country: pAttr.country || '',
         website: pAttr.website || '',
         logo: resolveMediaUrl(pAttr.logo),
+        logoAlt: resolveMediaData(pAttr.logo)?.alt || '',
       };
     });
 
     const rawGallery = toArray(attributes.gallery?.data ?? attributes.gallery);
     const gallery = rawGallery
-      .map((item) => {
-        const itemAttr = item?.attributes ?? item ?? {};
-        return {
-          url: resolveMediaUrl(item),
-          caption: itemAttr.caption || '',
-          alternativeText: itemAttr.alternativeText || '',
-          width: itemAttr.width || null,
-          height: itemAttr.height || null,
-        };
-      })
-      .filter((g) => Boolean(g.url));
+      .map(resolveMediaData)
+      .filter(Boolean);
 
     const rawProjects = toArray(attributes.projects?.data ?? attributes.projects);
     const projects = rawProjects.map((proj) => {
@@ -3465,7 +3488,7 @@ export function transformLaboratoryData(strapiLaboratories) {
       };
     });
 
-    const videoFile = resolveMediaUrl(attributes.videoFile);
+    const videoFile = resolveMediaData(attributes.videoFile);
     const videoUrl = attributes.videoUrl || '';
     const hasVideo = Boolean(videoFile || videoUrl);
 
@@ -3478,10 +3501,11 @@ export function transformLaboratoryData(strapiLaboratories) {
       summary: attributes.summary || '',
       capacity: attributes.capacity || null,
       heroImage: resolveMediaUrl(attributes.heroImage),
+      heroImageAlt: resolveMediaData(attributes.heroImage)?.alt || '',
       focalPoint: attributes.heroImage?.data?.attributes?.focalPoint ?? attributes.heroImage?.focalPoint ?? null,
       videoFile,
       videoUrl,
-      videoPoster: resolveMediaUrl(attributes.videoPoster),
+      videoPoster: resolveMediaData(attributes.videoPoster),
       videoTitle: attributes.videoTitle || '',
       videoDescription: attributes.videoDescription || '',
       hasVideo,

@@ -33,6 +33,9 @@ export default function VideoShowcase({
   const [isPlaying, setIsPlaying] = useState(false);
 
   const videoSrc = typeof videoFile === 'string' ? videoFile : videoFile?.url;
+  const caption = typeof videoFile === 'object' ? videoFile?.caption : '';
+  const posterSrc = typeof poster === 'string' ? poster : poster?.url;
+  const posterAlt = typeof poster === 'object' ? poster?.alt : '';
   const embedUrl = getEmbedUrl(videoUrl);
   const isDirectUrl = !embedUrl && videoUrl && /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(videoUrl);
   const resolvedDirectSrc = videoSrc || (isDirectUrl ? videoUrl : null);
@@ -53,11 +56,11 @@ export default function VideoShowcase({
       <div className="relative rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-800 bg-black shadow-2xl">
         <div className="relative aspect-video w-full overflow-hidden bg-gray-950 flex items-center justify-center">
           {/* If user hasn't clicked play yet and we have a poster, show cinematic cover */}
-          {!isPlaying && poster && (
+          {!isPlaying && posterSrc && (
             <div className="absolute inset-0 z-20 cursor-pointer group" onClick={() => setIsPlaying(true)}>
               <img
-                src={poster}
-                alt={title || 'Video preview'}
+                src={posterSrc}
+                alt={posterAlt || title || 'Video preview'}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-center justify-center">
@@ -87,7 +90,7 @@ export default function VideoShowcase({
           {resolvedDirectSrc ? (
             <video
               src={resolvedDirectSrc}
-              poster={poster}
+              poster={posterSrc}
               controls
               autoPlay={isPlaying}
               preload="metadata"
@@ -122,7 +125,7 @@ export default function VideoShowcase({
         </div>
 
         {/* Video metadata footer */}
-        {(title || description) && (!poster || isPlaying) && (
+        {(title || description || caption) && (!posterSrc || isPlaying) && (
           <div className="p-4 sm:p-5 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
             {title && (
               <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
@@ -132,6 +135,11 @@ export default function VideoShowcase({
             {description && (
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 {description}
+              </p>
+            )}
+            {caption && (
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">
+                {caption}
               </p>
             )}
           </div>

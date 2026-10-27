@@ -103,7 +103,7 @@ export default function EventSlugClient({ event, pageData }) {
             <div className="w-full h-64 sm:h-80 md:h-[420px] relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-gray-100 dark:bg-gray-900">
               <img
                 src={event.image}
-                alt={event.title}
+                alt={event.imageAlt || event.title}
                 style={
                   event.focalPoint
                     ? {

@@ -41,7 +41,7 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
             <motion.img
               key={currentIndex}
               src={items[currentIndex].url}
-              alt={items[currentIndex].alt || `${alt} ${currentIndex + 1}`}
+              alt={items[currentIndex].alt || items[currentIndex].alternativeText || `${alt} ${currentIndex + 1}`}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -113,7 +113,7 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
               >
                 <img
                   src={item.url}
-                  alt={item.alt || `Thumbnail ${index + 1}`}
+                  alt={item.alt || item.alternativeText || `Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
@@ -157,7 +157,7 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
                 <motion.img
                   key={currentIndex}
                   src={items[currentIndex].url}
-                  alt={items[currentIndex].alt || `${alt} ${currentIndex + 1}`}
+                  alt={items[currentIndex].alt || items[currentIndex].alternativeText || `${alt} ${currentIndex + 1}`}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}

@@ -771,7 +771,7 @@ export default function ProjectDetails({ project, pageData }) {
         {heroImageUrl && (
           <img
             src={heroImageUrl}
-            alt={project.title}
+            alt={project.heroImageAlt || project.title}
             className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
         )}
