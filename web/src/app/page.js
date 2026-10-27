@@ -189,7 +189,7 @@ export default async function Home() {
                   <div className="relative h-40 overflow-hidden">
                     <Image
                       src={article.image}
-                      alt={article.title}
+                      alt={article.imageAlt || article.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       unoptimized

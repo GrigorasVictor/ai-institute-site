@@ -374,7 +374,7 @@ export default function DynamicZone({ blocks, className = '' }) {
                   <div className="mt-6">
                     <BodyContentImage
                       src={resolveMediaUrl(block.media)}
-                      alt={block.media.alternativeText || block.heading || ''}
+                      alt={block.media.alt || block.media.alternativeText || block.heading || ''}
                       className="rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 mx-auto"
                     />
                     {block.media.caption && (
@@ -412,15 +412,15 @@ export default function DynamicZone({ blocks, className = '' }) {
               return (
                 <div key={`media-${index}`} className="my-8 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
                   {isVideo ? (
-                    <MediaPlayer 
-                      media={{ url: mediaSrc, mime: mimeStr, caption: mediaData.caption || block.caption }} 
-                      alt={mediaData.alternativeText || block.caption || ''} 
+                    <MediaPlayer
+                      media={{ url: mediaSrc, mime: mimeStr, caption: mediaData.caption || block.caption }}
+                      alt={mediaData.alt || mediaData.alternativeText || block.caption || ''}
                     />
                   ) : (
                     <>
                       <BodyContentImage
                         src={mediaSrc}
-                        alt={mediaData.alternativeText || block.caption || ''}
+                        alt={mediaData.alt || mediaData.alternativeText || block.caption || ''}
                       />
                       {(mediaData.caption || block.caption) && (
                         <p className="text-sm text-center text-gray-500 p-3 bg-white dark:bg-gray-950/50 border-t border-gray-100 dark:border-gray-800">
@@ -446,7 +446,7 @@ export default function DynamicZone({ blocks, className = '' }) {
                 <div key={`player-${index}`} className="my-8 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
                   <MediaPlayer 
                     media={{ url: mediaSrc, mime: mimeStr, caption: mediaData.caption || block.caption }} 
-                    alt={mediaData.alternativeText || block.caption || ''} 
+                    alt={mediaData.alt || mediaData.alternativeText || block.caption || ''}
                   />
                 </div>
               );
@@ -455,22 +455,30 @@ export default function DynamicZone({ blocks, className = '' }) {
           case 'shared.slider':
             {
               const files = Array.isArray(block.files) ? block.files : block.media ? block.media : [];
-              const images = files.map(f => resolveMediaUrl(f)).filter(Boolean);
-              if (images.length === 0) return null;
+              const imageItems = files
+                .map((file) => ({
+                  ...file,
+                  url: resolveMediaUrl(file),
+                }))
+                .filter((file) => file.url);
+              if (imageItems.length === 0) return null;
               
-              if (images.length === 1) {
-                const singleFile = files[0];
+              if (imageItems.length === 1) {
+                const singleFile = imageItems[0];
                 const mimeStr = singleFile?.mime || singleFile?.data?.attributes?.mime;
                 return (
                   <div key={`slide-${index}`} className="my-8 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-                    <MediaPlayer media={{ url: images[0], mime: mimeStr }} alt="Slide" />
+                    <MediaPlayer
+                      media={{ url: singleFile.url, mime: mimeStr, caption: singleFile.caption }}
+                      alt={singleFile.alt || 'Slide'}
+                    />
                   </div>
                 );
               }
 
               return (
                 <div key={`slider-${index}`} className="my-8">
-                  <GallerySlideshow images={images} />
+                  <GallerySlideshow images={imageItems} />
                 </div>
               );
             }

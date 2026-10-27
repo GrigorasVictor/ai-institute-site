@@ -506,7 +506,7 @@ function PartnersContent({
                       <div className="shrink-0 h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 dark:bg-gray-900 dark:border-gray-800 transition-colors group-hover:bg-white dark:group-hover:bg-black p-2 flex items-center justify-center">
                         <img
                           src={p.logo}
-                          alt={p.name}
+                          alt={p.logoAlt || p.name}
                           className="w-full h-full object-contain"
                         />
                       </div>

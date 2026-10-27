@@ -60,7 +60,7 @@ export default function SponsorPlaque({
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white dark:bg-gray-800 flex-shrink-0 border border-gray-100 dark:border-gray-800 p-2 flex items-center justify-center">
                   <img
                     src={logoUrl}
-                    alt={partner.name || 'Partner logo'}
+                    alt={partner.logoAlt || partner.name || 'Partner logo'}
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>

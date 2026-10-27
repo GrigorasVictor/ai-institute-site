@@ -26,7 +26,7 @@ export default function LaboratoryDetailClient({ lab, pageData }) {
   if (!lab) return null;
 
   const backLabel = 'Back to Laboratories';
-  const galleryUrls = (lab.gallery || []).map((item) => item.url || item).filter(Boolean);
+  const galleryImages = Array.isArray(lab.gallery) ? lab.gallery : [];
   const hasVideo = Boolean(lab.videoFile || lab.videoUrl);
   const heroSrc = lab.heroImage;
   const posterSrc = lab.videoPoster || lab.heroImage;
@@ -104,7 +104,7 @@ export default function LaboratoryDetailClient({ lab, pageData }) {
           <section className="mb-12 rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800">
             <SmartMediaImage
               src={heroSrc}
-              alt={lab.title}
+              alt={lab.heroImageAlt || lab.title}
               focalPoint={lab.focalPoint}
               aspectRatio="aspect-[21/9]"
               className="max-h-[500px]"
@@ -212,7 +212,7 @@ export default function LaboratoryDetailClient({ lab, pageData }) {
         </section>
 
         {/* Photo Gallery Slideshow */}
-        {galleryUrls.length > 0 && (
+        {galleryImages.length > 0 && (
           <section className="mb-14">
             <div className="flex items-center gap-2 mb-4">
               <FaImages className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -220,7 +220,7 @@ export default function LaboratoryDetailClient({ lab, pageData }) {
                 Laboratory Gallery
               </h2>
             </div>
-            <GallerySlideshow images={galleryUrls} alt={lab.title} />
+            <GallerySlideshow images={galleryImages} alt={lab.title} />
           </section>
         )}
 

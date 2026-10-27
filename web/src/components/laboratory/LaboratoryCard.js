@@ -21,7 +21,7 @@ export default function LaboratoryCard({ lab, className = '' }) {
         {imageUrl ? (
           <SmartMediaImage
             src={imageUrl}
-            alt={lab.title}
+            alt={lab.heroImageAlt || lab.title}
             focalPoint={lab.focalPoint}
             aspectRatio="aspect-video"
             imageClassName="group-hover:scale-105"

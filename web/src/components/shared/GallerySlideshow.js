@@ -9,7 +9,10 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const items = useMemo(
-    () => (Array.isArray(images) ? images.filter(Boolean) : []),
+    () =>
+      (Array.isArray(images) ? images : [])
+        .map((image) => (typeof image === 'string' ? { url: image } : image))
+        .filter((image) => image?.url),
     [images]
   );
 
@@ -37,8 +40,8 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
           <AnimatePresence mode="wait">
             <motion.img
               key={currentIndex}
-              src={items[currentIndex]}
-              alt={`${alt} ${currentIndex + 1}`}
+              src={items[currentIndex].url}
+              alt={items[currentIndex].alt || items[currentIndex].alternativeText || `${alt} ${currentIndex + 1}`}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -88,11 +91,16 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
             </div>
           )}
         </div>
+        {items[currentIndex].caption && (
+          <p className="px-3 py-2 text-sm text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-950/50">
+            {items[currentIndex].caption}
+          </p>
+        )}
 
         {/* Thumbnails */}
         {items.length > 1 && (
           <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-            {items.map((src, index) => (
+            {items.map((item, index) => (
               <button
                 key={`thumb-${index}`}
                 type="button"
@@ -104,8 +112,8 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
                 }`}
               >
                 <img
-                  src={src}
-                  alt={`Thumbnail ${index + 1}`}
+                  src={item.url}
+                  alt={item.alt || item.alternativeText || `Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
@@ -148,8 +156,8 @@ export default function GallerySlideshow({ images = [], alt = 'Gallery image' })
               <AnimatePresence mode="wait">
                 <motion.img
                   key={currentIndex}
-                  src={items[currentIndex]}
-                  alt={`${alt} ${currentIndex + 1}`}
+                  src={items[currentIndex].url}
+                  alt={items[currentIndex].alt || items[currentIndex].alternativeText || `${alt} ${currentIndex + 1}`}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}

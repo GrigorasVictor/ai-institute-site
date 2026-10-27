@@ -243,8 +243,8 @@ export function laboratoryJsonLd(lab) {
       "@type": "VideoObject",
       name: lab.videoTitle || `${lab.title} Video Tour`,
       description: lab.videoDescription || lab.summary,
-      thumbnailUrl: lab.videoPoster || lab.heroImage,
-      contentUrl: lab.videoFile || lab.videoUrl,
+      thumbnailUrl: lab.videoPoster?.url || lab.videoPoster || lab.heroImage,
+      contentUrl: lab.videoFile?.url || lab.videoFile || lab.videoUrl,
       uploadDate: new Date().toISOString(),
     };
   }
