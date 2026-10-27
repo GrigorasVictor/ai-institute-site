@@ -153,7 +153,21 @@ const DEFAULT_PUBLIC_BLOCKS = [
 function PublicContent({ blocks }) {
   // if strapi blocks are missing, use default fallback content
   const content = Array.isArray(blocks) && blocks.length > 0 ? blocks : DEFAULT_PUBLIC_BLOCKS;
-  return <DynamicZone blocks={content} />;
+  return (
+    <div className="space-y-6">
+      <DynamicZone blocks={content} />
+      {/* link to media gallery from public engagement */}
+      <motion.div variants={itemVariants} className="flex items-center justify-end pt-2">
+        <Link
+          href="/media"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          <span>Explore AIRi Media Gallery (photos, press & brochure)</span>
+          <FaArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </motion.div>
+    </div>
+  );
 }
 
 function AcademicContent({ blocks }) {
