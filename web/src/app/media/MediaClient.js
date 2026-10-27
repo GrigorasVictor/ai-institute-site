@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import {
-  FaFlickr,
   FaExternalLinkAlt,
   FaImages,
   FaNewspaper,
@@ -62,9 +61,17 @@ export default function MediaClient({ mediaData }) {
   const [selectedMedia, setSelectedMedia] = useState(null);
 
   const headerTitle = mediaData?.headerTitle || "Media Gallery";
+
+  // clean raw urls from subtitle text if present
+  const rawSubtitle = mediaData?.headerSubtitle || "";
+  const cleanedSubtitle = rawSubtitle
+    .replace(/https?:\/\/[^\s]+/gi, "")
+    .replace(/\s+at\s+flickr\s*:?$/i, "")
+    .trim();
+
   const headerSubtitle =
-    mediaData?.headerSubtitle ||
-    "Explore photo albums, press coverage, and institutional media resources from the Artificial Intelligence Research Institute.";
+    cleanedSubtitle ||
+    "Explore photo albums, press coverage, and institutional media resources.";
 
   const shareUrl =
     typeof window !== "undefined" ? window.location.href : "https://airi.utcluj.ro/media";
@@ -131,47 +138,38 @@ export default function MediaClient({ mediaData }) {
           initial="hidden"
           animate="visible"
         >
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-            <span>AIRi @ UTCN</span>
-            <span>•</span>
-            <span>Visual Archive & Press</span>
-          </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">
             {headerTitle}
           </h1>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            {headerSubtitle}
-          </p>
+          {headerSubtitle && (
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
+              {headerSubtitle}
+            </p>
+          )}
         </motion.div>
 
-        {/* flickr official albums hero banner */}
+        {/* flickr albums banner */}
         <motion.section
           variants={itemVariants}
           initial="hidden"
           animate="visible"
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-blue-800/40"
+          className="relative overflow-hidden rounded-2xl bg-slate-900 text-white p-6 sm:p-8"
         >
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold tracking-wide text-blue-200">
-                <FaFlickr className="w-3.5 h-3.5 text-pink-400" />
-                <span>Official Photo Gallery</span>
-              </div>
+            <div className="space-y-1.5 max-w-2xl">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
                 AIRi Photo Albums on Flickr
               </h2>
-              <p className="text-sm sm:text-base text-blue-100/90 leading-relaxed">
-                Explore high-resolution photo collections capturing our institute groundbreaking, construction
-                milestones, invited lectures, conferences, and international delegation visits.
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                Browse photo albums from conferences, campus construction, invited lectures, and events.
               </p>
             </div>
             <a
               href={FLICKR_ALBUMS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-white text-gray-900 hover:bg-blue-50 font-semibold text-sm transition-all shadow-md shrink-0 hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-gray-900 hover:bg-gray-100 font-medium text-sm transition-colors shrink-0 shadow-sm"
             >
-              <FaFlickr className="w-4 h-4 text-[#ff0084]" />
               <span>Explore All Flickr Albums</span>
               <FaExternalLinkAlt className="w-3 h-3 text-gray-500" />
             </a>
