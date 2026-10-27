@@ -113,8 +113,47 @@ function SectionCard({ title, children }) {
 // CONTENT SECTIONS
 // ============================================================================
 
+// fallback content when strapi is unreachable or blocks are not set
+const DEFAULT_PUBLIC_BLOCKS = [
+  {
+    __component: 'shared.cta',
+    title: 'Public Engagement',
+    description: 'We actively engage with the public to demystify AI, showcase our research, and share our latest findings with the community.',
+    primaryButtonText: 'News & Events',
+    primaryButtonUrl: '/news&events/news',
+    secondaryButtonText: 'Media Gallery',
+    secondaryButtonUrl: '/media',
+    theme: 'gradient',
+  },
+  {
+    __component: 'shared.card-grid',
+    columns: '3',
+    cards: [
+      {
+        icon: 'users',
+        title: 'Community Outreach',
+        description: 'Organizing open days, public lectures, and interactive demonstrations to bring AI closer to society.',
+      },
+      {
+        icon: 'book',
+        title: 'Educational Content',
+        description: 'Creating accessible materials, blogs, and presentations explaining core AI concepts.',
+      },
+      {
+        icon: 'newspaper',
+        title: 'Media & Press',
+        description: 'Sharing press releases, media appearances, and photo albums from our events and milestones.',
+        linkUrl: '/media',
+        linkText: 'View Media Gallery',
+      },
+    ],
+  },
+];
+
 function PublicContent({ blocks }) {
-  return <DynamicZone blocks={blocks} />;
+  // if strapi blocks are missing, use default fallback content
+  const content = Array.isArray(blocks) && blocks.length > 0 ? blocks : DEFAULT_PUBLIC_BLOCKS;
+  return <DynamicZone blocks={content} />;
 }
 
 function AcademicContent({ blocks }) {
