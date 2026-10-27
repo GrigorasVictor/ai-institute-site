@@ -2582,28 +2582,6 @@ export interface ApiLaboratoriesPageLaboratoriesPage
         };
       }> &
       Schema.Attribute.DefaultTo<'Search laboratories...'>;
-    sponsorshipCtaButtonText: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Discuss Sponsorship'>;
-    sponsorshipCtaButtonUrl: Schema.Attribute.String &
-      Schema.Attribute.DefaultTo<'/contact'>;
-    sponsorshipCtaDescription: Schema.Attribute.Text &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
-    sponsorshipCtaTitle: Schema.Attribute.String &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }> &
-      Schema.Attribute.DefaultTo<'Interested in Sponsoring a Laboratory?'>;
     subtitle: Schema.Attribute.Text &
       Schema.Attribute.SetPluginOptions<{
         i18n: {

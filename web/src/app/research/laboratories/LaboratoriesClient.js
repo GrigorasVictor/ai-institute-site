@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaTimes, FaFlask, FaHandshake, FaFilter } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaFlask } from 'react-icons/fa';
 import LaboratoryCard from '@/components/laboratory/LaboratoryCard';
 import DynamicZone from '@/components/shared/DynamicZone';
-import Link from 'next/link';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -214,29 +213,6 @@ export default function LaboratoriesClient({ laboratories = [], pageData }) {
           </div>
         )}
 
-        {/* Sponsorship CTA Callout (Inspired by engagement dynamic CTA) */}
-        <div className="mt-16 rounded-3xl overflow-hidden border border-blue-100 dark:border-blue-900/40 bg-gradient-to-br from-blue-500 via-indigo-600 to-blue-800 text-white p-8 sm:p-12 shadow-xl relative">
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-md mb-4 text-white">
-              <FaHandshake className="w-3.5 h-3.5" />
-              <span>Partnership & Sponsorship</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
-              {pageData?.sponsorshipCtaTitle || 'Interested in Sponsoring a Laboratory?'}
-            </h2>
-            <p className="text-blue-100 text-sm sm:text-base leading-relaxed mb-6">
-              {pageData?.sponsorshipCtaDescription ||
-                'Partner with AIRI to empower next-generation research, brand a dedicated room, and collaborate directly with top AI professors, researchers, and students.'}
-            </p>
-            <Link
-              href={pageData?.sponsorshipCtaButtonUrl || '/contact'}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-blue-900 font-bold text-sm shadow-lg hover:bg-blue-50 transition-all hover:scale-105"
-            >
-              <span>{pageData?.sponsorshipCtaButtonText || 'Discuss Sponsorship'}</span>
-            </Link>
-          </div>
-        </div>
       </section>
     </div>
   );

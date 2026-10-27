@@ -94,36 +94,6 @@
         }
       }
     },
-    "sponsorshipCtaTitle": {
-      "type": "string",
-      "default": "Interested in Sponsoring a Laboratory?",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "sponsorshipCtaDescription": {
-      "type": "text",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "sponsorshipCtaButtonText": {
-      "type": "string",
-      "default": "Discuss Sponsorship",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "sponsorshipCtaButtonUrl": {
-      "type": "string",
-      "default": "/contact"
-    },
     "body": {
       "type": "dynamiczone",
       "components": [
