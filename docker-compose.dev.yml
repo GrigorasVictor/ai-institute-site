@@ -90,6 +90,8 @@ services:
         # Rebuild the image when dependencies change (slow path, rarely needed).
         - action: rebuild
           path: ./server/package.json
+        - action: rebuild
+          path: ./server/package-lock.json
 
   nextjs:
     build:
