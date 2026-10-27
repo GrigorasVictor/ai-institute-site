@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FaHandshake, FaExternalLinkAlt } from 'react-icons/fa';
-import PartnerRoleBadge from '@/components/PartnerRoleBadge';
+import PartnerRoleBadge, { getPartnerRoleConfig } from '@/components/PartnerRoleBadge';
 
 export default function SponsorPlaque({
   partners = [],
@@ -46,11 +46,15 @@ export default function SponsorPlaque({
         {list.map((partner) => {
           const logoUrl = partner.logo?.url || partner.logo || partner.logoUrl;
           const website = partner.website;
+          const partnerHref = partner.slug
+            ? `/engagement/partners/${encodeURIComponent(partner.slug)}`
+            : null;
+          const roleConfig = getPartnerRoleConfig(partner.tier || partner.role);
 
           return (
             <div
               key={partner.id || partner.slug || partner.name}
-              className="flex items-center gap-4 rounded-xl border border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-gray-900/80 p-4 backdrop-blur-sm transition-all hover:shadow-md"
+              className={`flex items-center gap-4 rounded-xl border-2 ${roleConfig.cardBorder} bg-white/80 dark:bg-gray-900/80 p-4 backdrop-blur-sm transition-all hover:shadow-md`}
             >
               {logoUrl ? (
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white dark:bg-gray-800 flex-shrink-0 border border-gray-100 dark:border-gray-800 p-2 flex items-center justify-center">
@@ -68,9 +72,18 @@ export default function SponsorPlaque({
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
-                    {partner.name}
-                  </h3>
+                  {partnerHref ? (
+                    <Link
+                      href={partnerHref}
+                      className="text-base font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline truncate"
+                    >
+                      {partner.name}
+                    </Link>
+                  ) : (
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
+                      {partner.name}
+                    </h3>
+                  )}
                   {partner.tier && (
                     <PartnerRoleBadge role={partner.tier} size="sm" />
                   )}
