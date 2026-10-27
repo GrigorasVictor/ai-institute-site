@@ -8,8 +8,10 @@ export async function generateMetadata() {
   const media = await getSingleType("media-page", locale);
 
   return {
-    title: media?.headerTitle || "Media",
-    description: media?.headerSubtitle || "Photos, videos, and media resources from AIRi events and activities at UTCN.",
+    title: media?.headerTitle || "Media Gallery",
+    description:
+      media?.headerSubtitle ||
+      "Photos, albums on Flickr, press coverage, and media resources from AIRi at UTCN.",
   };
 }
 
