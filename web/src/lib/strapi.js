@@ -1672,7 +1672,7 @@ export async function getResultBySlug(slug, locale = null) {
       locale,
       fields: ['title', 'slug', 'description', 'publishedDate'],
       populate: {
-        attachments: { fields: ['url', 'name', 'mime', 'ext', 'size', 'formats', 'alternativeText'] },
+        attachments: { fields: ['url', 'name', 'mime', 'ext', 'size', 'formats', 'alternativeText', 'caption'] },
         projects: { fields: ['title', 'slug'] },
         body: {
           on: {
@@ -1680,17 +1680,17 @@ export async function getResultBySlug(slug, locale = null) {
             'shared.section': {
               fields: ['heading', 'subheading', 'body'],
               populate: {
-                media: { fields: ['url', 'formats', 'alternativeText', 'name', 'mime'] },
+                media: { fields: ['url', 'formats', 'alternativeText', 'caption', 'name', 'mime'] },
               },
             },
             'shared.media': {
               populate: {
-                file: { fields: ['url', 'formats', 'alternativeText', 'name', 'mime'] },
+                file: { fields: ['url', 'formats', 'alternativeText', 'caption', 'name', 'mime'] },
               },
             },
             'shared.slider': {
               populate: {
-                files: { fields: ['url', 'formats', 'alternativeText', 'name'] },
+                files: { fields: ['url', 'formats', 'alternativeText', 'caption', 'name'] },
               },
             },
           },
@@ -2276,6 +2276,7 @@ export function transformResultData(strapiResults) {
           return {
             url: resolveMediaUrl(f),
             alt: fd.alternativeText || fd.name || '',
+            caption: fd.caption || '',
             name: fd.name || '',
           };
         });
@@ -2289,6 +2290,7 @@ export function transformResultData(strapiResults) {
             ? {
                 url: resolveMediaUrl(mediaFile),
                 alt: mediaData.alternativeText || mediaData.name || '',
+                caption: mediaData.caption || '',
                 mime: mediaData.mime || '',
                 name: mediaData.name || '',
               }
@@ -2297,6 +2299,7 @@ export function transformResultData(strapiResults) {
             ? {
                 url: resolveMediaUrl(file),
                 alt: fileData.alternativeText || fileData.name || '',
+                caption: fileData.caption || '',
                 mime: fileData.mime || '',
                 name: fileData.name || '',
               }
@@ -2328,6 +2331,7 @@ export function transformResultData(strapiResults) {
         ext: fileData.ext || '',
         size: typeof fileData.size === 'number' ? fileData.size : null,
         alt: fileData.alternativeText || '',
+        caption: fileData.caption || '',
       };
     });
 
