@@ -105,6 +105,18 @@ const resolveMediaData = (media) => {
   };
 };
 
+const normalizePerson = (person) => {
+  if (!person) return null;
+  const attrs = person?.attributes ?? person ?? {};
+  return {
+    id: person?.id ?? null,
+    name: `${attrs.firstName || ''} ${attrs.lastName || ''}`.trim() || '',
+    slug: attrs.slug || '',
+    title: attrs.title || '',
+    image: resolveMediaUrl(attrs.portrait || attrs.profileImage),
+  };
+};
+
 const setPopulate = (params, baseKey, config = {}) => {
   const fields = Array.isArray(config.fields) ? config.fields : [];
 
@@ -114,7 +126,6 @@ const setPopulate = (params, baseKey, config = {}) => {
 
   // Strapi v5: when a populate entry has sub-keys (fields/populate), it must be treated as an object.
   // Only leaf populate keys should get a value.
-  const isNestedPopulateKey = baseKey.includes('[populate][');
   const isLeafPopulate = !fields.length && !hasNestedPopulate;
 
   if (isLeafPopulate) {
@@ -127,10 +138,9 @@ const setPopulate = (params, baseKey, config = {}) => {
 
   fields
     .filter(Boolean)
-    .forEach((field) => {
-      // Strapi v5 expects repeated `...[fields]=fieldName` entries for populated relations.
-      // (The indexed `...[fields][0]=...` format is not consistently honored for nested populates.)
-      params.append(`${baseKey}[fields]`, field);
+    .forEach((field, index) => {
+      // Strapi expects populated relation fields as an indexed array.
+      params.append(`${baseKey}[fields][${index}]`, field);
     });
 
   Object.entries(nestedPopulate).forEach(([relation, relationConfig]) => {
@@ -402,7 +412,7 @@ export async function fetchAPI(endpoint, options = {}) {
   }
 }
 
-async function fetchAllEntries(endpoint, baseOptions = {}, pageSize = 100) {
+async function fetchAllEntries(endpoint, baseOptions = {}, pageSize = 100, fetchOptions = {}) {
   // Strapi enforces a server-side max page size (100 in this project).
   // Requesting larger values causes page index/offset mismatches and silent data loss.
   const safePageSize = Math.max(1, Math.min(Number(pageSize) || 100, 100));
@@ -416,7 +426,7 @@ async function fetchAllEntries(endpoint, baseOptions = {}, pageSize = 100) {
       pagination: { page, pageSize: safePageSize },
     });
 
-    const data = await fetchAPI(`${endpoint}?${params.toString()}`);
+    const data = await fetchAPI(`${endpoint}?${params.toString()}`, fetchOptions);
     if (Array.isArray(data?.data)) results.push(...data.data);
 
     const metaPageCount = data?.meta?.pagination?.pageCount;
@@ -1016,7 +1026,7 @@ const LABORATORY_POPULATE = {
           ],
         },
         'shared.card-grid': {
-          fields: ['title', 'columns'],
+          fields: ['heading', 'subheading', 'columns'],
           populate: {
             cards: {
               fields: ['title', 'description', 'badge', 'linkUrl', 'icon'],
@@ -1480,7 +1490,9 @@ export async function getPublications(options = {}) {
         attachments: { fields: ['name', 'url', 'mime', 'ext', 'size'] }
       }
     };
-    return await fetchAllEntries('/publications', baseOptions, 100);
+    // The complete publication collection can exceed Next.js's 2 MB Data Cache
+    // entry limit because it includes authors, relations, and media metadata.
+    return await fetchAllEntries('/publications', baseOptions, 100, { cache: 'no-store' });
   } catch (error) {
     console.error('Failed to fetch publications:', error);
     return [];
@@ -2389,18 +2401,6 @@ export function transformNewsData(strapiNews) {
         }
       })
       .filter(Boolean);
-
-  const normalizePerson = (person) => {
-    if (!person) return null;
-    const attrs = person?.attributes ?? person ?? {};
-    return {
-      id: person?.id ?? null,
-      name: `${attrs.firstName || ''} ${attrs.lastName || ''}`.trim() || '',
-      slug: attrs.slug || '',
-      title: attrs.title || '',
-      image: resolveMediaUrl(attrs.portrait || attrs.profileImage),
-    };
-  };
 
   return list
     .map((item) => {
