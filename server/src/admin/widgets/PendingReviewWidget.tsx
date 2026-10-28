@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Badge, Flex, Link, Typography } from '@strapi/design-system';
 import { useFetchClient, Widget } from '@strapi/strapi/admin';
+import { useHref } from 'react-router-dom';
 
 import {
   fetchPendingReview,
@@ -23,6 +24,8 @@ function formatDate(value: string | null): string | null {
 
 function EntryRow({ group, entry }: { group: PendingGroup; entry: PendingGroup['entries'][number] }) {
   const date = formatDate(entry.updatedAt);
+  // Router-relative path -> absolute path with the configured admin basename.
+  const href = useHref(getEditViewUrl(group, entry));
 
   return (
     <Flex
@@ -34,7 +37,7 @@ function EntryRow({ group, entry }: { group: PendingGroup; entry: PendingGroup['
       style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
     >
       <div style={{ minWidth: 0, flex: 1 }}>
-        <Link href={getEditViewUrl(group, entry)} title={entry.title}>
+        <Link href={href} title={entry.title}>
           <Typography variant="omega" textColor="neutral800" ellipsis>
             {entry.title}
           </Typography>

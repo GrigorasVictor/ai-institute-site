@@ -269,6 +269,11 @@ export async function fetchPendingReview(client: AdminClient): Promise<PendingRe
  * Deep link into the Content Manager edit view.
  * Locale is carried the same way the admin panel itself does it:
  * ?plugins[i18n][locale]=xx
+ *
+ * The returned path is relative to the admin router (no admin mount prefix).
+ * The widget resolves it with `useHref`, which applies the configured admin
+ * basename, so links keep working when the panel is served from a
+ * subdirectory (e.g. /strapi/admin in production).
  */
 export function getEditViewUrl(group: PendingGroup, entry: PendingEntry): string {
   const locale = entry.locale
@@ -276,8 +281,8 @@ export function getEditViewUrl(group: PendingGroup, entry: PendingEntry): string
     : '';
 
   if (group.kind === 'singleType') {
-    return `/admin/content-manager/single-types/${group.uid}${locale}`;
+    return `/content-manager/single-types/${group.uid}${locale}`;
   }
 
-  return `/admin/content-manager/collection-types/${group.uid}/${entry.documentId}${locale}`;
+  return `/content-manager/collection-types/${group.uid}/${entry.documentId}${locale}`;
 }
