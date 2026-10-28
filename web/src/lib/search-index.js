@@ -206,7 +206,9 @@ function buildNewsEntries(newsItems) {
   return newsItems.map((item) =>
     makeEntry({
       title: item.title,
-      route: item.linkUrl || "/news&events/news",
+      route: item.slug
+        ? `/news&events/news/${encodeURIComponent(item.slug)}`
+        : item.linkUrl || "/news&events/news",
       tags: ["news", item.category, ...asArray(item.tags)],
       snippet: item.summary,
     })
@@ -217,7 +219,9 @@ function buildEventEntries(events) {
   return events.map((event) =>
     makeEntry({
       title: event.title,
-      route: event.url || "/news&events/events",
+      route: event.slug
+        ? `/news&events/events/${encodeURIComponent(event.slug)}`
+        : event.url || "/news&events/events",
       tags: ["event", event.category, event.location],
       snippet: event.description || [event.location, event.startDate].filter(Boolean).join(" · "),
     })
