@@ -47,6 +47,26 @@ export interface PendingResult {
   truncated: boolean;
 }
 
+export interface PendingSnapshot extends PendingResult {
+  /** Epoch milliseconds at which this data was collected from the API. */
+  fetchedAt: number;
+  /** True when the snapshot was served from the TTL cache, not a fresh request. */
+  cached: boolean;
+}
+
+export interface PendingFetchOptions {
+  /**
+   * Cache namespace. The data is permission-dependent, so callers should
+   * include the current admin user here to avoid showing one editor's
+   * readable content types to another on the same browser session.
+   */
+  cacheKey?: string;
+  /** Bypass the cache and refetch (used by the refresh button). */
+  force?: boolean;
+  /** Injectable clock, mainly for tests. */
+  now?: () => number;
+}
+
 interface AdminClient {
   get: (url: string, options?: { params?: Record<string, unknown> }) => Promise<{ data: any }>;
 }
@@ -216,9 +236,10 @@ async function collectSingleType(
 }
 
 /**
- * Fetches everything waiting for publish review across the whole site.
+ * Collects everything waiting for publish review across the whole site.
+ * Prefer `fetchPendingReview`, which adds the TTL cache on top of this.
  */
-export async function fetchPendingReview(client: AdminClient): Promise<PendingResult> {
+async function collectPendingReview(client: AdminClient): Promise<PendingResult> {
   const response = await client.get('/content-manager/content-types');
   const contentTypes: ContentTypeDto[] = response?.data?.data ?? [];
 
@@ -263,6 +284,85 @@ export async function fetchPendingReview(client: AdminClient): Promise<PendingRe
     groups,
     truncated: collected.some((c) => c.truncated),
   };
+}
+
+/** How long a snapshot is reused before the widget hits the API again. */
+export const PENDING_REVIEW_CACHE_TTL_MS = 2 * 60 * 1000;
+
+interface CacheRecord {
+  key: string;
+  snapshot: PendingSnapshot;
+}
+
+let cache: CacheRecord | null = null;
+let inFlight: { key: string; promise: Promise<PendingSnapshot> } | null = null;
+
+/**
+ * Fetches everything waiting for publish review, reusing a recent result when
+ * possible.
+ *
+ * The widget makes one request per draft&publish content type. On a large site
+ * that is a few dozen calls, so navigating back to the dashboard would re-run
+ * all of them for data that changes slowly. A short TTL makes repeat visits
+ * free while keeping the list effectively live; `force: true` refreshes on
+ * demand.
+ *
+ * Concurrent callers with the same key (e.g. React StrictMode mounting the
+ * effect twice) share a single in-flight request.
+ */
+export async function fetchPendingReview(
+  client: AdminClient,
+  options: PendingFetchOptions = {}
+): Promise<PendingSnapshot> {
+  const key = options.cacheKey ?? 'default';
+  const now = options.now ?? Date.now;
+
+  if (!options.force && cache?.key === key) {
+    const age = now() - cache.snapshot.fetchedAt;
+    if (age >= 0 && age < PENDING_REVIEW_CACHE_TTL_MS) {
+      return { ...cache.snapshot, cached: true };
+    }
+  }
+
+  if (inFlight?.key === key) {
+    return inFlight.promise;
+  }
+
+  const promise = collectPendingReview(client).then((result) => {
+    const snapshot: PendingSnapshot = {
+      ...result,
+      fetchedAt: now(),
+      cached: false,
+    };
+    cache = { key, snapshot };
+    return snapshot;
+  });
+
+  inFlight = { key, promise };
+
+  // Clear the in-flight marker once settled, without swallowing the rejection
+  // for the caller. Both branches return undefined, so the derived promise
+  // never rejects and cannot trigger an unhandled rejection warning.
+  const clearInFlight = () => {
+    if (inFlight?.promise === promise) inFlight = null;
+  };
+  promise.then(clearInFlight, clearInFlight);
+
+  return promise;
+}
+
+/**
+ * Returns a fresh cached snapshot without making a request, if one exists for
+ * this key. Lets the widget render immediately when it remounts (e.g. when
+ * navigating back to the dashboard) instead of flashing a loader.
+ */
+export function getCachedPendingReview(cacheKey = 'default'): PendingSnapshot | null {
+  if (!cache || cache.key !== cacheKey) return null;
+
+  const age = Date.now() - cache.snapshot.fetchedAt;
+  if (age < 0 || age >= PENDING_REVIEW_CACHE_TTL_MS) return null;
+
+  return { ...cache.snapshot, cached: true };
 }
 
 /**
