@@ -41,6 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./server
+          file: ./server/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:latest
@@ -58,6 +59,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./web
+          file: ./web/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:latest
@@ -72,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./research-paper-graph
-          file: ./research-paper-graph/dockerfile
+          file: ./research-paper-graph/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/paper-sync:latest
@@ -85,6 +87,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./snipe-it
+          file: ./snipe-it/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:latest
@@ -107,4 +110,4 @@ jobs:
           echo "**Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Rollback" >> $GITHUB_STEP_SUMMARY
-          echo "To rollback, update \`docker-compose.prod.yml\` image tags to a previous commit SHA." >> $GITHUB_STEP_SUMMARY
+          echo "To rollback, update \`compose.prod.yaml\` image tags to a previous commit SHA." >> $GITHUB_STEP_SUMMARY

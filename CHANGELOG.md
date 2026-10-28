@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **"Pending review" widget on the Strapi admin homepage**:
+  - Lists everything that is not live on the website, grouped by content type: never-published drafts and published entries that have pending edits.
+  - Uses the existing, permission-checked Content Manager views (`__status` filters `draft` and `published-modified`), so no new backend endpoints are required and editors only see content types they can read.
+  - Each row deep-links to the entry's edit view in the Content Manager (current locale included); single-type content is checked per locale.
+  - Results are cached in the browser for 2 minutes and can be refreshed manually; the widget shows when the data was last updated, so revisiting the dashboard does not re-query every content type.
 - **Native Strapi v5 Internationalization (i18n)**:
   - Enabled `@strapi/plugin-i18n` with 11 supported locales: `en` (default), `ro`, `bg`, `de`, `el`, `es`, `fr`, `it`, `lv`, `tr`, `zh`.
   - Added 12 localized Single Types in Strapi to manage site-wide static and promotional content dynamically:

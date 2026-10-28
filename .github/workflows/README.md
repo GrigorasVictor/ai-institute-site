@@ -2,6 +2,8 @@
 
 This folder holds GitHub Actions workflows.
 
+Compose files: `compose.yaml` (local, production-like), `compose.dev.yaml` (development), `compose.prod.yaml` (production server).
+
 ## Database backup (prod compose)
 
 The production compose file includes a simple backup service that:
@@ -16,7 +18,7 @@ The production compose file includes a simple backup service that:
 2. Restore into the database:
 
 ```
-docker compose exec -T postgres pg_restore -d $POSTGRES_DB < backups/backup_YYYY-MM-DD_HH-MM-SS.dump
+docker compose -f compose.prod.yaml exec -T postgres pg_restore -d $POSTGRES_DB < backups/backup_YYYY-MM-DD_HH-MM-SS.dump
 ```
 
 Notes:
@@ -34,4 +36,4 @@ image: ghcr.io/airi-utcn/ai-institute-site/web:abc123def
 image: ghcr.io/airi-utcn/ai-institute-site/strapi:abc123def
 ```
 
-4. Then `docker compose up -d`
+4. Then `docker compose -f compose.prod.yaml up -d`

@@ -1,6 +1,6 @@
 # Development Docker Compose configuration
 #
-# Use `docker compose -f docker-compose.dev.yml watch` to start all services
+# Use `docker compose -f compose.dev.yaml watch` to start all services
 # with hot-reload and automatic file sync — no full image rebuilds needed.
 #
 # How `watch` works:
@@ -30,7 +30,7 @@ services:
   strapi:
     build:
       context: ./server
-      dockerfile: dockerfile.dev
+      dockerfile: Dockerfile.dev
     # No static build-time args needed — strapi develop builds the admin live.
     restart: no
     environment:
@@ -96,7 +96,7 @@ services:
   nextjs:
     build:
       context: ./web
-      dockerfile: dockerfile.dev
+      dockerfile: Dockerfile.dev
     restart: no
     environment:
       NODE_ENV: development
@@ -194,7 +194,7 @@ services:
   # paper-sync:
   #   build:
   #     context: ./research-paper-graph
-  #     dockerfile: dockerfile
+  #     dockerfile: Dockerfile
   #   # profiles: ["tools"]
   #   entrypoint: ["bash", "/app/entrypoint.sh"]
   #   environment:
@@ -218,11 +218,11 @@ services:
 
   # One-off runner for manual local checks (no cron loop).
   # Example:
-  # docker compose -f docker-compose.dev.yml --profile tools run --rm paper-sync-once
+  # docker compose -f compose.dev.yaml --profile tools run --rm paper-sync-once
   # paper-sync-once:
   #   build:
   #     context: ./research-paper-graph
-  #     dockerfile: dockerfile
+  #     dockerfile: Dockerfile
   #   profiles: ["tools"]
   #   entrypoint: ["python", "main.py"]
   #   environment:
