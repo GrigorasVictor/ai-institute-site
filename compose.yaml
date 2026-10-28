@@ -1,6 +1,8 @@
+# Default local stack: builds images from source and simulates production.
+# Usage: docker compose up --build
 services:
   postgres:
-    # Use ECR Public mirror to avoid Docker Hub limits
+    # Use ECR Public mirror for Postgres to avoid Docker Hub limits
     image: public.ecr.aws/docker/library/postgres:16
     restart: always
     environment:
@@ -10,21 +12,21 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-    labels:
-      - "com.centurylinklabs.watchtower.enable=false"
 
   strapi:
-    # -----------------------------------------------------------
-    # CHANGE THIS: Replace 'YOUR_GITHUB_USER' with your username
-    # -----------------------------------------------------------
-    image: ghcr.io/airi-utcn/ai-institute-site/server:latest
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      args:
+        PUBLIC_STRAPI_URL: ${PUBLIC_STRAPI_URL}
+        STRAPI_ADMIN_URL: ${STRAPI_ADMIN_URL}
     restart: always
     environment:
       DATABASE_CLIENT: ${DATABASE_CLIENT}
@@ -33,11 +35,9 @@ services:
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USERNAME: ${DATABASE_USERNAME}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      NODE_ENV: production
-      # These public URLs are baked in at build time, but Strapi sometimes needs them here too
+      NODE_ENV: ${NODE_ENV}
       PUBLIC_STRAPI_URL: ${PUBLIC_STRAPI_URL}
       STRAPI_ADMIN_URL: ${STRAPI_ADMIN_URL}
-      # Secrets
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
@@ -57,22 +57,24 @@ services:
       CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
       PREVIEW_SECRET: ${PREVIEW_SECRET}
     ports:
-      - "127.0.0.1:1337:1337"
+      - "1337:1337"
     volumes:
-      # We still need to persist uploads!
-      - ./uploads:/app/public/uploads
+      - ./server/public/uploads:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "netstat -tln | grep 1337 || exit 1"] # Don't question it. It works.
+      # The fucking health check kept failing. This is an ugly workaround.
+      test: ["CMD-SHELL", "netstat -tln | grep 1337 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
 
   nextjs:
-    image: ghcr.io/airi-utcn/ai-institute-site/web:latest
+    build:
+      context: ./web
+      dockerfile: Dockerfile
     restart: always
     environment:
       NODE_ENV: production
@@ -81,88 +83,48 @@ services:
       REVALIDATION_SECRET: ${REVALIDATION_SECRET}
       PUBLIC_STRAPI_URL: ${PUBLIC_STRAPI_URL}
       # Browser/public base URL (used to prefix media URLs): should be reachable by end users.
+      # Example prod: https://airi.utcluj.ro/strapi
       NEXT_PUBLIC_STRAPI_URL: ${NEXT_PUBLIC_STRAPI_URL:-${PUBLIC_STRAPI_URL}}
+
       # Server-to-server base URL inside the Docker network.
+      # Example: http://strapi:1337
       STRAPI_INTERNAL_URL: ${STRAPI_INTERNAL_URL:-http://strapi:1337}
       GRAPH_MESO_MIN_NODE_PAPERS: ${GRAPH_MESO_MIN_NODE_PAPERS:-3}
       GRAPH_MESO_MAX_NODES: ${GRAPH_MESO_MAX_NODES:-20}
       GRAPH_MESO_MIN_NODES: ${GRAPH_MESO_MIN_NODES:-8}
       SNIPEIT_URL: ${SNIPEIT_URL}
       SNIPEIT_API_KEY: ${SNIPEIT_API_KEY}
-      CLIENT_URL: ${CLIENT_URL}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
       PREVIEW_SECRET: ${PREVIEW_SECRET}
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
     depends_on:
       strapi:
         condition: service_healthy
 
-  watchtower:
-    # Use GHCR mirror for Watchtower
-    image: ghcr.io/containrrr/watchtower:latest
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      # Mount the Docker config directory (contains auth credentials)
-      # Prod server specific: you need to be careful on how you did the docker login on the prod server. This assumes you have a config.json with credentials for GHCR auth in ~/.docker/config.json
-      - ~/.docker/config.json:/config.json:ro
-    command: --interval 300 --cleanup
-    environment:
-      # Alternative: use env vars if config.json mount fails
-      REPO_USER: ${REPO_USER}
-      REPO_PASS: ${REPO_PASS}
-    restart: always
-
-  # Automated daily PostgreSQL backups with 7-day retention
-  db-backup:
-    image: public.ecr.aws/docker/library/postgres:16
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      PGHOST: postgres
-      PGDATABASE: ${POSTGRES_DB}
-      PGUSER: ${POSTGRES_USER}
-      PGPASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - ./backups:/backups
-    # Run a backup every day at 3:00 AM, keep last 7 days
-    entrypoint: >
-      sh -c '
-        while true; do
-          TIMESTAMP=$$(date +%Y-%m-%d_%H-%M-%S)
-          echo "[$$TIMESTAMP] Starting backup..."
-          pg_dump -Fc > /backups/backup_$$TIMESTAMP.dump
-          echo "[$$TIMESTAMP] Backup complete: backup_$$TIMESTAMP.dump"
-          # Delete backups older than 7 days
-          find /backups -name "backup_*.dump" -mtime +7 -delete
-          echo "Cleaned old backups. Sleeping 24h..."
-          sleep 86400
-        done
-      '
-    restart: always
-    labels:
-      - "com.centurylinklabs.watchtower.enable=false"
-
+  # Paper sync service — run manually or on a cron schedule.
+  # Usage: docker compose run --rm paper-sync --institution "..."
   paper-sync:
-    image: ghcr.io/airi-utcn/ai-institute-site/paper-sync:latest
-    restart: always
+    build:
+      context: ./research-paper-graph
+      dockerfile: Dockerfile
+    profiles: ["tools"]
     environment:
-      # Strapi connection (inside Docker network)
-      STRAPI_URL: ${STRAPI_INTERNAL_URL:-http://strapi:1337}
+      STRAPI_URL: http://strapi:1337
       STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
-      # Cron schedule & timezone
       PAPER_SYNC_CRON: ${PAPER_SYNC_CRON:-0 0 * * 6}
       TZ: ${PAPER_SYNC_TZ:-UTC}
-      # Graph tuning knobs used by research-paper-graph runtime settings
-      GRAPH_SIMILARITY_THRESHOLD: ${GRAPH_SIMILARITY_THRESHOLD:-0.5}
+      GRAPH_SIMILARITY_THRESHOLD: ${GRAPH_SIMILARITY_THRESHOLD:-0.6}
       GRAPH_DUPLICATE_THRESHOLD: ${GRAPH_DUPLICATE_THRESHOLD:-0.92}
       GRAPH_AI_MODEL: ${GRAPH_AI_MODEL:-all-MiniLM-L6-v2}
-      GRAPH_HDBSCAN_MIN_CLUSTER_SIZE: ${GRAPH_HDBSCAN_MIN_CLUSTER_SIZE:-20}
-      GRAPH_HDBSCAN_MIN_SAMPLES: ${GRAPH_HDBSCAN_MIN_SAMPLES:-5}
+      GRAPH_HDBSCAN_MIN_CLUSTER_SIZE: ${GRAPH_HDBSCAN_MIN_CLUSTER_SIZE:-12}
+      GRAPH_HDBSCAN_MIN_SAMPLES: ${GRAPH_HDBSCAN_MIN_SAMPLES:-3}
       GRAPH_SECONDARY_CLUSTER_DISTANCE_THRESHOLD: ${GRAPH_SECONDARY_CLUSTER_DISTANCE_THRESHOLD:-0.7}
       GRAPH_TOPIC_HDBSCAN_MIN_CLUSTER_SIZE: ${GRAPH_TOPIC_HDBSCAN_MIN_CLUSTER_SIZE:-3}
       GRAPH_TOPIC_HDBSCAN_MIN_SAMPLES: ${GRAPH_TOPIC_HDBSCAN_MIN_SAMPLES:-2}
       GRAPH_TOP_K: ${GRAPH_TOP_K:-20}
+    volumes:
+      - ./research-paper-graph/outputs:/app/outputs
     depends_on:
       strapi:
         condition: service_healthy
@@ -185,18 +147,13 @@ services:
       - mysql-snipeit-data:/var/lib/mysql
 
   snipe-it:
-    image: ghcr.io/airi-utcn/ai-institute-site/snipe-it:latest
+    image: snipe/snipe-it:latest
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8000:80"
+      - "8000:80"
     environment:
-      APP_ENV: production
-      APP_URL: ${SNIPEIT_PUBLIC_URL:-https://airi.utcluj.ro/snipeit}
+      APP_URL: ${SNIPEIT_PUBLIC_URL:-http://localhost:8000}
       APP_KEY: ${SNIPEIT_APP_KEY}
-      APP_FORCE_TLS: "true"
-      APP_TRUSTED_PROXIES: "*"
-      APP_TRUSTED_HEADERS: "HEADER_X_FORWARDED_FOR,HEADER_X_FORWARDED_HOST,HEADER_X_FORWARDED_PROTO,HEADER_X_FORWARDED_PORT,HEADER_X_FORWARDED_PREFIX"
-      LIVEWIRE_URL_PREFIX: ${SNIPEIT_LIVEWIRE_PREFIX:-/}
       DB_CONNECTION: mysql
       DB_HOST: mysql-snipeit
       DB_DATABASE: ${SNIPEIT_DB_DATABASE}

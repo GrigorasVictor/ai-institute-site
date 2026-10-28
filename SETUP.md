@@ -47,12 +47,13 @@ Ensure you have the following installed:
 
 ## Running with Docker
 
-This project has **two Docker Compose configurations** with different purposes:
+This project has **three Docker Compose configurations** with different purposes:
 
 | File | Purpose |
 |---|---|
-| `docker-compose.yml` | Simulates the **production environment** — full image builds, `npm start` / `next start`. Use this to verify production-like behavior. |
-| `docker-compose.dev.yml` | **Active development** — lightweight dev images with `strapi develop` and `next dev --turbopack`. File changes are synced instantly via Docker Compose Watch; no rebuilds needed. |
+| `compose.yaml` | Simulates the **production environment** — full image builds, `npm start` / `next start`. Use this to verify production-like behavior. |
+| `compose.dev.yaml` | **Active development** — lightweight dev images with `strapi develop` and `next dev --turbopack`. File changes are synced instantly via Docker Compose Watch; no rebuilds needed. |
+| `compose.prod.yaml` | **Server deployment** — pulls prebuilt images from GHCR; used on the production host. |
 
 ### Active Development (Recommended)
 
@@ -60,14 +61,14 @@ Use Docker Compose Watch for day-to-day development. It syncs your local source 
 
 ```bash
 # First time: build dev images and start the watch loop
-docker compose -f docker-compose.dev.yml watch
+docker compose -f compose.dev.yaml watch
 
 # Ctrl+C stops the watch loop. Bring the stack down with:
-docker compose -f docker-compose.dev.yml down
+docker compose -f compose.dev.yaml down
 
 # View logs while watching (separate terminal)
-docker compose -f docker-compose.dev.yml logs -f strapi
-docker compose -f docker-compose.dev.yml logs -f nextjs
+docker compose -f compose.dev.yaml logs -f strapi
+docker compose -f compose.dev.yaml logs -f nextjs
 ```
 
 What gets synced automatically:
@@ -77,7 +78,7 @@ What gets synced automatically:
 
 ### Production Simulation
 
-Use the default `docker-compose.yml` to test the full production build locally (full image builds, admin bundle compiled ahead of time, `npm start`).
+Use the default `compose.yaml` to test the full production build locally (full image builds, admin bundle compiled ahead of time, `npm start`).
 
 ```bash
 # Build and start containers (can be run from anywhere in the project)
@@ -88,7 +89,7 @@ docker compose up --build
 # The frontend will be at http://localhost:3000
 
 # Start previously built containers (no rebuild)
-docker compose upand
+docker compose up
 
 # Stop containers (Ctrl+C, then)
 docker compose down
@@ -199,8 +200,8 @@ npm run migrate:i18n
 # If using Docker (Development or Production):
 docker compose exec strapi npm run migrate:i18n
 
-# In production with docker-compose.prod.yml:
-docker compose -f docker-compose.prod.yml exec strapi npm run migrate:i18n
+# In production with compose.prod.yaml:
+docker compose -f compose.prod.yaml exec strapi npm run migrate:i18n
 ```
 
 For a complete guide on running this migration in production Docker environments, see [docs/i18n-production-migration.md](./docs/i18n-production-migration.md).
@@ -340,7 +341,7 @@ npm run build
 lsof -i :3000
 lsof -i :1337
 
-# Stop the process or change ports in docker-compose.yml
+# Stop the process or change ports in compose.yaml
 ```
 
 **Problem:** Out of disk space
@@ -357,7 +358,7 @@ docker compose down -v
 
 **Problem:** Connection refused
 - Verify PostgreSQL container is running
-- Check `DATABASE_HOST` matches service name in docker-compose.yml
+- Check `DATABASE_HOST` matches service name in compose.yaml
 - Wait a few seconds for PostgreSQL to fully start
 
 **Problem:** Migration script fails

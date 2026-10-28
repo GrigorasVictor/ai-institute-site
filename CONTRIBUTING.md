@@ -139,6 +139,28 @@ git commit -m "docs: update contribution guidelines"
 - Test changes locally before pushing
 - Remember: schema changes require rebuilding Docker containers
 
+### Docker Conventions
+
+Keep container files predictable so builds behave the same on Linux (case-sensitive) and macOS/Windows (case-insensitive).
+
+**Dockerfiles**
+
+- `Dockerfile` — the default/production image for a service directory.
+- `Dockerfile.dev` — the development variant. Always reference it explicitly with `dockerfile: Dockerfile.dev`.
+- Always capitalize the **D** in `Dockerfile`. A lowercase `dockerfile` may work on macOS/Windows but fails on Linux and in CI with `lstat .../Dockerfile: no such file or directory`.
+
+**Compose files**
+
+| File | Purpose |
+|---|---|
+| `compose.yaml` | Default local stack (production-like build). `docker compose up` picks it up automatically. |
+| `compose.dev.yaml` | Development stack with watch/hot-reload. Run with `docker compose -f compose.dev.yaml watch`. |
+| `compose.prod.yaml` | Production server stack (prebuilt images). Run with `docker compose -f compose.prod.yaml ...`. |
+
+- Use the modern `compose.*.yaml` names, not the legacy `docker-compose.*.yml` prefix.
+- Always set `dockerfile:` explicitly when a service directory contains more than one Dockerfile.
+- Every build context must have a `.dockerignore` covering dependencies, build output, env files, and mounted runtime data.
+
 ## Testing Your Changes
 
 ### Before Committing

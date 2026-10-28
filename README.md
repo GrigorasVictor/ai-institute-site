@@ -91,7 +91,7 @@ ai-institute-site/
 │   ├── src/api/        # Content type definitions
 │   ├── config/         # Strapi configuration
 │   └── scripts/        # Utility scripts (migration, etc.)
-└── docker-compose.yml  # Container orchestration
+└── compose.yaml        # Container orchestration
 ```
 
 ## Key Features
