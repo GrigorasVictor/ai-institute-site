@@ -3,6 +3,14 @@ import fallbackNewsData from '@/app/data/news&events/newsData.json';
 
 export const dynamic = 'force-dynamic';
 
+const escapeXml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+
 /**
  * Route handler for the AIRI @ UTCN news RSS feed (/rss.xml).
  * Generates a valid RSS 2.0 XML document containing the latest published news articles.
@@ -59,8 +67,8 @@ export async function GET() {
 
     return `    <item>
       <title><![CDATA[${title}]]></title>
-      <link>${link}</link>
-      <guid isPermaLink="true">${link}</guid>
+      <link>${escapeXml(link)}</link>
+      <guid isPermaLink="true">${escapeXml(link)}</guid>
       <pubDate>${pubDate}</pubDate>
       <description><![CDATA[${summary}]]></description>
     </item>`;
@@ -70,10 +78,10 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>AIRi @ UTCN – News &amp; Updates</title>
-    <link>${siteUrl}</link>
+    <link>${escapeXml(siteUrl)}</link>
     <description>Latest research news, press releases, and announcements from the Artificial Intelligence Research Institute at Technical University of Cluj-Napoca.</description>
     <language>en</language>
-    <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="${escapeXml(siteUrl)}/rss.xml" rel="self" type="application/rss+xml" />
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${itemsXml}
   </channel>
