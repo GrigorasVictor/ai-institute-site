@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # OS metadata
 .DS_Store
+
+# Docs are not needed in the image
+**/*.md

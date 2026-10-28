@@ -21,3 +21,6 @@ graph_links.json
 
 # Logs
 *.log
+
+# Docs are not needed in the image
+**/*.md
