@@ -174,6 +174,7 @@ export default function Navbar({ navbarData: customNavbarData }) {
     { href: '/news&events/open-project-calls', label: nav.menuCalls || 'Calls for Projects' },
     { href: '/news&events/awards', label: nav.menuAwards || 'Awards' },
     { href: '/news&events/careers', label: nav.menuCareers || 'Careers' },
+    { href: '/media', label: nav.menuMedia || 'Media Gallery' },
   ];
 
   const aboutMenu = [

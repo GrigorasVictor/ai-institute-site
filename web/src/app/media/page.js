@@ -7,9 +7,16 @@ export async function generateMetadata() {
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
   const media = await getSingleType("media-page", locale);
 
+  const cleanDescription = (media?.headerSubtitle || "")
+    .replace(/https?:\/\/[^\s]+/gi, "")
+    .replace(/\s+at\s+flickr\s*:?$/i, "")
+    .trim();
+
   return {
-    title: media?.headerTitle || "Media",
-    description: media?.headerSubtitle || "Photos, videos, and media resources from AIRi events and activities at UTCN.",
+    title: media?.headerTitle || "Media Gallery",
+    description:
+      cleanDescription ||
+      "Photos, albums on Flickr, press coverage, and media resources from AIRi at UTCN.",
   };
 }
 

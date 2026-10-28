@@ -40,6 +40,9 @@ const remotePatterns = [
 
   // Production (behind Nginx, often under /strapi)
   { protocol: 'https', hostname: 'airi.utcluj.ro', pathname: '/**' },
+  // flickr cdn images
+  { protocol: 'https', hostname: 'live.staticflickr.com', pathname: '/**' },
+  { protocol: 'https', hostname: '*.staticflickr.com', pathname: '/**' },
   ...(envPattern ? [envPattern] : []),
 ];
 
@@ -52,6 +55,46 @@ const nextConfig = {
   images: {
     remotePatterns,
     ...(isStaticBuild || isLocalHost ? { unoptimized: true } : {}),
+  },
+  // redirects for shorthand and legacy urls to prevent 404s
+  async redirects() {
+    return [
+      {
+        source: '/news',
+        destination: '/news&events/news',
+        permanent: true,
+      },
+      {
+        source: '/news&events',
+        destination: '/news&events/news',
+        permanent: true,
+      },
+      {
+        source: '/events',
+        destination: '/news&events/events',
+        permanent: true,
+      },
+      {
+        source: '/engagement/academic',
+        destination: '/engagement?tab=academic',
+        permanent: true,
+      },
+      {
+        source: '/engagement/industry',
+        destination: '/engagement?tab=industry',
+        permanent: true,
+      },
+      {
+        source: '/engagement/high-school',
+        destination: '/engagement?tab=high-school',
+        permanent: true,
+      },
+      {
+        source: '/engagement/industrial-phd',
+        destination: '/engagement?tab=industry',
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [

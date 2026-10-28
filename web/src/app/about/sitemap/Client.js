@@ -35,11 +35,11 @@ export default function Client({ aboutData }) {
     {
       title: "Engagement",
       links: [
-        { label: "Academic", href: "/engagement/academic" },
-        { label: "Industry", href: "/engagement/industry" },
-        { label: "High School", href: "/engagement/high-school" },
-        { label: "Partners", href: "/engagement/partners" },
-        { label: "Industrial PhD", href: "/engagement/industrial-phd" },
+        { label: "Public", href: "/engagement?tab=public" },
+        { label: "Academic", href: "/engagement?tab=academic" },
+        { label: "Industry", href: "/engagement?tab=industry" },
+        { label: "High School", href: "/engagement?tab=high-school" },
+        { label: "Partners", href: "/engagement?tab=partners" },
       ],
     },
     {
@@ -58,6 +58,7 @@ export default function Client({ aboutData }) {
         { label: "Calls for Projects", href: "/news&events/open-project-calls" },
         { label: "Awards", href: "/news&events/awards" },
         { label: "Career Opportunities", href: "/news&events/careers" },
+        { label: "Media Gallery", href: "/media" },
       ],
     },
     {

@@ -16,7 +16,8 @@ const socialLinks = [
     Icon: FaLinkedin,
   },
   {
-    href: "https://www.flickr.com/people/203870795@N08/",
+    // link to photo albums on flickr
+    href: "https://www.flickr.com/photos/203870795@N08/albums/",
     label: "Flickr",
     Icon: FaFlickr,
   },
