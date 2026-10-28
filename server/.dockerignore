@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # Local runtime data (mounted as a volume by Docker Compose)
 public/uploads
+
+# Docs are not needed in the image
+**/*.md
