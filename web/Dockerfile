@@ -1,5 +1,7 @@
-# Use AWS ECR Public mirror to avoid Docker Hub rate limits
-FROM public.ecr.aws/docker/library/node:22-alpine AS base
+# Defaults to AWS ECR Public for local builds. CI overrides NODE_IMAGE to point
+# at the GHCR mirror, so it never pulls from Docker Hub or ECR Public.
+ARG NODE_IMAGE=public.ecr.aws/docker/library/node:22-alpine
+FROM ${NODE_IMAGE} AS base
 
 RUN apk update && apk upgrade --no-cache
 
@@ -13,7 +15,7 @@ FROM base AS builder
 COPY package*.json ./
 
 # Install the application dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the application code to the working directory
 COPY . .

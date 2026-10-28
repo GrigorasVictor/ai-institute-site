@@ -3,111 +3,138 @@ name: Build and Publish Docker Images
 on:
   workflow_dispatch:
   push:
-    branches: 
+    branches:
       - master
-      - feature/deployment-pipeline
+    # Anything that cannot change an image is ignored. deploy.yml and
+    # _build-image.yml are deliberately not ignored so they are exercised;
+    # mirror-workflow changes run the mirror workflow instead.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'compose.yaml'
+      - 'compose.dev.yaml'
+      - 'compose.prod.yaml'
+      - 'scripts/**'
+      - '.github/workflows/README.md'
+      - '.github/workflows/mirror-images.yml'
+      - '.github/workflows/_mirror-images.yml'
+      - '.gitignore'
+      - '.env.example'
+      - 'LICENSE'
+      - 'agents/**'
+      - '.agents/**'
+      - '.gemini/**'
 
-env:
-  REGISTRY: ghcr.io
+# No `concurrency` cancellation: because each run only rebuilds the services it
+# touched, cancelling a superseded run could skip a service entirely. Two
+# merges landing close together must both finish.
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  # Make sure the GHCR copies of every base image exist before any build
+  # starts. This only contacts public registries when a tag is missing.
+  mirrors:
     permissions:
       contents: read
       packages: write
+    uses: ./.github/workflows/_mirror-images.yml
+    with:
+      force: false
 
+  # Work out which services actually changed, so a web-only commit does not
+  # rebuild Strapi, Python, and the ~1 GB Snipe-IT image.
+  changes:
+    needs: mirrors
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+      web: ${{ steps.filter.outputs.web }}
+      paper_sync: ${{ steps.filter.outputs.paper_sync }}
+      snipe_it: ${{ steps.filter.outputs.snipe_it }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Downcase REPO
-        run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+          fetch-depth: 0
 
-      # Enable BuildKit caching for faster builds
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # --- Build and Push Server ---
-      - name: Build and push Server (Strapi)
-        uses: docker/build-push-action@v5
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
         with:
-          context: ./server
-          file: ./server/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:${{ github.sha }}
-          # These MUST match the values in your production .env file.
-          # Set them in: GitHub -> Repo -> Settings -> Secrets and variables -> Actions -> Variables
-          build-args: |
-            PUBLIC_STRAPI_URL=${{ vars.PUBLIC_STRAPI_URL }}
-            STRAPI_ADMIN_URL=${{ vars.STRAPI_ADMIN_URL }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/server:buildcache,mode=max
+          base: ${{ github.ref }}
+          filters: |
+            server:
+              - 'server/**'
+              - '.github/workflows/deploy.yml'
+              - '.github/workflows/_build-image.yml'
+            web:
+              - 'web/**'
+              - '.github/workflows/deploy.yml'
+              - '.github/workflows/_build-image.yml'
+            paper_sync:
+              - 'research-paper-graph/**'
+              - '.github/workflows/deploy.yml'
+              - '.github/workflows/_build-image.yml'
+            snipe_it:
+              - 'snipe-it/**'
+              - '.github/workflows/deploy.yml'
+              - '.github/workflows/_build-image.yml'
 
-      # --- Build and Push Web (Next.js) ---
-      - name: Build and push Web
-        uses: docker/build-push-action@v5
-        with:
-          context: ./web
-          file: ./web/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:${{ github.sha }}
-          build-args: |
-            NEXT_PUBLIC_STRAPI_URL=${{ vars.PUBLIC_STRAPI_URL }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:buildcache,mode=max
+  server:
+    needs: [changes, mirrors]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.server == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/_build-image.yml
+    with:
+      service: Server (Strapi)
+      context: ./server
+      dockerfile: ./server/Dockerfile
+      image: server
+      build-args: |
+        PUBLIC_STRAPI_URL=${{ vars.PUBLIC_STRAPI_URL }}
+        STRAPI_ADMIN_URL=${{ vars.STRAPI_ADMIN_URL }}
 
-      # --- Build and Push Paper Sync (Python importer) ---
-      - name: Build and push Paper Sync
-        uses: docker/build-push-action@v5
-        with:
-          context: ./research-paper-graph
-          file: ./research-paper-graph/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/paper-sync:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/paper-sync:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/paper-sync:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/paper-sync:buildcache,mode=max
+  web:
+    needs: [changes, mirrors]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.web == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/_build-image.yml
+    with:
+      service: Web (Next.js)
+      context: ./web
+      dockerfile: ./web/Dockerfile
+      image: web
+      build-args: |
+        NEXT_PUBLIC_STRAPI_URL=${{ vars.PUBLIC_STRAPI_URL }}
 
-      # --- Build and Push Snipe-IT ---
-      - name: Build and push Snipe-IT
-        uses: docker/build-push-action@v5
-        with:
-          context: ./snipe-it
-          file: ./snipe-it/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/snipe-it:buildcache,mode=max
+  paper_sync:
+    needs: [changes, mirrors]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.paper_sync == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/_build-image.yml
+    with:
+      service: Paper Sync (Python)
+      context: ./research-paper-graph
+      dockerfile: ./research-paper-graph/Dockerfile
+      image: paper-sync
 
-      # --- Deployment Summary (visible in GitHub Actions tab) ---
-      - name: Write deployment summary
-        run: |
-          echo "## 🚀 Deployment Build Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | Tag |" >> $GITHUB_STEP_SUMMARY
-          echo "| ----- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Server (Strapi)** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Web (Next.js)** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Paper Sync (Python)** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Rollback" >> $GITHUB_STEP_SUMMARY
-          echo "To rollback, update \`compose.prod.yaml\` image tags to a previous commit SHA." >> $GITHUB_STEP_SUMMARY
+  snipe_it:
+    needs: [changes, mirrors]
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.snipe_it == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/_build-image.yml
+    with:
+      service: Snipe-IT
+      context: ./snipe-it
+      dockerfile: ./snipe-it/Dockerfile
+      image: snipe-it

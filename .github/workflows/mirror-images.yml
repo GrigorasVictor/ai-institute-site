@@ -1,0 +1,27 @@
+name: Mirror upstream images to GHCR
+
+# Refreshes the GHCR copies of the Docker Hub images used by CI.
+# Runs weekly and on demand; the deploy pipeline also calls the shared
+# reusable workflow when a tag is missing.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/mirror-images.yml'
+      - '.github/workflows/_mirror-images.yml'
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  mirror:
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/_mirror-images.yml
+    with:
+      # Re-copy the pinned tags so upstream rebuilds of the same version are
+      # picked up.
+      force: true

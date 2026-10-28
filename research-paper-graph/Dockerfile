@@ -1,4 +1,7 @@
-FROM python:3.12-slim
+# Defaults to AWS ECR Public for local builds. CI overrides PYTHON_IMAGE to
+# point at the GHCR mirror, so it never pulls from Docker Hub or ECR Public.
+ARG PYTHON_IMAGE=public.ecr.aws/docker/library/python:3.12-slim
+FROM ${PYTHON_IMAGE}
 
 WORKDIR /app
 

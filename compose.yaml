@@ -130,7 +130,7 @@ services:
         condition: service_healthy
 
   mysql-snipeit:
-    image: mysql:8.0
+    image: public.ecr.aws/docker/library/mysql:8.0
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${SNIPEIT_DB_ROOT_PASSWORD}
