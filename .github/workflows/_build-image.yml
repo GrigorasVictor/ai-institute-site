@@ -22,8 +22,18 @@ on:
         description: Image name below ghcr.io/<owner>/<repo>/.
         required: true
         type: string
-      build-args:
-        description: Newline-separated build arguments.
+      public_strapi_url:
+        description: Value for the PUBLIC_STRAPI_URL build arg (server only).
+        required: false
+        type: string
+        default: ''
+      strapi_admin_url:
+        description: Value for the STRAPI_ADMIN_URL build arg (server only).
+        required: false
+        type: string
+        default: ''
+      next_public_strapi_url:
+        description: Value for the NEXT_PUBLIC_STRAPI_URL build arg (web only).
         required: false
         type: string
         default: ''
@@ -84,11 +94,14 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ inputs.image }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ inputs.image }}:${{ github.sha }}
-          # Base-image overrides point the Dockerfiles at the GHCR mirrors so CI
-          # never pulls from Docker Hub or ECR Public. Services that do not use
-          # these ARGs ignore them.
+          # Keep these as single-line inputs. GitHub passes multiline reusable-
+          # workflow inputs with CRLF line endings; mixing those with the LF
+          # lines below makes the action's CSV parser merge the last arguments
+          # (NODE_IMAGE swallowed PYTHON_IMAGE).
           build-args: |
-            ${{ inputs.build-args }}
+            PUBLIC_STRAPI_URL=${{ inputs.public_strapi_url }}
+            STRAPI_ADMIN_URL=${{ inputs.strapi_admin_url }}
+            NEXT_PUBLIC_STRAPI_URL=${{ inputs.next_public_strapi_url }}
             NODE_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/mirror/node:${{ env.NODE_VERSION }}
             PYTHON_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/mirror/python:${{ env.PYTHON_VERSION }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ inputs.image }}:buildcache

@@ -169,6 +169,7 @@ Keep container files predictable so builds behave the same on Linux (case-sensit
 - `deploy.yml` rebuilds only the services whose directories changed. Docs, compose files, and tooling changes do not trigger a build.
 - A manual run rebuilds every image.
 - Changes to `deploy.yml` or `_build-image.yml` trigger a full rebuild so the pipeline is exercised. Mirror-workflow changes only run the mirror job.
+- Pass build arguments to `_build-image.yml` as separate single-line inputs. Do not add a multiline `build-args` input: GitHub passes reusable-workflow inputs with CRLF line endings, and mixing those with the LF lines in the build step makes `docker/build-push-action` merge the last arguments.
 
 ## Testing Your Changes
 

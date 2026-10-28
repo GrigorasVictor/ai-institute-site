@@ -94,9 +94,8 @@ jobs:
       context: ./server
       dockerfile: ./server/Dockerfile
       image: server
-      build-args: |
-        PUBLIC_STRAPI_URL=${{ vars.PUBLIC_STRAPI_URL }}
-        STRAPI_ADMIN_URL=${{ vars.STRAPI_ADMIN_URL }}
+      public_strapi_url: ${{ vars.PUBLIC_STRAPI_URL }}
+      strapi_admin_url: ${{ vars.STRAPI_ADMIN_URL }}
 
   web:
     needs: [changes, mirrors]
@@ -110,8 +109,7 @@ jobs:
       context: ./web
       dockerfile: ./web/Dockerfile
       image: web
-      build-args: |
-        NEXT_PUBLIC_STRAPI_URL=${{ vars.PUBLIC_STRAPI_URL }}
+      next_public_strapi_url: ${{ vars.PUBLIC_STRAPI_URL }}
 
   paper_sync:
     needs: [changes, mirrors]
