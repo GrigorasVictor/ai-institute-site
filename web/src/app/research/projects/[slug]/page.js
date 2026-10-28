@@ -1,5 +1,6 @@
 import FallbackDisclaimer from "@/components/FallbackDisclaimer";
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 import { getProjects, getProjectBySlug, transformProjectData, getSingleType } from "@/lib/strapi";
 import ProjectDetailsClient from "./ProjectDetails";
 import { JsonLd, projectJsonLd } from "@/lib/jsonld";
@@ -39,6 +40,7 @@ export default async function ProjectPage({ params }) {
     getProjectBySlug(slug, locale),
     getSingleType("projects-page", locale),
   ]);
+  if (!projectData) notFound();
   const project = transformProjectData([projectData])[0];
 
   return (
