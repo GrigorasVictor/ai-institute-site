@@ -1,14 +1,30 @@
+# Dependencies
 node_modules
+
+# Build output and caches
 build
 dist
 .cache
+.strapi
 .tmp
 coverage
+
+# Local environment files
 .env
 .env.*
+
+# VCS metadata
 .git
 .gitignore
-Dockerfile
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# Local runtime data (mounted as a volume by Docker Compose)
+public/uploads
+
+# Docs are not needed in the image
+**/*.md

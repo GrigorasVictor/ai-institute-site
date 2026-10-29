@@ -1,0 +1,26 @@
+# Python environments and caches
+venv
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Local runtime data (mounted as a volume by Docker Compose)
+outputs
+graph_links.json
+
+# Local environment files
+.env
+.env.*
+
+# VCS metadata
+.git
+.gitignore
+
+# Logs
+*.log
+
+# Docs are not needed in the image
+**/*.md

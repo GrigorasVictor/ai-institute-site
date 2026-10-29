@@ -139,6 +139,38 @@ git commit -m "docs: update contribution guidelines"
 - Test changes locally before pushing
 - Remember: schema changes require rebuilding Docker containers
 
+### Docker Conventions
+
+Keep container files predictable so builds behave the same on Linux (case-sensitive) and macOS/Windows (case-insensitive).
+
+**Dockerfiles**
+
+- `Dockerfile` — the default/production image for a service directory.
+- `Dockerfile.dev` — the development variant. Always reference it explicitly with `dockerfile: Dockerfile.dev`.
+- Always capitalize the **D** in `Dockerfile`. A lowercase `dockerfile` may work on macOS/Windows but fails on Linux and in CI with `lstat .../Dockerfile: no such file or directory`.
+
+**Compose files**
+
+| File | Purpose |
+|---|---|
+| `compose.yaml` | Default local stack (production-like build). `docker compose up` picks it up automatically. |
+| `compose.dev.yaml` | Development stack with watch/hot-reload. Run with `docker compose -f compose.dev.yaml watch`. |
+| `compose.prod.yaml` | Production server stack (prebuilt images). Run with `docker compose -f compose.prod.yaml ...`. |
+
+- Use the modern `compose.*.yaml` names, not the legacy `docker-compose.*.yml` prefix.
+- Always set `dockerfile:` explicitly when a service directory contains more than one Dockerfile.
+- Every build context must have a `.dockerignore` covering dependencies, build output, env files, and mounted runtime data.
+- Do not add a Docker Hub base image. Use `public.ecr.aws/docker/library/...` or a GHCR mirror. If an image is only published to Docker Hub, add it to `.github/workflows/_mirror-images.yml` and reference the GHCR copy.
+- Expose a mirrored base image as an `ARG` with the ECR default (`ARG NODE_IMAGE=public.ecr.aws/docker/library/node:22-alpine`), then `FROM ${NODE_IMAGE}`. CI overrides these args to the GHCR mirror, so local builds need no registry login.
+- ECR Public has its own anonymous limit (500 GB/month, 1 pull/second), so CI must not pull from it even though it avoids Docker Hub.
+
+**CI**
+
+- `deploy.yml` rebuilds only the services whose directories changed. Docs, compose files, and tooling changes do not trigger a build.
+- A manual run rebuilds every image.
+- Changes to `deploy.yml` or `_build-image.yml` trigger a full rebuild so the pipeline is exercised. Mirror-workflow changes only run the mirror job.
+- Pass build arguments to `_build-image.yml` as separate single-line inputs. Do not add a multiline `build-args` input: GitHub passes reusable-workflow inputs with CRLF line endings, and mixing those with the LF lines in the build step makes `docker/build-push-action` merge the last arguments.
+
 ## Testing Your Changes
 
 ### Before Committing

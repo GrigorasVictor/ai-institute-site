@@ -9,6 +9,7 @@ import {
   getResources,
   getSeminars,
   getStaff,
+  getLaboratories,
   transformDepartmentData,
   transformEventData,
   transformNewsData,
@@ -18,6 +19,7 @@ import {
   transformResourceData,
   transformSeminarData,
   transformStaffData,
+  transformLaboratoryData,
 } from "@/lib/strapi";
 import { toPublicationSlug } from "@/lib/slug";
 
@@ -32,18 +34,19 @@ const STATIC_ENTRIES = [
   { title: "Virtual Tour", route: "/about/virtual-tour", tags: ["about", "virtual tour", "3d"], snippet: "Virtual tour of the institute." },
   { title: "Sitemap", route: "/about/sitemap", tags: ["about", "sitemap"], snippet: "Overview of the website structure." },
   { title: "Contact", route: "/contact", tags: ["contact", "location", "email"], snippet: "Contact details and ways to reach AIRI." },
-  { title: "Collaborators", route: "/collaborators", tags: ["partners", "collaborators"], snippet: "Partner and collaborator overview." },
+  { title: "Collaborators", route: "/engagement?tab=partners", tags: ["partners", "collaborators"], snippet: "Partner and collaborator overview." },
   { title: "Media", route: "/media", tags: ["media", "gallery", "press"], snippet: "Media coverage and gallery content." },
   { title: "Timeline", route: "/timeline", tags: ["timeline", "history", "milestones"], snippet: "Key milestones in AIRI's history." },
   { title: "People", route: "/people", tags: ["people", "researchers", "staff"], snippet: "Researchers, staff, alumni, and visitors." },
   { title: "Resources", route: "/resources", tags: ["resources", "tools", "apis"], snippet: "Research tools, APIs, and learning resources." },
   { title: "Research Themes", route: "/research/themes", tags: ["research", "themes", "areas"], snippet: "Research themes and linked projects and publications." },
   { title: "Research Departments", route: "/research/departments", tags: ["research", "departments"], snippet: "Research departments and their members." },
+  { title: "Laboratories", route: "/research/laboratories", tags: ["research", "laboratories", "labs", "facilities", "rooms", "sponsored"], snippet: "Research laboratories and sponsored spaces across AIRI." },
   { title: "Projects", route: "/research/projects", tags: ["research", "projects"], snippet: "Research projects across the institute." },
   { title: "Publications", route: "/research/publications", tags: ["research", "publications", "papers"], snippet: "Academic publications and papers." },
   { title: "Paper Graph", route: "/research/paper-graph", tags: ["research", "graph", "publications"], snippet: "Interactive publication graph and communities." },
   { title: "Engagement", route: "/engagement", tags: ["engagement", "outreach"], snippet: "Overview of public, academic, and industry engagement." },
-  { title: "Public Engagement", route: "/engagement/public", tags: ["engagement", "public"], snippet: "Public-facing outreach and events." },
+  { title: "Public Engagement", route: "/engagement?tab=public", tags: ["engagement", "public"], snippet: "Public-facing outreach and events." },
   { title: "Academic Engagement", route: "/engagement/academic", tags: ["engagement", "academic", "students"], snippet: "Academic programs and student engagement." },
   { title: "Industry Engagement", route: "/engagement/industry", tags: ["engagement", "industry"], snippet: "Industry collaboration and applied AI work." },
   { title: "High-School Engagement", route: "/engagement/high-school", tags: ["engagement", "high-school", "outreach"], snippet: "High-school outreach and learning activities." },
@@ -203,7 +206,9 @@ function buildNewsEntries(newsItems) {
   return newsItems.map((item) =>
     makeEntry({
       title: item.title,
-      route: item.linkUrl || "/news&events/news",
+      route: item.slug
+        ? `/news&events/news/${encodeURIComponent(item.slug)}`
+        : item.linkUrl || "/news&events/news",
       tags: ["news", item.category, ...asArray(item.tags)],
       snippet: item.summary,
     })
@@ -214,7 +219,9 @@ function buildEventEntries(events) {
   return events.map((event) =>
     makeEntry({
       title: event.title,
-      route: event.url || "/news&events/events",
+      route: event.slug
+        ? `/news&events/events/${encodeURIComponent(event.slug)}`
+        : event.url || "/news&events/events",
       tags: ["event", event.category, event.location],
       snippet: event.description || [event.location, event.startDate].filter(Boolean).join(" · "),
     })
@@ -243,6 +250,24 @@ function buildPartnerEntries(partners) {
   );
 }
 
+function buildLaboratoryEntries(laboratories) {
+  return laboratories.map((lab) =>
+    makeEntry({
+      title: lab.title,
+      route: lab.slug ? `/research/laboratories/${encodeURIComponent(lab.slug)}` : "/research/laboratories",
+      tags: [
+        "laboratory",
+        "lab",
+        "room",
+        lab.roomNumber,
+        ...asArray(lab.partners).map((p) => p.name),
+        ...asArray(lab.departments).map((d) => d.name),
+      ],
+      snippet: lab.summary || lab.roomNumber || "AIRI Research Laboratory",
+    })
+  );
+}
+
 export async function buildSearchIndex() {
   const [
     publicationRows,
@@ -255,6 +280,7 @@ export async function buildSearchIndex() {
     eventRows,
     seminarRows,
     partnerRows,
+    laboratoryRows,
   ] = await Promise.all([
     getPublications({ includeUnlisted: true, graphEligibleOnly: true }),
     getStaff(),
@@ -266,6 +292,7 @@ export async function buildSearchIndex() {
     getEvents(),
     getSeminars(),
     getPartners(),
+    getLaboratories().catch(() => []),
   ]);
 
   const publications = transformPublicationData(publicationRows);
@@ -277,6 +304,7 @@ export async function buildSearchIndex() {
   const events = transformEventData(eventRows);
   const seminars = transformSeminarData(seminarRows);
   const partners = transformPartnerData(partnerRows);
+  const laboratories = transformLaboratoryData(laboratoryRows);
 
   return dedupeEntries([
     ...STATIC_ENTRIES.map(makeEntry),
@@ -290,5 +318,6 @@ export async function buildSearchIndex() {
     ...buildEventEntries(events),
     ...buildSeminarEntries(seminars),
     ...buildPartnerEntries(partners),
+    ...buildLaboratoryEntries(laboratories),
   ]).sort((a, b) => a.title.localeCompare(b.title));
 }

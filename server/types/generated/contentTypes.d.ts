@@ -2494,6 +2494,218 @@ export interface ApiHomePageHomePage extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiLaboratoriesPageLaboratoriesPage
+  extends Struct.SingleTypeSchema {
+  collectionName: 'laboratories_pages';
+  info: {
+    description: 'Content for the laboratories listing page and UI translations';
+    displayName: 'Laboratories Page';
+    pluralName: 'laboratories-pages';
+    singularName: 'laboratories-page';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    allDepartments: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'All Departments'>;
+    allThemes: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'All Themes'>;
+    body: Schema.Attribute.DynamicZone<
+      [
+        'shared.cta',
+        'shared.card-grid',
+        'shared.card',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.separator',
+      ]
+    > &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    emptyState: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'No laboratories match your criteria.'>;
+    heroImage: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::laboratories-page.laboratories-page'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    resultsCount: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Found {count} laboratory'>;
+    resultsCountPlural: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Found {count} laboratories'>;
+    searchPlaceholder: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Search laboratories...'>;
+    subtitle: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<'Laboratories & Spaces'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiLaboratoryLaboratory extends Struct.CollectionTypeSchema {
+  collectionName: 'laboratories';
+  info: {
+    description: 'Research laboratories and sponsored spaces';
+    displayName: 'Laboratory';
+    pluralName: 'laboratories';
+    singularName: 'laboratory';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    body: Schema.Attribute.DynamicZone<
+      [
+        'shared.cta',
+        'shared.card-grid',
+        'shared.card',
+        'shared.focus-item',
+        'shared.section',
+        'shared.rich-text',
+        'shared.media',
+        'shared.slider',
+        'shared.separator',
+      ]
+    > &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bookingUrl: Schema.Attribute.String;
+    capacity: Schema.Attribute.Integer;
+    contactEmail: Schema.Attribute.Email;
+    coordinator: Schema.Attribute.Relation<'manyToOne', 'api::person.person'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    departments: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::department.department'
+    >;
+    gallery: Schema.Attribute.Media<'images', true>;
+    heroImage: Schema.Attribute.Media<'images'>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::laboratory.laboratory'
+    >;
+    openHours: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    partners: Schema.Attribute.Relation<'manyToMany', 'api::partner.partner'>;
+    projects: Schema.Attribute.Relation<'manyToMany', 'api::project.project'>;
+    publishedAt: Schema.Attribute.DateTime;
+    researchers: Schema.Attribute.Relation<'manyToMany', 'api::person.person'>;
+    researchThemes: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::research-theme.research-theme'
+    >;
+    roomNumber: Schema.Attribute.String;
+    slug: Schema.Attribute.UID<'title'>;
+    summary: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    videoDescription: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    videoFile: Schema.Attribute.Media<'videos' | 'files'>;
+    videoPoster: Schema.Attribute.Media<'images'>;
+    videoTitle: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    videoUrl: Schema.Attribute.String;
+    virtualTour360Url: Schema.Attribute.String;
+  };
+}
+
 export interface ApiMediaPageMediaPage extends Struct.SingleTypeSchema {
   collectionName: 'media_pages';
   info: {
@@ -2555,7 +2767,8 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    author: Schema.Attribute.Relation<'manyToOne', 'api::person.person'>;
+    author: Schema.Attribute.Relation<'manyToOne', 'api::person.person'> &
+      Schema.Attribute.Required;
     body: Schema.Attribute.DynamicZone<
       [
         'shared.section',
@@ -2587,9 +2800,10 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     featuredPeople: Schema.Attribute.Relation<
       'manyToMany',
       'api::person.person'
-    >;
+    > &
+      Schema.Attribute.Required;
     gallery: Schema.Attribute.Media<'images', true>;
-    heroImage: Schema.Attribute.Media<'images'>;
+    heroImage: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     linkUrl: Schema.Attribute.String;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
@@ -2597,17 +2811,20 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
       'api::news-article.news-article'
     >;
     publishedAt: Schema.Attribute.DateTime;
-    publishedDate: Schema.Attribute.Date;
+    publishedDate: Schema.Attribute.Date & Schema.Attribute.Required;
     relatedDepartments: Schema.Attribute.Relation<
       'manyToMany',
       'api::department.department'
-    >;
+    > &
+      Schema.Attribute.Required;
     relatedProjects: Schema.Attribute.Relation<
       'manyToMany',
       'api::project.project'
-    >;
+    > &
+      Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'>;
     summary: Schema.Attribute.Text &
+      Schema.Attribute.Required &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -3193,6 +3410,10 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
         };
       }>;
     heroImage: Schema.Attribute.Media<'images'>;
+    laboratories: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::laboratory.laboratory'
+    >;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -5919,6 +6140,8 @@ declare module '@strapi/strapi' {
       'api::graph-macro.graph-macro': ApiGraphMacroGraphMacro;
       'api::graph-meso.graph-meso': ApiGraphMesoGraphMeso;
       'api::home-page.home-page': ApiHomePageHomePage;
+      'api::laboratories-page.laboratories-page': ApiLaboratoriesPageLaboratoriesPage;
+      'api::laboratory.laboratory': ApiLaboratoryLaboratory;
       'api::media-page.media-page': ApiMediaPageMediaPage;
       'api::news-article.news-article': ApiNewsArticleNewsArticle;
       'api::news-page.news-page': ApiNewsPageNewsPage;

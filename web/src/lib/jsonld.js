@@ -218,6 +218,48 @@ export function eventJsonLd(event) {
   return data;
 }
 
+// ─── Laboratory ─────────────────────────────────────────────────────────────
+
+export function laboratoryJsonLd(lab) {
+  if (!lab) return null;
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    name: lab.title,
+    description: lab.summary,
+    url: `${SITE_URL}/research/laboratories/${lab.slug}`,
+    containedInPlace: {
+      "@type": "ResearchOrganization",
+      name: ORG_NAME,
+      url: SITE_URL,
+    },
+  };
+
+  if (lab.heroImage) data.image = lab.heroImage;
+  if (lab.roomNumber) data.branchCode = lab.roomNumber;
+
+  if (lab.hasVideo && (lab.videoFile || lab.videoUrl)) {
+    data.subjectOf = {
+      "@type": "VideoObject",
+      name: lab.videoTitle || `${lab.title} Video Tour`,
+      description: lab.videoDescription || lab.summary,
+      thumbnailUrl: lab.videoPoster?.url || lab.videoPoster || lab.heroImage,
+      contentUrl: lab.videoFile?.url || lab.videoFile || lab.videoUrl,
+      uploadDate: new Date().toISOString(),
+    };
+  }
+
+  if (lab.partners?.length) {
+    data.sponsor = lab.partners.map((p) => ({
+      "@type": "Organization",
+      name: p.name,
+      url: p.website || undefined,
+    }));
+  }
+
+  return data;
+}
+
 // ─── BreadcrumbList ──────────────────────────────────────────────────────────
 
 export function breadcrumbJsonLd(items) {

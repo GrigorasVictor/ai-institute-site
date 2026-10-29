@@ -1,6 +1,6 @@
 # Production Guide: Running the i18n Data Migration Script
 
-This guide explains how to run the internationalization (i18n) and static content migration script on a production server running containerized images via [`docker-compose.prod.yml`](../docker-compose.prod.yml).
+This guide explains how to run the internationalization (i18n) and static content migration script on a production server running containerized images via [`compose.prod.yaml`](../compose.prod.yaml).
 
 ---
 
@@ -28,16 +28,16 @@ On your production server, pull the latest images and restart the containers:
 cd /path/to/ai-institute-site
 
 # Pull the newly published images from GHCR
-docker compose -f docker-compose.prod.yml pull strapi nextjs
+docker compose -f compose.prod.yaml pull strapi nextjs
 
 # Start or recreate the containers
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f compose.prod.yaml up -d
 ```
 
 Check the Strapi logs to confirm that the server has started and database schemas have synchronized:
 
 ```bash
-docker compose -f docker-compose.prod.yml logs -f --tail=100 strapi
+docker compose -f compose.prod.yaml logs -f --tail=100 strapi
 ```
 *(Wait until you see `[INFO] Server started...` or similar in the log output).*
 
@@ -52,12 +52,12 @@ Choose one of the following methods depending on whether your services are alrea
 Since the `strapi` service is already running and connected to PostgreSQL, execute the script directly inside the active container:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec strapi npm run migrate:i18n
+docker compose -f compose.prod.yaml exec strapi npm run migrate:i18n
 ```
 
 *Or invoke node directly:*
 ```bash
-docker compose -f docker-compose.prod.yml exec strapi node scripts/migrate-i18n.js
+docker compose -f compose.prod.yaml exec strapi node scripts/migrate-i18n.js
 ```
 
 #### Method B: One-Off Ephemeral Container
@@ -65,7 +65,7 @@ docker compose -f docker-compose.prod.yml exec strapi node scripts/migrate-i18n.
 If Strapi is stopped or you prefer running the migration in an isolated container instance before launching the web server:
 
 ```bash
-docker compose -f docker-compose.prod.yml run --rm strapi npm run migrate:i18n
+docker compose -f compose.prod.yaml run --rm strapi npm run migrate:i18n
 ```
 
 This starts a temporary container on the same network with all environment variables, runs the migration, writes the data to the shared PostgreSQL volume, and automatically deletes the container (`--rm`).
@@ -142,14 +142,14 @@ If authors have updated translation JSON files on the host and you wish to run t
 
 ```bash
 # Copy your custom JSON files from the host into the running container
-docker cp ./path/to/my/messages/. $(docker compose -f docker-compose.prod.yml ps -q strapi):/app/messages/
+docker cp ./path/to/my/messages/. $(docker compose -f compose.prod.yaml ps -q strapi):/app/messages/
 
 # Run the migration
-docker compose -f docker-compose.prod.yml exec strapi npm run migrate:i18n
+docker compose -f compose.prod.yaml exec strapi npm run migrate:i18n
 ```
 
 ### Clearing Next.js Fetch Cache
 If the Next.js frontend has cached previous API responses:
 ```bash
-docker compose -f docker-compose.prod.yml restart nextjs
+docker compose -f compose.prod.yaml restart nextjs
 ```

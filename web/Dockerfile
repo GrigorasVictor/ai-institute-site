@@ -1,0 +1,44 @@
+# Defaults to AWS ECR Public for local builds. CI overrides NODE_IMAGE to point
+# at the GHCR mirror, so it never pulls from Docker Hub or ECR Public.
+ARG NODE_IMAGE=public.ecr.aws/docker/library/node:22-alpine
+FROM ${NODE_IMAGE} AS base
+
+RUN apk update && apk upgrade --no-cache
+
+# Set the working directory in the container
+WORKDIR /app
+
+# STAGE 1 - install deps and build assets
+FROM base AS builder
+
+# Copy the package.json and package-lock.json files to the working directory
+COPY package*.json ./
+
+# Install the application dependencies
+RUN npm ci
+
+# Copy the application code to the working directory
+COPY . .
+
+# ARGs must be redeclared in the stage they are used
+ARG NEXT_PUBLIC_STRAPI_URL
+ENV NEXT_PUBLIC_STRAPI_URL=$NEXT_PUBLIC_STRAPI_URL
+
+# Build the Next.js application for production
+RUN npm run build
+
+# STAGE 2 - assemble the runtime image
+FROM base AS runner
+
+# Copy the production build and node_modules from the builder stage
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/next.config.mjs ./
+
+# Expose the port that the application will run on
+EXPOSE 3000
+
+# Set the command to start the application
+CMD ["npm", "start"]

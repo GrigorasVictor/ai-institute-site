@@ -1,0 +1,117 @@
+{
+  "kind": "singleType",
+  "collectionName": "laboratories_pages",
+  "info": {
+    "singularName": "laboratories-page",
+    "pluralName": "laboratories-pages",
+    "displayName": "Laboratories Page",
+    "description": "Content for the laboratories listing page and UI translations"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Laboratories & Spaces",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "subtitle": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "searchPlaceholder": {
+      "type": "string",
+      "default": "Search laboratories...",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "allDepartments": {
+      "type": "string",
+      "default": "All Departments",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "allThemes": {
+      "type": "string",
+      "default": "All Themes",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "resultsCount": {
+      "type": "string",
+      "default": "Found {count} laboratory",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "resultsCountPlural": {
+      "type": "string",
+      "default": "Found {count} laboratories",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "emptyState": {
+      "type": "string",
+      "default": "No laboratories match your criteria.",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "body": {
+      "type": "dynamiczone",
+      "components": [
+        "shared.cta",
+        "shared.card-grid",
+        "shared.card",
+        "shared.focus-item",
+        "shared.section",
+        "shared.rich-text",
+        "shared.media",
+        "shared.slider",
+        "shared.separator"
+      ],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}

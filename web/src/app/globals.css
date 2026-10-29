@@ -301,3 +301,127 @@
   color: var(--icia-date) !important;
   font-weight: 600;
 }
+
+
+/* ============================================
+   PRINT & PDF EXPORT STYLES
+   ============================================ */
+
+@media print {
+  @page {
+    margin: 1.5cm;
+    size: auto;
+  }
+
+  /* Hide navigation, footers, interactive buttons, share utilities, and overlays */
+  nav,
+  footer,
+  aside,
+  button,
+  .print\:hidden,
+  [data-print-hidden="true"],
+  .bg-gradient-to-t,
+  /* Hide slideshow buttons, thumbnails, expand icons and floating counters */
+  [aria-label="Open fullscreen"],
+  [aria-label="Previous image"],
+  [aria-label="Next image"],
+  [class*="aspect-"] button,
+  [class*="aspect-"] > div[class*="rounded-full"],
+  .aspect-video + div {
+    display: none !important;
+  }
+
+  /* Reset layout for clean paper and PDF export */
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Prevent page breaks inside sections, headings, images, and figure blocks */
+  section,
+  article,
+  figure,
+  header,
+  table,
+  [class*="aspect-"],
+  .aspect-video {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Keep headings with their following content */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Ensure images never get cut across page splits and maintain aspect ratio */
+  img {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  /* Allow containers to size naturally for print */
+  .aspect-video,
+  [class*="aspect-"] {
+    aspect-ratio: auto !important;
+    height: auto !important;
+    max-height: 480px !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  .aspect-video img,
+  [class*="aspect-"] img {
+    position: static !important;
+    max-height: 460px !important;
+    width: auto !important;
+    margin: 0 auto !important;
+    border-radius: 8px !important;
+  }
+
+  /* Remove heavy shadows */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Print Gallery Grid */
+  .print-gallery-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12pt !important;
+    margin: 12pt 0 !important;
+    break-inside: auto !important;
+  }
+
+  .print-gallery-item {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 6pt !important;
+    padding: 6pt !important;
+    background: #ffffff !important;
+  }
+
+  .print-gallery-item img {
+    width: 100% !important;
+    height: 140pt !important;
+    max-height: 140pt !important;
+    object-fit: cover !important;
+    border-radius: 4pt !important;
+  }
+
+  /* Clear links for reading */
+  a {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+  }
+}

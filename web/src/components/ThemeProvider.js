@@ -1,6 +1,13 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  applyThemeClass,
+  DARK_THEME,
+  getPreferredTheme,
+  LIGHT_THEME,
+  THEME_KEY,
+} from "@/lib/theme";
 
 const ThemeContext = createContext({
   theme: "light",
@@ -9,46 +16,32 @@ const ThemeContext = createContext({
   toggleTheme: () => {},
 });
 
-const THEME_KEY = "theme";
-
-const getPreferredTheme = () => {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem(THEME_KEY);
-  if (stored === "dark" || stored === "light") return stored;
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  return prefersDark ? "dark" : "light";
-};
-
-const applyThemeClass = (nextTheme) => {
-  if (typeof document === "undefined") return;
-  const isDark = nextTheme === "dark";
-  document.documentElement.classList.toggle("dark", isDark);
-  document.documentElement.dataset.theme = nextTheme;
-};
-
 export default function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(LIGHT_THEME);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize from storage/media once on mount
   useEffect(() => {
     const initial = getPreferredTheme();
     setTheme(initial);
     applyThemeClass(initial);
+    setIsInitialized(true);
   }, []);
 
   // Persist and apply when theme changes
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isInitialized || typeof window === "undefined") return;
     window.localStorage.setItem(THEME_KEY, theme);
     applyThemeClass(theme);
-  }, [theme]);
+  }, [isInitialized, theme]);
 
   const value = useMemo(
     () => ({
       theme,
-      isDark: theme === "dark",
+      isDark: theme === DARK_THEME,
       setTheme,
-      toggleTheme: () => setTheme((prev) => (prev === "dark" ? "light" : "dark")),
+      toggleTheme: () =>
+        setTheme((prev) => (prev === DARK_THEME ? LIGHT_THEME : DARK_THEME)),
     }),
     [theme]
   );

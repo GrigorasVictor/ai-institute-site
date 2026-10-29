@@ -8,12 +8,13 @@ WORKDIR /app
 
 # Install dependencies first (cached layer — only re-runs if package.json changes)
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the source (will be overwritten by `docker compose watch` syncs)
 COPY . .
 
 EXPOSE 1337
 
-# Run in develop mode: watches for source changes and reloads automatically
-CMD ["npm", "run", "develop"]
+# Vite's optimized admin chunks are generated in node_modules/.strapi and can
+# reference hashes from a previous dependency or Strapi build.
+CMD ["sh", "-c", "rm -rf /app/node_modules/.strapi/vite /app/node_modules/.strapi/deps-check.hash && npm run develop"]

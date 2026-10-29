@@ -22,7 +22,7 @@ export default async function Home() {
 
   let latestNews = [];
   try {
-    const newsData = await getNewsArticles({ pageSize: 3, locale });
+    const newsData = await getNewsArticles({ pageSize: 6, locale });
     latestNews = transformNewsData(newsData);
   } catch (error) {
     console.error("Failed to fetch news for homepage:", error);
@@ -189,7 +189,7 @@ export default async function Home() {
                   <div className="relative h-40 overflow-hidden">
                     <Image
                       src={article.image}
-                      alt={article.title}
+                      alt={article.imageAlt || article.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       unoptimized

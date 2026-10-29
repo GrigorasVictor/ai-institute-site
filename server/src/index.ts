@@ -13,6 +13,7 @@ const SLUG_COLLECTIONS = [
   "api::research-theme.research-theme",
   "api::resource.resource",
   "api::team.team",
+  "api::laboratory.laboratory",
 ];
 
 const generateSlug = (str: any) =>
@@ -193,6 +194,8 @@ export default {
         "api::search-page.search-page",
         "api::timeline-page.timeline-page",
         "api::events-page.events-page",
+        "api::laboratory.laboratory",
+        "api::laboratories-page.laboratories-page",
       ];
 
       let addedCount = 0;

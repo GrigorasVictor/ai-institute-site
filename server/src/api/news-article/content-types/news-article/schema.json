@@ -32,6 +32,7 @@
     },
     "summary": {
       "type": "text",
+      "required": true,
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -51,10 +52,12 @@
       "default": "announcement"
     },
     "publishedDate": {
-      "type": "date"
+      "type": "date",
+      "required": true
     },
     "heroImage": {
       "type": "media",
+      "required": true,
       "multiple": false,
       "allowedTypes": [
         "images"
@@ -90,22 +93,26 @@
     },
     "relatedDepartments": {
       "type": "relation",
+      "required": true,
       "relation": "manyToMany",
       "target": "api::department.department"
     },
     "relatedProjects": {
       "type": "relation",
+      "required": true,
       "relation": "manyToMany",
       "target": "api::project.project",
       "inversedBy": "news"
     },
     "featuredPeople": {
       "type": "relation",
+      "required": true,
       "relation": "manyToMany",
       "target": "api::person.person"
     },
     "author": {
       "type": "relation",
+      "required": true,
       "relation": "manyToOne",
       "target": "api::person.person"
     }

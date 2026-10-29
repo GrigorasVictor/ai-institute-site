@@ -1,0 +1,120 @@
+name: Mirror upstream images
+
+# Copies every upstream base image used by the build pipeline into GHCR.
+#
+# Anonymous pulls are rate-limited per source IP: Docker Hub limits pulls, and
+# ECR Public caps anonymous use at 500 GB/month (GitHub-hosted runners share
+# IPs with everyone else). Mirrored tags are pinned, so once a copy exists CI
+# only talks to GHCR. The deploy pipeline calls this before building to make
+# sure the tags exist; the scheduled workflow refreshes them weekly.
+#
+# Upstream sources are tried in order: Docker Hub, Google's Docker Hub mirror,
+# then ECR Public (skipped for images that are not published there).
+
+on:
+  workflow_call:
+    inputs:
+      force:
+        description: Re-copy the images even when the GHCR tags already exist.
+        required: false
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  # Keep these in sync with the ARG defaults in the Dockerfiles and with the
+  # versions in _build-image.yml.
+  NODE_VERSION: 22-alpine
+  PYTHON_VERSION: 3.12-slim
+  # Keep this in sync with the FROM line in snipe-it/Dockerfile.
+  SNIPE_IT_VERSION: v8.8.3
+  # Keep this in sync with BUILDKIT_VERSION in _build-image.yml.
+  BUILDKIT_VERSION: v0.34.1
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Downcase repository name
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >>"$GITHUB_ENV"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mirror images
+        run: |
+          set -euo pipefail
+          force='${{ inputs.force }}'
+
+          # Copy to the GHCR tag in $1, trying each remaining argument as a
+          # source. Google's Docker Hub cache is tried first because it has no
+          # anonymous quota for these images; Docker Hub and ECR Public are
+          # fallbacks (ECR caps anonymous use at 500 GB/month).
+          mirror() {
+            local dst="$1"
+            shift
+
+            if [ "$force" != "true" ] && docker buildx imagetools inspect "$dst" >/dev/null 2>&1; then
+              echo "Already mirrored: $dst"
+              return 0
+            fi
+
+            local src attempt
+            for src in "$@"; do
+              attempt=1
+              while true; do
+                if docker buildx imagetools create --tag "$dst" "$src"; then
+                  echo "Mirrored $dst from $src"
+                  return 0
+                fi
+                if [ "$attempt" -ge 3 ]; then
+                  echo "::warning::Failed to mirror from $src after $attempt attempts"
+                  break
+                fi
+                echo "Attempt $attempt failed for $src; retrying in $((attempt * 15))s..."
+                sleep $((attempt * 15))
+                attempt=$((attempt + 1))
+              done
+            done
+
+            echo "::error::Could not mirror $dst from any source"
+            return 1
+          }
+
+          mirror "${REGISTRY}/${IMAGE_NAME}/mirror/node:${NODE_VERSION}" \
+            "mirror.gcr.io/library/node:${NODE_VERSION}" \
+            "docker.io/library/node:${NODE_VERSION}" \
+            "public.ecr.aws/docker/library/node:${NODE_VERSION}"
+
+          mirror "${REGISTRY}/${IMAGE_NAME}/mirror/python:${PYTHON_VERSION}" \
+            "mirror.gcr.io/library/python:${PYTHON_VERSION}" \
+            "docker.io/library/python:${PYTHON_VERSION}" \
+            "public.ecr.aws/docker/library/python:${PYTHON_VERSION}"
+
+          mirror "${REGISTRY}/${IMAGE_NAME}/mirror/snipe-it:${SNIPE_IT_VERSION}" \
+            "mirror.gcr.io/snipe/snipe-it:${SNIPE_IT_VERSION}" \
+            "docker.io/snipe/snipe-it:${SNIPE_IT_VERSION}"
+
+          mirror "${REGISTRY}/${IMAGE_NAME}/mirror/buildkit:${BUILDKIT_VERSION}" \
+            "mirror.gcr.io/moby/buildkit:${BUILDKIT_VERSION}" \
+            "docker.io/moby/buildkit:${BUILDKIT_VERSION}"
+
+      - name: Verify mirrors
+        run: |
+          docker buildx imagetools inspect \
+            "${REGISTRY}/${IMAGE_NAME}/mirror/node:${NODE_VERSION}"
+          docker buildx imagetools inspect \
+            "${REGISTRY}/${IMAGE_NAME}/mirror/python:${PYTHON_VERSION}"
+          docker buildx imagetools inspect \
+            "${REGISTRY}/${IMAGE_NAME}/mirror/snipe-it:${SNIPE_IT_VERSION}"
+          docker buildx imagetools inspect \
+            "${REGISTRY}/${IMAGE_NAME}/mirror/buildkit:${BUILDKIT_VERSION}"
