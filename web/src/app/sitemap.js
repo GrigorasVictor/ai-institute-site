@@ -19,6 +19,14 @@ import {
 
 const SITE_URL = "https://airi.utcluj.ro";
 
+const escapeXml = (value) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
 /**
  * Dynamic sitemap generated from Strapi content.
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap
@@ -137,5 +145,8 @@ export default async function sitemap() {
     console.error("Sitemap: failed to fetch dynamic content from Strapi", error);
   }
 
-  return [...staticPages, ...dynamicPages];
+  return [...staticPages, ...dynamicPages].map((page) => ({
+    ...page,
+    url: escapeXml(page.url),
+  }));
 }
