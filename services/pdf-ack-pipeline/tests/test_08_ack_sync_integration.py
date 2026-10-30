@@ -7,11 +7,13 @@ Tests the complete pipeline using in-memory queues:
 - ACK_MAX_PAPERS_PER_RUN batch limit stopping cleanly
 - Stale QUEUED task recovery on startup
 - Skipping already processed papers on second run
+- Full SQLite (COMPLETED) -> Strapi PUT by PDF link -> SQLite (SYNCED_TO_STRAPI) flow
 """
 
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from helpers import InMemoryQueueBridge, create_sample_pdf_file, make_test_config
 from coordinator_service.ack_sync import run_ack_sync
@@ -22,6 +24,7 @@ from shared.schemas import ResultMessage, TaskMessage, TaskStatus
 def mock_worker_success(task: TaskMessage) -> ResultMessage:
     return ResultMessage(
         paper_id=task.paper_id,
+        pdf_path=task.pdf_path,
         file_hash=task.file_hash,
         status=TaskStatus.SUCCESS,
         acknowledgment_text="Acknowledging support from National Research Grant 999.",
@@ -68,6 +71,43 @@ class TestAckSyncIntegration(unittest.TestCase):
             self.assertEqual(stats2["completed"], 0)
             self.assertEqual(stats2["skipped"], 1)
             self.assertEqual(bridge.attempts_made, 2)  # No new queue publish
+
+    def test_sync_url_saves_to_sqlite_then_strapi_and_marks_synced(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            pdf_url = "https://airi.utcluj.ro/strapi/uploads/paper_horizon.pdf"
+            cfg = make_test_config(
+                tmp_path,
+                max_papers=0,
+                retry_timeout=1,
+                max_retries=2,
+                test_urls=(pdf_url,),
+            )
+
+            tracker = StateTracker(db_path=cfg.state_db_path)
+            bridge = InMemoryQueueBridge(worker_handler=mock_worker_success)
+
+            mock_strapi = MagicMock()
+            mock_strapi.sync_acknowledgment_by_pdf_url.return_value = "real-strapi-doc-id"
+
+            with patch("coordinator_service.ack_sync.resolve_pdf_hash", return_value="sha256-horizon-123"):
+                stats = run_ack_sync(
+                    config=cfg,
+                    tracker=tracker,
+                    queue=bridge,
+                    strapi_client=mock_strapi,
+                )
+
+            self.assertEqual(stats["completed"], 1)
+            mock_strapi.sync_acknowledgment_by_pdf_url.assert_called_once_with(
+                pdf_path=pdf_url,
+                acknowledgment_text="Acknowledging support from National Research Grant 999.",
+            )
+
+            records = tracker.list_all()
+            self.assertEqual(len(records), 1)
+            self.assertEqual(records[0]["pdf_path"], pdf_url)
+            self.assertEqual(records[0]["status"], PaperStatus.SYNCED_TO_STRAPI)
 
     def test_sync_max_papers_limit(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

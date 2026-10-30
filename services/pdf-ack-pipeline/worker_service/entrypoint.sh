@@ -38,6 +38,11 @@ emit_cron_env() {
 	emit_cron_env AI_BI_THRESHOLD
 	emit_cron_env AI_CROSS_THRESHOLD
 	emit_cron_env AI_TOP_K
+	emit_cron_env AI_SLM_ENABLED
+	emit_cron_env AI_SLM_MODEL
+	emit_cron_env AI_SLM_PROMPT_FILE
+	emit_cron_env AI_SLM_MAX_NEW_TOKENS
+	emit_cron_env AI_SLM_TEMPERATURE
 	emit_cron_env WORKER_POLL_INTERVAL_SECONDS
 	emit_cron_env WORKER_IDLE_EXIT_SECONDS
 	emit_cron_env ACK_MAX_PAPERS_PER_RUN

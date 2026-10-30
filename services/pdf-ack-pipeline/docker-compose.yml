@@ -10,7 +10,8 @@ services:
              mkdir -p /data/state &&
              sqlite3 /data/state/processed_papers.db '
                PRAGMA journal_mode=WAL;
-               CREATE TABLE IF NOT EXISTS processed_papers (\n                 paper_id TEXT PRIMARY KEY,
+               CREATE TABLE IF NOT EXISTS processed_papers (
+                 paper_id TEXT PRIMARY KEY,
                  pdf_path TEXT NOT NULL DEFAULT \"\",
                  file_hash TEXT NOT NULL,
                  status TEXT NOT NULL,
@@ -59,10 +60,11 @@ services:
       context: .
       dockerfile: ./worker_service/Dockerfile
     container_name: pdf-ack-worker
+    network_mode: host
     restart: unless-stopped
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-localhost}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
@@ -79,13 +81,19 @@ services:
       AI_CROSS_THRESHOLD: ${AI_CROSS_THRESHOLD:-0.05}
       AI_TOP_K: ${AI_TOP_K:-5}
 
+      AI_SLM_ENABLED: ${AI_SLM_ENABLED:-true}
+      AI_SLM_MODEL: ${AI_SLM_MODEL:-Qwen/Qwen3.5-0.8B}
+      AI_SLM_PROMPT_FILE: ${AI_SLM_PROMPT_FILE:-/app/worker_service/semantic_data/slm_cleanup_prompt.txt}
+      AI_SLM_MAX_NEW_TOKENS: ${AI_SLM_MAX_NEW_TOKENS:-512}
+      AI_SLM_TEMPERATURE: ${AI_SLM_TEMPERATURE:-0.2}
+
       WORKER_POLL_INTERVAL_SECONDS: ${WORKER_POLL_INTERVAL_SECONDS:-5}
       WORKER_IDLE_EXIT_SECONDS: ${WORKER_IDLE_EXIT_SECONDS:-60}
-      ACK_MAX_PAPERS_PER_RUN: ${ACK_MAX_PAPERS_PER_RUN:-5}
+      ACK_MAX_PAPERS_PER_RUN: ${ACK_MAX_PAPERS_PER_RUN:-0}
       ACK_SYNC_CRON: ${ACK_SYNC_CRON:-0 2 * * 6}
       ACK_SYNC_TZ: ${ACK_SYNC_TZ:-UTC}
       ACK_RUN_ON_STARTUP: ${ACK_RUN_ON_STARTUP:-true}
-      OMP_NUM_THREADS: 2
+      OMP_NUM_THREADS: 4
     volumes:
       - ./worker_service/.model_cache:/app/worker_service/.model_cache
     depends_on:
@@ -97,10 +105,11 @@ services:
       context: .
       dockerfile: ./coordinator_service/Dockerfile
     container_name: pdf-ack-coordinator
+    network_mode: host
     restart: unless-stopped
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-localhost}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
@@ -119,12 +128,12 @@ services:
       STRAPI_TIMEOUT_SECONDS: ${STRAPI_TIMEOUT_SECONDS:-30}
       COMPUTE_SHA256_STREAM: ${COMPUTE_SHA256_STREAM:-true}
       ACK_TEST_PDF_URLS: ${ACK_TEST_PDF_URLS:-}
-      ACK_MAX_PAPERS_PER_RUN: ${ACK_MAX_PAPERS_PER_RUN:-5}
+      ACK_MAX_PAPERS_PER_RUN: ${ACK_MAX_PAPERS_PER_RUN:-0}
 
       ACK_SYNC_CRON: ${ACK_SYNC_CRON:-0 2 * * 6}
       ACK_SYNC_TZ: ${ACK_SYNC_TZ:-UTC}
       ACK_RUN_ON_STARTUP: ${ACK_RUN_ON_STARTUP:-true}
-      TASK_RETRY_TIMEOUT_SECONDS: ${TASK_RETRY_TIMEOUT_SECONDS:-120}
+      TASK_RETRY_TIMEOUT_SECONDS: ${TASK_RETRY_TIMEOUT_SECONDS:-300}
       MAX_TASK_RETRIES: ${MAX_TASK_RETRIES:-3}
       COORDINATOR_RESULT_POLL_SECONDS: ${COORDINATOR_RESULT_POLL_SECONDS:-1.0}
     volumes:

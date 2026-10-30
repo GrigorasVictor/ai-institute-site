@@ -11,10 +11,73 @@ from result_consumer import drain_results_queue, wait_for_paper_result
 from shared.config import PipelineConfig, settings
 from shared.queue_manager import QueueManager
 from shared.schemas import TaskMessage
-from state_tracker import StateTracker
-from utils import StrapiAckClient, compute_text_sha256, resolve_pdf_hash
+from state_tracker import PaperStatus, StateTracker
+from utils import (
+    StrapiAckClient,
+    compute_text_sha256,
+    is_http_url,
+    resolve_pdf_hash,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def build_strapi_client(config: PipelineConfig = settings) -> StrapiAckClient:
+    """Creates a StrapiAckClient configured from `PipelineConfig`."""
+    strapi_base = config.strapi_internal_url or config.strapi_url or config.public_strapi_url
+    media_base = config.public_strapi_url or strapi_base
+    return StrapiAckClient(
+        api_base_url=strapi_base,
+        token=config.strapi_api_token,
+        media_base_url=media_base,
+        page_size=config.strapi_page_size,
+        timeout=config.strapi_timeout_seconds,
+    )
+
+
+def sync_pending_completed_to_strapi(
+    tracker: StateTracker,
+    strapi_client: Optional[StrapiAckClient],
+) -> int:
+    """
+    Finds any records in SQLite that have `status = 'COMPLETED'` and a non-empty
+    `acknowledgment_text`, looks up their publication in Strapi by `pdf_path` link,
+    updates the `acknowledgment` field in Strapi, and promotes their SQLite status
+    to `SYNCED_TO_STRAPI`.
+    """
+    if strapi_client is None:
+        return 0
+
+    unsynced = tracker.get_unsynced_completed_papers()
+    synced_count = 0
+    for row in unsynced:
+        pdf_path = row.get("pdf_path") or ""
+        ack_text = (row.get("acknowledgment_text") or "").strip()
+        if not pdf_path or not ack_text or not is_http_url(pdf_path):
+            continue
+
+        synced_doc_id = strapi_client.sync_acknowledgment_by_pdf_url(
+            pdf_path=pdf_path,
+            acknowledgment_text=ack_text,
+            fallback_document_id=row.get("paper_id"),
+        )
+        if synced_doc_id:
+            tracker.mark_as_synced_to_strapi(row["paper_id"])
+            synced_count += 1
+            logger.info(
+                "[SYNCED_TO_STRAPI] paper_id='%s' -> Strapi documentId='%s' (pdf='%s').",
+                row["paper_id"],
+                synced_doc_id,
+                pdf_path,
+            )
+        else:
+            logger.warning(
+                "Could not sync acknowledgment for paper_id='%s' (pdf='%s') to Strapi.",
+                row["paper_id"],
+                pdf_path,
+            )
+
+    return synced_count
 
 
 def iter_candidate_papers(
@@ -23,25 +86,25 @@ def iter_candidate_papers(
     override_pdf_urls: Optional[List[str]] = None,
 ) -> Iterator[Dict[str, Any]]:
     """
-    Yields candidate papers one by one from:
-    1. Explicit CLI `override_pdf_urls` (if provided)
-    2. `ACK_TEST_PDF_URLS` configured in `.env` (if non-empty)
-    3. Local `.pdf` files in `PDF_STORAGE_DIR` (if any exist)
-    4. Public Strapi `/api/publications` via read-only `StrapiAckClient`
+    Yields publication dictionaries `{paper_id, title, pdf_path, strapi_hash}` to process.
+    Precedence:
+    1. `override_pdf_urls` (CLI `--pdf-url`)
+    2. `config.ack_test_pdf_urls` (if non-empty)
+    3. Local PDFs in `config.pdf_storage_dir` (if non-empty)
+    4. Strapi publications via `StrapiAckClient.iter_publications_with_pdfs()`
     """
-    urls_to_use = list(override_pdf_urls) if override_pdf_urls else list(config.ack_test_pdf_urls)
-    if urls_to_use:
-        logger.info("Reading %d PDF URL(s) from test configuration...", len(urls_to_use))
-        for idx, raw_url in enumerate(urls_to_use, start=1):
-            clean_url = raw_url.strip()
-            if not clean_url:
+    urls = override_pdf_urls if override_pdf_urls is not None else config.ack_test_pdf_urls
+    if urls:
+        logger.info("Using %d test PDF URL(s) from configuration.", len(urls))
+        for raw_url in urls:
+            url = raw_url.strip()
+            if not url:
                 continue
-            name_slug = clean_url.rstrip("/").split("/")[-1].replace(".pdf", "") or f"test-paper-{idx}"
-            paper_id = f"test-{name_slug}-{compute_text_sha256(clean_url)[:8]}"
+            synthetic_id = compute_text_sha256(url)[:24]
             yield {
-                "paper_id": paper_id,
-                "title": name_slug,
-                "pdf_path": clean_url,
+                "paper_id": synthetic_id,
+                "title": url.split("/")[-1] or synthetic_id,
+                "pdf_path": url,
                 "strapi_hash": None,
             }
         return
@@ -59,15 +122,8 @@ def iter_candidate_papers(
                 }
             return
 
-    strapi_base = config.public_strapi_url or config.strapi_internal_url or config.strapi_url
-    logger.info("Fetching publications with PDFs from public Strapi: %s/api/publications", strapi_base)
-    client = strapi_client or StrapiAckClient(
-        api_base_url=strapi_base,
-        token=config.strapi_api_token,
-        media_base_url=config.public_strapi_url or strapi_base,
-        page_size=config.strapi_page_size,
-        timeout=config.strapi_timeout_seconds,
-    )
+    client = strapi_client or build_strapi_client(config)
+    logger.info("Fetching publications with PDFs from Strapi: %s/publications", client.api_url)
     try:
         yield from client.iter_publications_with_pdfs()
     except Exception as exc:
@@ -79,13 +135,18 @@ def process_single_paper_with_retry(
     tracker: StateTracker,
     queue: QueueManager,
     config: PipelineConfig = settings,
+    strapi_client: Optional[StrapiAckClient] = None,
 ) -> str:
     """
     Processes a single paper end-to-end (1-by-1):
     1. Computes the PDF SHA-256 fingerprint without saving the PDF to disk.
-    2. Checks `tracker.is_already_processed(paper_id, file_hash)`.
+    2. Checks `tracker.is_already_processed(paper_id, file_hash, pdf_path=pdf_path)`.
+       If already `COMPLETED` with an acknowledgment that hasn't been synced to Strapi yet,
+       syncs it to Strapi via `pdf_path` and marks `SYNCED_TO_STRAPI`.
     3. Pushes `TaskMessage` to Queue 1 (`tasks_queue`) and marks it as `QUEUED`.
-    4. Waits for the worker's response on Queue 2 (`results_queue`) and saves to SQLite3.
+    4. Waits for the worker's response on Queue 2 (`results_queue`), saves first to SQLite3
+       (`COMPLETED`), then sends `acknowledgment` to Strapi by `pdf_path` and updates SQLite3
+       to `SYNCED_TO_STRAPI`.
     5. Automatically retries up to `max_task_retries` if the worker crashes or times out.
 
     Returns one of: 'skipped', 'completed', 'failed'.
@@ -103,12 +164,44 @@ def process_single_paper_with_retry(
             compute_stream=config.compute_sha256_stream,
             timeout=config.strapi_timeout_seconds,
         )
-        logger.info("[HASH COMPUTED] paper_id='%s' | file='%s' | sha256=%s", paper_id, pdf_path, file_hash)
     except Exception as exc:
-        logger.error("Failed to compute SHA-256 for paper_id='%s' (%s): %s", paper_id, pdf_path, exc)
+        logger.error(
+            "Failed to access PDF or compute fingerprint for paper_id='%s' (file='%s'): %s",
+            paper_id,
+            pdf_path,
+            exc,
+        )
+        tracker.mark_as_failed(
+            paper_id=paper_id,
+            file_hash="",
+            error_message=f"Fingerprint failed: {exc}",
+            pdf_path=pdf_path,
+        )
         return "failed"
 
-    if tracker.is_already_processed(paper_id, file_hash):
+    logger.info(
+        "[HASH COMPUTED] paper_id='%s' | file='%s' | sha256=%s",
+        paper_id,
+        pdf_path,
+        file_hash,
+    )
+
+    if tracker.is_already_processed(paper_id, file_hash, pdf_path=pdf_path):
+        existing = tracker.get_record(paper_id)
+        if (
+            existing
+            and existing.get("status") == PaperStatus.COMPLETED
+            and existing.get("acknowledgment_text")
+            and strapi_client is not None
+            and is_http_url(pdf_path)
+        ):
+            synced_doc_id = strapi_client.sync_acknowledgment_by_pdf_url(
+                pdf_path=pdf_path,
+                acknowledgment_text=existing["acknowledgment_text"],
+            )
+            if synced_doc_id:
+                tracker.mark_as_synced_to_strapi(paper_id)
+
         logger.info(
             "[SKIP] paper_id='%s' | file='%s' is already processed (hash=%s...).",
             paper_id,
@@ -144,14 +237,18 @@ def process_single_paper_with_retry(
             tracker=tracker,
             timeout_seconds=config.task_retry_timeout_seconds,
             poll_interval=config.coordinator_result_poll_seconds,
+            strapi_client=strapi_client,
         )
 
         if result is not None and result.status.value == "success":
+            final_rec = tracker.get_record(paper_id)
+            final_status = final_rec["status"] if final_rec else PaperStatus.COMPLETED
             ack_preview = (result.acknowledgment_text or "No acknowledgment found")[:100]
             logger.info(
-                "[SAVED TO SQLITE DB] paper_id='%s' | file='%s' | confidence=%s | ack='%s'",
+                "[SAVED TO SQLITE DB] paper_id='%s' | file='%s' | status='%s' | confidence=%s | ack='%s'",
                 paper_id,
                 pdf_path,
+                final_status,
                 f"{result.confidence_score:.4f}" if result.confidence_score is not None else "None",
                 ack_preview,
             )
@@ -163,6 +260,7 @@ def process_single_paper_with_retry(
                     paper_id=paper_id,
                     file_hash=file_hash,
                     error_message=f"Worker timed out after {config.task_retry_timeout_seconds}s (attempt {attempt}/{config.max_task_retries})",
+                    pdf_path=pdf_path,
                 )
             logger.error(
                 "Paper '%s' (file='%s') failed after %d/%d attempts.",
@@ -192,9 +290,10 @@ def run_ack_sync(
 ) -> Dict[str, int]:
     """
     Main synchronization job triggered by cron or CLI:
-    1. Drains any leftover results in `results_queue` into SQLite3.
-    2. Re-queues any stale `QUEUED` tasks from interrupted runs.
-    3. Iterates through candidate PDFs one by one (up to `max_papers` if > 0),
+    1. Drains any leftover results in `results_queue` into SQLite3 (and Strapi).
+    2. Syncs any previously `COMPLETED` SQLite records with acknowledgments to Strapi (`SYNCED_TO_STRAPI`).
+    3. Re-queues any stale `QUEUED` tasks from interrupted runs.
+    4. Iterates through candidate PDFs one by one (up to `max_papers` if > 0),
        dispatching to `worker_service` and persisting results into SQLite3 (`processed_papers.db`).
     """
     own_queue = queue is None
@@ -204,10 +303,12 @@ def run_ack_sync(
         max_retries=config.max_task_retries,
     )
     active_queue = queue or QueueManager(config)
+    active_strapi = strapi_client or build_strapi_client(config)
     limit = max_papers if max_papers is not None else config.ack_max_papers_per_run
 
-    stats = {
+    stats: Dict[str, int] = {
         "drained_on_start": 0,
+        "synced_to_strapi": 0,
         "scanned": 0,
         "completed": 0,
         "skipped": 0,
@@ -215,7 +316,16 @@ def run_ack_sync(
     }
 
     try:
-        stats["drained_on_start"] = drain_results_queue(active_queue, active_tracker)
+        stats["drained_on_start"] = drain_results_queue(
+            queue=active_queue,
+            tracker=active_tracker,
+            strapi_client=active_strapi,
+        )
+
+        stats["synced_to_strapi"] = sync_pending_completed_to_strapi(
+            tracker=active_tracker,
+            strapi_client=active_strapi,
+        )
 
         # First retry any stale QUEUED tasks left over from previous crashed runs
         stale_records = active_tracker.get_stale_queued_papers()
@@ -239,6 +349,7 @@ def run_ack_sync(
                 tracker=active_tracker,
                 queue=active_queue,
                 config=config,
+                strapi_client=active_strapi,
             )
             stats["scanned"] += 1
             stats[outcome] += 1
@@ -246,7 +357,7 @@ def run_ack_sync(
         # Process candidate papers 1-by-1
         for paper in iter_candidate_papers(
             config=config,
-            strapi_client=strapi_client,
+            strapi_client=active_strapi,
             override_pdf_urls=override_pdf_urls,
         ):
             if limit > 0 and (stats["completed"] + stats["failed"]) >= limit:
@@ -262,6 +373,7 @@ def run_ack_sync(
                 tracker=active_tracker,
                 queue=active_queue,
                 config=config,
+                strapi_client=active_strapi,
             )
             stats[outcome] += 1
 

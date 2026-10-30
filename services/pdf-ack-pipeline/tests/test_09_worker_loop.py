@@ -2,6 +2,7 @@
 Integration tests for worker_service lifecycle and batch loop (worker_service/main.py).
 Verifies:
 - Worker process_task returns SUCCESS or FAILED with clean exception handling
+- Worker process_task invokes SLMCleaner when enabled and falls back cleanly
 - Worker loop exits cleanly when max_papers limit is reached
 - Worker loop exits after worker_idle_exit_seconds when the queue is empty
 """
@@ -14,6 +15,7 @@ from unittest.mock import MagicMock, patch
 from helpers import create_sample_pdf_file
 from shared.schemas import ResultMessage, TaskMessage, TaskStatus
 from worker_service.main import process_task, run_worker
+from worker_service.src.slm_cleaner import SLMCleaner
 
 
 class _LoopGuard(BaseException):
@@ -41,6 +43,40 @@ class TestWorkerLoop(unittest.TestCase):
             self.assertEqual(res.status, TaskStatus.SUCCESS)
             self.assertEqual(res.acknowledgment_text, "Supported by grant ABC.")
             self.assertAlmostEqual(res.confidence_score, 0.88, places=2)
+
+    def test_process_task_with_slm_cleaner(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pdf_path = Path(tmp_dir) / "doc.pdf"
+            create_sample_pdf_file(pdf_path, ack_text="Sup- ported by grant ABC. Page 12")
+
+            mock_extractor = MagicMock()
+            mock_extractor.extract.return_value = [
+                {"text": "Sup- ported by grant ABC. Page 12", "confidence": 0.91}
+            ]
+
+            mock_slm = MagicMock()
+            mock_slm.enabled = True
+            mock_slm.clean.return_value = "Supported by grant ABC."
+
+            task = TaskMessage(paper_id="doc-slm", pdf_path=str(pdf_path), file_hash="hash-slm")
+            res = process_task(task, mock_extractor, mock_slm)
+
+            self.assertEqual(res.status, TaskStatus.SUCCESS)
+            self.assertEqual(res.acknowledgment_text, "Supported by grant ABC.")
+            mock_slm.clean.assert_called_once_with("Sup- ported by grant ABC. Page 12")
+
+    def test_slm_cleaner_strip_artifacts(self) -> None:
+        cleaner = SLMCleaner(enabled=False)
+        self.assertTrue(len(cleaner.system_prompt) > 20)
+        self.assertEqual(cleaner.clean("Raw text with artifact"), "Raw text with artifact")
+        self.assertEqual(
+            SLMCleaner._strip_artifacts("assistant\nClean acknowledgment text."),
+            "Clean acknowledgment text.",
+        )
+        self.assertEqual(
+            SLMCleaner._strip_artifacts("```\nClean acknowledgment text.\n```"),
+            "Clean acknowledgment text.",
+        )
 
     def test_process_task_no_acknowledgment_found(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -72,11 +108,14 @@ class TestWorkerLoop(unittest.TestCase):
         mock_extractor.extract.assert_not_called()
 
     @patch("worker_service.main.time.sleep", return_value=None)
+    @patch("worker_service.main.SLMCleaner")
     @patch("worker_service.main.SemanticExtractor")
     @patch("worker_service.main.QueueManager")
-    def test_worker_exits_on_max_papers_limit(self, mock_qm_cls, mock_ext_cls, _sleep) -> None:
+    def test_worker_exits_on_max_papers_limit(self, mock_qm_cls, mock_ext_cls, mock_slm_cls, _sleep) -> None:
         mock_qm = MagicMock()
         mock_qm_cls.return_value = mock_qm
+        mock_slm_cls.return_value.max_new_tokens = 512
+        mock_slm_cls.return_value.temperature = 0.2
 
         # 3 tasks available, then an empty queue, then a hard guard so nothing can hang
         tasks = [
@@ -97,16 +136,23 @@ class TestWorkerLoop(unittest.TestCase):
         self.assertEqual(mock_qm.pop_task.call_count, 2)
         mock_qm.close.assert_called_once()
 
+    @patch("worker_service.main.SLMCleaner")
     @patch("worker_service.main.SemanticExtractor")
     @patch("worker_service.main.QueueManager")
-    def test_worker_exits_on_idle_timeout(self, mock_qm_cls, mock_ext_cls) -> None:
+    def test_worker_exits_on_idle_timeout(self, mock_qm_cls, mock_ext_cls, mock_slm_cls) -> None:
         mock_qm = MagicMock()
         mock_qm_cls.return_value = mock_qm
+        mock_slm_cls.return_value.max_new_tokens = 512
+        mock_slm_cls.return_value.temperature = 0.2
         # Empty queue; the guard fires after ~200 polls (~10s) if idle exit is broken
         mock_qm.pop_task.side_effect = [None] * 200 + [_LoopGuard()]
 
         with patch("worker_service.main.settings") as mock_settings:
             mock_settings.worker_poll_interval_seconds = 0.05
+            mock_settings.ai_confidence_threshold = 0.55
+            mock_settings.ai_bi_threshold = 0.60
+            mock_settings.ai_cross_threshold = 0.05
+            mock_settings.ai_top_k = 5
             processed = run_worker(max_papers=0, idle_exit_seconds=0.1)
 
         self.assertEqual(processed, 0)

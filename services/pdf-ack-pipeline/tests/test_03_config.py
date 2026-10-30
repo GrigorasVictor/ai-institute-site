@@ -32,6 +32,10 @@ class TestConfig(unittest.TestCase):
             "ACK_MAX_PAPERS_PER_RUN": "15",
             "WORKER_IDLE_EXIT_SECONDS": "45",
             "COMPUTE_SHA256_STREAM": "false",
+            "AI_SLM_ENABLED": "false",
+            "AI_SLM_MODEL": "Qwen/Qwen3.5-0.8B",
+            "AI_SLM_MAX_NEW_TOKENS": "256",
+            "AI_SLM_TEMPERATURE": "0.2",
         }
         with patch.dict(os.environ, overrides, clear=False):
             cfg = load_config()
@@ -41,6 +45,10 @@ class TestConfig(unittest.TestCase):
             self.assertEqual(cfg.ack_max_papers_per_run, 15)
             self.assertEqual(cfg.worker_idle_exit_seconds, 45)
             self.assertFalse(cfg.compute_sha256_stream)
+            self.assertFalse(cfg.ai_slm_enabled)
+            self.assertEqual(cfg.ai_slm_model, "Qwen/Qwen3.5-0.8B")
+            self.assertEqual(cfg.ai_slm_max_new_tokens, 256)
+            self.assertAlmostEqual(cfg.ai_slm_temperature, 0.2)
 
 
 if __name__ == "__main__":

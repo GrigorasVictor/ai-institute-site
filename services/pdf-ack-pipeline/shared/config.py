@@ -63,6 +63,11 @@ class PipelineConfig:
     ai_bi_threshold: float
     ai_cross_threshold: float
     ai_top_k: int
+    ai_slm_enabled: bool
+    ai_slm_model: str
+    ai_slm_prompt_file: Path
+    ai_slm_max_new_tokens: int
+    ai_slm_temperature: float
     worker_poll_interval_seconds: int
     worker_idle_exit_seconds: int
 
@@ -124,6 +129,14 @@ def load_config() -> PipelineConfig:
         ai_bi_threshold=float(os.getenv("AI_BI_THRESHOLD", "0.60")),
         ai_cross_threshold=float(os.getenv("AI_CROSS_THRESHOLD", "0.05")),
         ai_top_k=int(os.getenv("AI_TOP_K", "5")),
+        ai_slm_enabled=_parse_bool(os.getenv("AI_SLM_ENABLED"), default=True),
+        ai_slm_model=os.getenv("AI_SLM_MODEL", "Qwen/Qwen3.5-0.8B"),
+        ai_slm_prompt_file=_resolve_path(
+            os.getenv("AI_SLM_PROMPT_FILE", "./worker_service/semantic_data/slm_cleanup_prompt.txt"),
+            PIPELINE_ROOT,
+        ),
+        ai_slm_max_new_tokens=int(os.getenv("AI_SLM_MAX_NEW_TOKENS", "512")),
+        ai_slm_temperature=float(os.getenv("AI_SLM_TEMPERATURE", "0.2")),
         worker_poll_interval_seconds=int(os.getenv("WORKER_POLL_INTERVAL_SECONDS", "5")),
         worker_idle_exit_seconds=int(os.getenv("WORKER_IDLE_EXIT_SECONDS", "60")),
         strapi_url=strapi_url,
@@ -138,7 +151,7 @@ def load_config() -> PipelineConfig:
         ack_sync_cron=os.getenv("ACK_SYNC_CRON", "0 2 * * 6"),
         ack_sync_tz=os.getenv("ACK_SYNC_TZ", os.getenv("TZ", "UTC")),
         ack_run_on_startup=_parse_bool(os.getenv("ACK_RUN_ON_STARTUP"), default=True),
-        task_retry_timeout_seconds=int(os.getenv("TASK_RETRY_TIMEOUT_SECONDS", "120")),
+        task_retry_timeout_seconds=int(os.getenv("TASK_RETRY_TIMEOUT_SECONDS", "300")),
         max_task_retries=int(os.getenv("MAX_TASK_RETRIES", "3")),
         coordinator_result_poll_seconds=float(os.getenv("COORDINATOR_RESULT_POLL_SECONDS", "1.0")),
     )

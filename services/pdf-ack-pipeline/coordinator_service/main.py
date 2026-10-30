@@ -11,7 +11,7 @@ PIPELINE_ROOT = Path(__file__).resolve().parent.parent
 if str(PIPELINE_ROOT) not in sys.path:
     sys.path.insert(0, str(PIPELINE_ROOT))
 
-from ack_sync import run_ack_sync
+from ack_sync import build_strapi_client, run_ack_sync, sync_pending_completed_to_strapi
 from result_consumer import drain_results_queue
 from shared.config import settings
 from shared.queue_manager import QueueManager
@@ -40,7 +40,7 @@ def log_startup_configuration(limit_override: Optional[int] = None) -> None:
     )
     logger.info("SQLite3 State DB  : %s", settings.state_db_path)
     logger.info(
-        "Strapi Read URL   : %s (media=%s)",
+        "Strapi API URL    : %s (media=%s)",
         settings.strapi_internal_url or settings.strapi_url,
         settings.public_strapi_url or settings.strapi_url,
     )
@@ -67,7 +67,7 @@ def log_startup_configuration(limit_override: Optional[int] = None) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ack-coordinator",
-        description="Synchronize publication PDFs, dispatch acknowledgment extraction tasks, and persist results in SQLite3.",
+        description="Synchronize publication PDFs, dispatch acknowledgment extraction tasks, and persist results in SQLite3 and Strapi.",
     )
     parser.add_argument(
         "--pdf-url",
@@ -85,7 +85,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--drain-only",
         action="store_true",
-        help="Only drain pending results from results_queue into SQLite3 without scanning for new PDFs.",
+        help="Only drain pending results from results_queue into SQLite3 and Strapi without scanning for new PDFs.",
     )
     parser.add_argument(
         "--list-db",
@@ -123,8 +123,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         for row in rows:
             ack_preview = (row.get("acknowledgment_text") or "")[:80]
             logger.info(
-                "  paper_id=%s | status=%s | score=%s | retries=%s | ack='%s'",
+                "  paper_id=%s | pdf_path=%s | status=%s | score=%s | retries=%s | ack='%s'",
                 row["paper_id"],
+                row.get("pdf_path") or "",
                 row["status"],
                 row["confidence_score"],
                 row["retry_count"],
@@ -132,10 +133,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             )
         return 0
 
+    strapi_client = build_strapi_client(settings)
+
     if args.drain_only:
         queue = QueueManager(settings)
         try:
-            count = drain_results_queue(queue, tracker)
+            count = drain_results_queue(queue, tracker, strapi_client=strapi_client)
+            sync_pending_completed_to_strapi(tracker, strapi_client)
             logger.info("Drained %d result(s) from '%s' into SQLite3.", count, settings.results_queue)
             return 0
         finally:
@@ -146,6 +150,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         override_pdf_urls=args.pdf_urls,
         max_papers=args.limit,
         tracker=tracker,
+        strapi_client=strapi_client,
     )
     return 0
 

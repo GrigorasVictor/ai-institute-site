@@ -6,7 +6,7 @@ Verifies that:
 3. Both entrypoint.sh files have Unix (LF) line endings (no Windows CRLF corruption) and end with exec cron -f.
 4. No forbidden patterns remain in the codebase:
    - No Python watchdog threads or watchdog prints
-   - No Strapi PUT / write calls
+   - Worker service never makes write/PUT calls to Strapi (only coordinator_service/utils.py may PUT acknowledgments)
 """
 
 import re
@@ -64,7 +64,7 @@ class TestStaticConfigConsistency(unittest.TestCase):
             self.assertTrue(text.startswith("#!/bin/bash"), f"{script.name} must start with #!/bin/bash")
             self.assertIn("exec cron -f", text, f"{script.name} must end by launching cron in foreground")
 
-    def test_no_watchdog_or_strapi_put_in_codebase(self) -> None:
+    def test_no_watchdog_or_unauthorized_put_in_codebase(self) -> None:
         py_files = list(PIPELINE_ROOT.rglob("*.py"))
         for py_path in py_files:
             # Ignore test files and virtual environments
@@ -79,12 +79,13 @@ class TestStaticConfigConsistency(unittest.TestCase):
                 f"Forbidden watchdog pattern found in {py_path}",
             )
 
-            # Check no client.put or httpx.put to Strapi
-            self.assertNotRegex(
-                content,
-                r"\.put\(",
-                f"Found forbidden write/PUT method in read-only pipeline: {py_path}",
-            )
+            # Only coordinator_service/utils.py is permitted to send PUT requests to Strapi
+            if py_path.name != "utils.py":
+                self.assertNotRegex(
+                    content,
+                    r"\.put\(",
+                    f"Found forbidden write/PUT method outside coordinator_service/utils.py: {py_path}",
+                )
 
 
 if __name__ == "__main__":

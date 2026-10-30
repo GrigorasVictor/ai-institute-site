@@ -13,7 +13,7 @@ class TaskMessage(BaseModel):
     """Message sent from Coordinator to Worker via tasks_queue."""
 
     paper_id: str = Field(..., description="Unique identifier of the paper (e.g., Strapi documentId or OpenAlex ID)")
-    pdf_path: str = Field(..., description="File path to the PDF inside the shared storage volume")
+    pdf_path: str = Field(..., description="Full URL or file path to the PDF")
     file_hash: str = Field(..., description="SHA-256 fingerprint of the PDF file")
 
 
@@ -21,6 +21,7 @@ class ResultMessage(BaseModel):
     """Message returned from Worker to Coordinator via results_queue."""
 
     paper_id: str = Field(..., description="Unique identifier of the paper")
+    pdf_path: str = Field(default="", description="Full URL or file path to the processed PDF")
     file_hash: str = Field(..., description="SHA-256 fingerprint of the processed PDF file")
     status: TaskStatus = Field(..., description="Processing outcome ('success' or 'failed')")
     acknowledgment_text: Optional[str] = Field(

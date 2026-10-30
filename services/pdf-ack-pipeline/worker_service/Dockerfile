@@ -2,14 +2,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Limit CPU thread usage to 2 threads so the worker runs quietly in the background
+# Configure CPU thread usage for PyTorch / Transformer inference
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    OMP_NUM_THREADS=2 \
-    MKL_NUM_THREADS=2 \
-    OPENBLAS_NUM_THREADS=2 \
-    VECLIB_MAXIMUM_THREADS=2 \
-    NUMEXPR_NUM_THREADS=2 \
+    OMP_NUM_THREADS=4 \
+    MKL_NUM_THREADS=4 \
+    OPENBLAS_NUM_THREADS=4 \
+    VECLIB_MAXIMUM_THREADS=4 \
+    NUMEXPR_NUM_THREADS=4 \
     TOKENIZERS_PARALLELISM=false
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

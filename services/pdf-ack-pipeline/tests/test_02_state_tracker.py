@@ -1,10 +1,10 @@
 """
 Unit tests for SQLite3 StateTracker (state_tracker.py).
 Verifies:
-- State transitions (QUEUED -> timeout retry -> COMPLETED / FAILED)
+- State transitions (QUEUED -> timeout retry -> COMPLETED -> SYNCED_TO_STRAPI / FAILED)
 - Retry limits
 - SHA-256 changes triggering reprocessing
-- Stale recovery and listing
+- Stale recovery, unsynced completed lookup, and listing
 - WAL journal mode and persistent reads across connections
 """
 
@@ -31,7 +31,7 @@ class TestStateTracker(unittest.TestCase):
             self.assertIsNone(tracker.get_record(paper_id))
 
             # Mark as QUEUED (attempt 1)
-            attempt = tracker.mark_as_queued(paper_id, file_hash, "http://strapi/p100.pdf")
+            attempt = tracker.mark_as_queued(paper_id, file_hash, "http://strapi/uploads/p100.pdf")
             self.assertEqual(attempt, 1)
             # Immediately considered in progress
             self.assertTrue(tracker.is_already_processed(paper_id, file_hash))
@@ -42,14 +42,14 @@ class TestStateTracker(unittest.TestCase):
             self.assertFalse(tracker.is_already_processed(paper_id, file_hash))
 
             # Attempt 2
-            attempt = tracker.mark_as_queued(paper_id, file_hash, "http://strapi/p100.pdf")
+            attempt = tracker.mark_as_queued(paper_id, file_hash, "http://strapi/uploads/p100.pdf")
             self.assertEqual(attempt, 2)
 
             # Let it time out again -> max_retries (2) reached, no more retries
             time.sleep(1.1)
             self.assertTrue(tracker.is_already_processed(paper_id, file_hash))
 
-            # Complete paper
+            # Complete paper (Step 1: saved in SQLite)
             tracker.mark_as_completed(
                 paper_id=paper_id,
                 file_hash=file_hash,
@@ -59,9 +59,22 @@ class TestStateTracker(unittest.TestCase):
             rec = tracker.get_record(paper_id)
             self.assertIsNotNone(rec)
             self.assertEqual(rec["status"], PaperStatus.COMPLETED)
+            self.assertEqual(rec["pdf_path"], "http://strapi/uploads/p100.pdf")
             self.assertAlmostEqual(rec["confidence_score"], 0.954, places=3)
             self.assertIn("12345", rec["acknowledgment_text"])
             self.assertTrue(tracker.is_already_processed(paper_id, file_hash))
+
+            # Appears in unsynced completed papers before Strapi confirmation
+            unsynced = tracker.get_unsynced_completed_papers()
+            self.assertEqual(len(unsynced), 1)
+            self.assertEqual(unsynced[0]["paper_id"], paper_id)
+
+            # Confirm synced to Strapi (Step 3: status becomes SYNCED_TO_STRAPI)
+            tracker.mark_as_synced_to_strapi(paper_id)
+            rec_synced = tracker.get_record(paper_id)
+            self.assertEqual(rec_synced["status"], PaperStatus.SYNCED_TO_STRAPI)
+            self.assertTrue(tracker.is_already_processed(paper_id, file_hash))
+            self.assertEqual(len(tracker.get_unsynced_completed_papers()), 0)
 
             # If hash changes (PDF was edited on Strapi), it is NOT considered processed!
             new_hash = compute_text_sha256("content-v2-updated")
@@ -73,9 +86,15 @@ class TestStateTracker(unittest.TestCase):
             tracker = StateTracker(db_path=db_path, retry_timeout_seconds=1, max_retries=2)
 
             # Mark a paper as failed directly
-            tracker.mark_as_failed("paper-err", "hash-err", error_message="Corrupted PDF")
+            tracker.mark_as_failed(
+                "paper-err",
+                "hash-err",
+                error_message="Corrupted PDF",
+                pdf_path="http://strapi/err.pdf",
+            )
             rec = tracker.get_record("paper-err")
             self.assertEqual(rec["status"], PaperStatus.FAILED)
+            self.assertEqual(rec["pdf_path"], "http://strapi/err.pdf")
             self.assertEqual(rec["error_message"], "Corrupted PDF")
 
             # Stale QUEUED paper recovery
@@ -100,6 +119,15 @@ class TestStateTracker(unittest.TestCase):
             self.assertEqual(len(records), 1)
             self.assertEqual(records[0]["paper_id"], "p1")
             self.assertEqual(records[0]["status"], PaperStatus.COMPLETED)
+
+            # Verify pdf_path is backfilled if previously empty
+            self.assertTrue(
+                tracker2.is_already_processed("p1", "h1", pdf_path="https://airi.utcluj.ro/strapi/uploads/p1.pdf")
+            )
+            self.assertEqual(
+                tracker2.get_record("p1")["pdf_path"],
+                "https://airi.utcluj.ro/strapi/uploads/p1.pdf",
+            )
 
 
 if __name__ == "__main__":
